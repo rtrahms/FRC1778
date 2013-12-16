@@ -7,14 +7,15 @@
 
 package frc1778;
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj.command.Command;
-import edu.wpi.first.wpilibj.command.Scheduler;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import edu.wpi.first.wpilibj.Compressor;
+//import edu.wpi.first.wpilibj.IterativeRobot;
+//import edu.wpi.first.wpilibj.Timer;
+//import edu.wpi.first.wpilibj.buttons.JoystickButton;
+//import edu.wpi.first.wpilibj.command.Command;
+//import edu.wpi.first.wpilibj.command.Scheduler;
+//import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -23,7 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
-public class IterativeRobot1778 extends IterativeRobot {
+public class IterativeRobot1778 // extends IterativeRobot 
+{
    
     //private Drive mDrive = null;
     //private Climber mClimber = null;
@@ -31,16 +33,16 @@ public class IterativeRobot1778 extends IterativeRobot {
     //private XboxController driveXbox = new XboxController(1);
     //private XboxController operatorXbox = new XboxController(2);
     
-    private Compressor compressor = null;
-    private Scheduler scheduler;
-    private SendableChooser autonChooser = new SendableChooser();
+    //private Compressor compressor = null;
+    //private Scheduler scheduler;
+    //private SendableChooser autonChooser = new SendableChooser();
    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
-        scheduler = Scheduler.getInstance();
+        //scheduler = Scheduler.getInstance();
              
         System.out.println("entering robotInit");
        
@@ -57,9 +59,8 @@ public class IterativeRobot1778 extends IterativeRobot {
         autonChooser.addDefault("Shoot", new ShootAuton(this));
         autonChooser.addObject("Troll", new TrollAuton());
         autonChooser.addObject("Do nothing", new FakeCommand());
-        */
         SmartDashboard.putData("Autonomous Chooser", autonChooser);
-
+        */
        
     }
     
@@ -82,16 +83,17 @@ public class IterativeRobot1778 extends IterativeRobot {
         mClimber.disableClimbingMode();
         mDrive.stop();
         mDrive.disengagePto();
-        */
 
         ((Command) autonChooser.getSelected()).start();
+        */
     }
 
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-        scheduler.run();
+        System.out.println("entering autonomousPeriodic");
+        //scheduler.run();
     }
     
     /**
@@ -100,7 +102,6 @@ public class IterativeRobot1778 extends IterativeRobot {
     public void teleopInit() {
         
         System.out.println("entering teleopInit");
-
 
         /*
         mDrive.resetGyro();
@@ -120,7 +121,8 @@ public class IterativeRobot1778 extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-        scheduler.run();        
+        System.out.println("entering teleopPeriodic");
+        //scheduler.run();        
     }
     
     /**
