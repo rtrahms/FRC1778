@@ -37,8 +37,9 @@ public class OI {
    
     // constructor
     public OI() {
-        leftButton1.whenPressed(new LowerScoop());
-        leftButton1.whenReleased(new RaiseScoop());
+        //leftButton1.whenPressed(new LowerScoop());
+        //leftButton1.whenReleased(new RaiseScoop());
+        
     }
     
 }

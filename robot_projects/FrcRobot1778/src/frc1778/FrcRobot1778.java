@@ -12,8 +12,13 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+
+import edu.wpi.first.wpilibj.Joystick;
+
 import frc1778.commands.CommandBase;
 import frc1778.commands.ExampleCommand;
+import frc1778.subsystems.DriveSystem;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -26,6 +31,8 @@ public class FrcRobot1778 extends IterativeRobot {
 
     Command autonomousCommand;
 
+    Joystick leftJoy, rightJoy;
+    
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -36,6 +43,11 @@ public class FrcRobot1778 extends IterativeRobot {
 
         // Initialize all subsystems
         CommandBase.init();
+        
+        // create the Joystick objects
+        leftJoy = new Joystick(1);
+        rightJoy = new Joystick(2);
+        
     }
 
     public void autonomousInit() {
@@ -56,6 +68,8 @@ public class FrcRobot1778 extends IterativeRobot {
         // continue until interrupted by another command, remove
         // this line or comment it out.
         autonomousCommand.cancel();
+        
+        
     }
 
     /**
@@ -63,6 +77,9 @@ public class FrcRobot1778 extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+        
+        // TODO: need to check isOperatorControl and isEnabled
+        
     }
     
     /**
