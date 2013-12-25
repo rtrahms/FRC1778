@@ -1,0 +1,6 @@
+MIDlet-Name: Frc1778CommandBasedRobotTemplate
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: FIRST
+MIDlet-1: Frc1778CommandBasedRobotTemplate, , frc1778.Frc1778CommandBasedRobotTemplate
+MicroEdition-Profile: IMP-1.0
+MicroEdition-Configuration: CLDC-1.1
