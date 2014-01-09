@@ -4,6 +4,7 @@
  * NOT a FIRST robot program
  */
 //From Matt
+//FROM MKTDEV
 package samplejavaapp1;
 
 // change made by Rob on I believe the RobDev branch
@@ -22,9 +23,9 @@ public class SampleJavaApp1 {
         // A simple console output program
         // If running this inside nebeans or other IDE,
         // make sure you have your output window open
-        System.out.println("Matt's Contribution: DOGE");
+        System.out.println("Matt's Contribution: DOGECOIN");
         
-        System.out.println("Hello TEAM 1778!");
+        System.out.println("Hello TEAM 1778 software!");
     }
     
 }
