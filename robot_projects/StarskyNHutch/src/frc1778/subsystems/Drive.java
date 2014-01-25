@@ -34,6 +34,7 @@ public class Drive extends Subsystem {
             l_Master = new CANJaguar(rMap.L_MASTER, CANJaguar.ControlMode.kVoltage);
             r_Master = new CANJaguar(rMap.R_MASTER, CANJaguar.ControlMode.kVoltage);
 
+        rMap.DBG("Drive a");
         //  Slaves are always in kVoltage and can never be in anything else.
             l_Slave = new CANJaguar(rMap.L_SLAVE, CANJaguar.ControlMode.kVoltage);
             r_Slave = new CANJaguar(rMap.R_SLAVE, CANJaguar.ControlMode.kVoltage);
@@ -44,20 +45,26 @@ public class Drive extends Subsystem {
 //      if (l_Slave) {
             l_Slave.configMaxOutputVoltage(voltage);
             r_Slave.configMaxOutputVoltage(voltage);
+        rMap.DBG("Drive b");
 //      }
             //  enable GetSpeed()
             l_Master.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
             r_Master.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
             l_Master.configEncoderCodesPerRev(rMap.ENCODER_TICKS_PER_WHEEL_REV);
+        rMap.DBG("Drive c");
             r_Master.configEncoderCodesPerRev(rMap.ENCODER_TICKS_PER_WHEEL_REV);
         //  enable GetPosition()
             l_Master.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
             r_Master.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
+        rMap.DBG("Drive d");
 
             voltageMode();
+        rMap.DBG("Drive e");
             disable();
+        rMap.DBG("Drive f");
         } catch (CANTimeoutException e) {
         }
+        rMap.DBG("Drive end");
     }
 
     public void initDefaultCommand() { // Set the default command for a subsystem here. 

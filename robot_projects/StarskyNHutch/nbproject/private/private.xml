@@ -6,6 +6,8 @@
             <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/commands/DriveTest.java</file>
             <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/OI.java</file>
             <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/commands/TankDriveWithJoysticks.java</file>
+            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/subsystems/Drive.java</file>
+            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/commands/CommandBase.java</file>
             <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/RobotClass.java</file>
             <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/RobotMap.java</file>
         </group>

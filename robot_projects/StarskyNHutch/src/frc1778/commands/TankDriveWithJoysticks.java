@@ -14,7 +14,7 @@ public class TankDriveWithJoysticks extends CommandBase {
     double minmax;
     double rate_o_change_multiply;
 
-    void TankDriveWithJoysticks() {
+    public TankDriveWithJoysticks() {
         requires(drive);
     }
 

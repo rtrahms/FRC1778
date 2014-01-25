@@ -4,12 +4,12 @@
 package frc1778;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import frc1778.commands.CommandBase;
-import frc1778.commands.ExampleCommand;
-import frc1778.commands.TankDriveWithJoysticks;
+import frc1778.commands.DriveTest;
 
 public class RobotClass extends IterativeRobot {
     Command autonomousCommand;
@@ -19,10 +19,11 @@ public class RobotClass extends IterativeRobot {
      */
     public void robotInit() {
     //  instantiate the command used for the autonomous period
-        autonomousCommand = new ExampleCommand();
-
+    
     //  Initialize all subsystems
         CommandBase.init();
+        
+        autonomousCommand = new DriveTest();
     }
 
     public void autonomousInit() {
@@ -47,6 +48,7 @@ public class RobotClass extends IterativeRobot {
      */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
+        Watchdog.getInstance().feed();
     }
     
     /**

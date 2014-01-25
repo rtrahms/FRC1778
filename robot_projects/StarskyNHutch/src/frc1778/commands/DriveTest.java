@@ -3,7 +3,7 @@
 package frc1778.commands;
 
 public class DriveTest extends CommandBase {
-    void DriveTest() {       
+    public DriveTest() {       
         requires(drive);
     }
     
