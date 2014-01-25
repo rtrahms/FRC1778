@@ -3,7 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/subsystems/Drive.java</file>
+            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/commands/DriveTest.java</file>
+            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/OI.java</file>
+            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/commands/TankDriveWithJoysticks.java</file>
+            <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/RobotClass.java</file>
             <file>file:/C:/_/frc2014/StarskyNHutch/src/frc1778/RobotMap.java</file>
         </group>
     </open-files>

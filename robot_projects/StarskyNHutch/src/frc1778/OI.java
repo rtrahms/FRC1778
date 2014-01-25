@@ -3,6 +3,7 @@ package frc1778;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import frc1778.commands.DriveTest;
 import frc1778.commands.TankDriveWithJoysticks;
 
 /**
@@ -73,14 +74,14 @@ public class OI {
 	rButton10  = new JoystickButton (rightJoy, 10);
 	rButton11  = new JoystickButton (rightJoy, 11);
 	
-	jimButton1 = new JoystickButton(jimJoy, 1);		// Manual Lift Up Control
-	jimButton2 = new JoystickButton(jimJoy, 2);		// Capture Ball Command
+	jimButton1 = new JoystickButton(jimJoy, 1);
+	jimButton2 = new JoystickButton(jimJoy, 2);
 	jimButton3 = new JoystickButton(jimJoy, 3);
 	jimButton4 = new JoystickButton(jimJoy, 4);
 	jimButton5 = new JoystickButton(jimJoy, 5);
 	jimButton6 = new JoystickButton(jimJoy, 6);
-	jimButton7 = new JoystickButton(jimJoy, 7);		// Manual Shooter/Turret control
-	jimButton8 = new JoystickButton(jimJoy, 8);	    // Manual Kick Control
+	jimButton7 = new JoystickButton(jimJoy, 7);
+	jimButton8 = new JoystickButton(jimJoy, 8);
 	jimButton9 = new JoystickButton(jimJoy, 9);
 	jimButton10 = new JoystickButton(jimJoy, 10);	
 
@@ -89,8 +90,8 @@ public class OI {
 /*	lButton6->WhenPressed(new DriveStraight());
 	lButton9->WhenPressed(new SetShooterLimits());
 	lButton10->WhenPressed(new GyroReset());
-	lButton11.whenPressed(new DriveTest());
 */
+	lButton11.whenPressed(new DriveTest());
 	
     //  Right Controller	
         rButton1.whenReleased(new TankDriveWithJoysticks());	
@@ -98,47 +99,47 @@ public class OI {
     
 
     public boolean getLeftButton6(){
-            return leftJoy.getRawButton(6);
+        return leftJoy.getRawButton(6);
     }
 
     public boolean getLeftButton7(){
-            return leftJoy.getRawButton(7);
+        return leftJoy.getRawButton(7);
     }
 
     public double getLeftSpeed () {
-            return  -leftJoy.getY ();
+        return  -leftJoy.getY ();
     }
 
     public double getLeftTurn () {
-            return   leftJoy.getX ();
+        return   leftJoy.getX ();
     }
 
     public double getRightSpeed () {
-            return -rightJoy.getY ();
+        return -rightJoy.getY ();
     }
 
     public double getRightTurn () {
-            return  rightJoy.getX ();
+        return  rightJoy.getX ();
     }
 
     public double getRightThrottle () {
-            return -rightJoy.getZ ();
+        return -rightJoy.getZ ();
     }
 
     public double getLeftThrottle () {
-            return -leftJoy.getZ ();
+        return -leftJoy.getZ ();
     }
 
     public double getJimLeftX () {
-            return  jimJoy.getRawAxis (1);
+        return  jimJoy.getRawAxis (1);
     }
 
     public double getJimLeftY () {
-            return -jimJoy.getRawAxis (2);
+        return -jimJoy.getRawAxis (2);
     }
 
     public double getJimRightY () {
-            return -jimJoy.getRawAxis (4);
+        return -jimJoy.getRawAxis (4);
     }
 
 }

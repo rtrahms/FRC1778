@@ -1,6 +1,5 @@
 package frc1778.commands;
 
-import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc1778.OI;
@@ -8,7 +7,7 @@ import frc1778.subsystems.Drive;
 import frc1778.subsystems.ExampleSubsystem;
 
 /**
- * The base for all commands. All atomic commands should subclass CommandBase.
+ * base for all commands.  All atomic commands should subclass CommandBase.
  * CommandBase stores creates and stores each control system. To access a
  * subsystem elsewhere in your code in your code use CommandBase.exampleSubsystem
  * @author Author
