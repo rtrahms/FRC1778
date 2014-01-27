@@ -17,6 +17,9 @@ public abstract class CommandBase extends Command {
     // Create a single static instance of all of your subsystems
     public static Drive drive;
 
+    // TODO: Declare a single static instance of front gate
+    // TODO: Matt should do this
+    
     public static void init() {
         // This MUST be here. If the OI creates Commands (which it very likely
         // will), constructing it during the construction of CommandBase (from
@@ -27,6 +30,9 @@ public abstract class CommandBase extends Command {
         
         drive = new Drive ();
         System.out.println("in CommandBase.init() 2");
+
+        // TODO: instantiate new instance of front gate
+        // TODO: Matt should do this
         
         oi = new OI();
         System.out.println("in CommandBase.init() 3");

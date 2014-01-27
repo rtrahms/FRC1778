@@ -52,7 +52,11 @@ public class OI {
     {
 	leftJoy  = new Joystick (1);
 	rightJoy = new Joystick (2);
+        
+        // TODO: Joystick on port 3 needs to be instantiated for the gamepad
+        // TODO: Evan should do this
 //      jimJoy   = new Joystick (3);  /* , 4, 10 */
+        
     /*  extra logitech joystick with 4 axies and 10 buttons */
 
 //	lButton1   = new JoystickButton (leftJoy, 1);
@@ -95,9 +99,14 @@ public class OI {
 	
     //  Right Controller	
         rButton1.whenReleased(new TankDriveWithJoysticks());	
+        
+        // TODO: tie gamepad inputs to new gate operation commands
+        // TODO: Evan should do this
     }
     
 
+    // Tank drive & Arcade drive input methods (left and right joysticks)
+    
     public boolean getLeftButton6(){
         return leftJoy.getRawButton(6);
     }
@@ -130,6 +139,10 @@ public class OI {
         return -leftJoy.getZ ();
     }
 
+    // Gate control input methods (gamepad)
+    // TODO: Define input methods for the gamepad here for gate operation
+    // TODO: Evan should be defining these
+    
     public double getJimLeftX () {
         return  jimJoy.getRawAxis (1);
     }

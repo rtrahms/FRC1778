@@ -24,6 +24,10 @@ public class RobotClass extends IterativeRobot {
         CommandBase.init();
         
         autonomousCommand = new DriveTest();
+        
+        // TODO: The user should be able to select more than one autonomous action
+        // TODO: Selectable via the selectable chooser (smart dashboard)
+        // TODO: Initialize the choices here - David should do this
     }
 
     public void autonomousInit() {
