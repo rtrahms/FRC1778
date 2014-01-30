@@ -8,11 +8,12 @@ import edu.wpi.first.wpilibj.Watchdog;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc1778.commands.Autonomous;
 import frc1778.commands.CommandBase;
-import frc1778.commands.DriveTest;
 
 public class RobotClass extends IterativeRobot {
-    Command autonomousCommand;
+    public Command autonomousCommand;
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -23,7 +24,8 @@ public class RobotClass extends IterativeRobot {
     //  Initialize all subsystems
         CommandBase.init();
         
-        autonomousCommand = new DriveTest();
+        autonomousCommand = new Autonomous();
+        SmartDashboard.putData(autonomousCommand);
         
         // TODO: The user should be able to select more than one autonomous action
         // TODO: Selectable via the selectable chooser (smart dashboard)
@@ -37,6 +39,7 @@ public class RobotClass extends IterativeRobot {
 
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
+        Watchdog.getInstance().feed();
     }
 
     public void teleopInit() {

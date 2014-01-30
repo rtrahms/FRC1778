@@ -3,6 +3,7 @@ package frc1778.commands;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc1778.OI;
+import frc1778.RobotClass;
 import frc1778.subsystems.Drive;
 
 /**
@@ -39,7 +40,7 @@ public abstract class CommandBase extends Command {
         
 
         // Show what command your subsystem is running on the SmartDashboard
-//        SmartDashboard.putData(DriveTest);
+
     }
 
     public CommandBase(String name) {

@@ -88,7 +88,7 @@ public class Drive extends Subsystem {
      * @param right
      */
     public void setLeftRight(double left, double right) {
-        rMap.DBG("setLeftRight");
+        System.out.println("setLeftRight " + left + ", " + right);
         try {
             r_Master.setX(right, (byte) 0);
             l_Master.setX(-left, (byte) 0);
