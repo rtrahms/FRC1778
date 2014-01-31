@@ -15,6 +15,7 @@ public class TankDriveWithJoysticks extends CommandBase {
     double rate_o_change_multiply;
 
     public TankDriveWithJoysticks() {
+        super("TankDriveWithJoysticks");
         requires(drive);
     }
 

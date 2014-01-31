@@ -1,13 +1,13 @@
+//
 
 package frc1778.commands;
 
 /**
- *
- * @author bradmiller
  */
 public class ExampleCommand extends CommandBase {
 
     public ExampleCommand() {
+        // super ("ccommand name");
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
     }

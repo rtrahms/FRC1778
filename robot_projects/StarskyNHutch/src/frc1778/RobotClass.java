@@ -14,13 +14,8 @@ import frc1778.commands.CommandBase;
 
 public class RobotClass extends IterativeRobot {
     public Command autonomousCommand;
-    /**
-     * This function is run when the robot is first started up and should be
-     * used for any initialization code.
-     */
-    public void robotInit() {
-    //  instantiate the command used for the autonomous period
     
+    public void robotInit() {  
     //  Initialize all subsystems
         CommandBase.init();
         
@@ -33,34 +28,21 @@ public class RobotClass extends IterativeRobot {
     }
 
     public void autonomousInit() {
-    //  schedule the autonomous command (example)
         autonomousCommand.start();
     }
 
     public void autonomousPeriodic() {
         Scheduler.getInstance().run();
-        Watchdog.getInstance().feed();
     }
 
     public void teleopInit() {
-	// This makes sure that the autonomous stops running when
-        // teleop starts running. If you want the autonomous to 
-        // continue until interrupted by another command, remove
-        // this line or comment it out.
         autonomousCommand.cancel();
     }
 
-    /**
-     * This function is called periodically during operator control
-     */
     public void teleopPeriodic() {
         Scheduler.getInstance().run();
-        Watchdog.getInstance().feed();
     }
-    
-    /**
-     * This function is called periodically during test mode
-     */
+
     public void testPeriodic() {
         LiveWindow.run();
     }

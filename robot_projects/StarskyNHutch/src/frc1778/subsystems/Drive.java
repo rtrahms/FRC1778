@@ -62,7 +62,9 @@ public class Drive extends Subsystem {
         rMap.DBG("Drive e");
             disable();
         rMap.DBG("Drive f");
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X Drive");
         }
         rMap.DBG("Drive end");
     }
@@ -78,11 +80,11 @@ public class Drive extends Subsystem {
 //      if (l_Slave) { 
         l_Slave.setSafetyEnabled(enabled);
         r_Slave.setSafetyEnabled(enabled);
-//      }
+//    }
     }
 
     /**
-     * BOOM - set them there motors goin'
+     * BOOM - set them there motors going
      *
      * @param left
      * @param right
@@ -96,7 +98,9 @@ public class Drive extends Subsystem {
             r_Slave.setX(r_Master.getOutputVoltage(), (byte) 0);
             l_Slave.setX(l_Master.getOutputVoltage(), (byte) 0);
 //          }  
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e)
+        {
+            System.out.println("X setLeftRight");
         }
     }
 
@@ -112,7 +116,9 @@ public class Drive extends Subsystem {
             l_Slave.configNeutralMode(CANJaguar.NeutralMode.kBrake);
             r_Slave.configNeutralMode(CANJaguar.NeutralMode.kBrake);
 //          }
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X brakeMode");
         }
     }
 
@@ -128,7 +134,9 @@ public class Drive extends Subsystem {
             r_Slave.configNeutralMode(CANJaguar.NeutralMode.kCoast);
             l_Slave.configNeutralMode(CANJaguar.NeutralMode.kCoast);
 //          }
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X coastMode");
         }
     }
 
@@ -141,7 +149,9 @@ public class Drive extends Subsystem {
             l_Master.changeControlMode(CANJaguar.ControlMode.kPercentVbus);
             r_Master.changeControlMode(CANJaguar.ControlMode.kPercentVbus);
             coastMode();
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X percentMode");
         }
     }
 
@@ -154,7 +164,9 @@ public class Drive extends Subsystem {
             l_Master.changeControlMode(CANJaguar.ControlMode.kVoltage);
             r_Master.changeControlMode(CANJaguar.ControlMode.kVoltage);
             coastMode();
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X voltageMode");
         }
     }
 
@@ -167,7 +179,9 @@ public class Drive extends Subsystem {
             l_Master.enableControl(0.0);
             r_Master.enableControl(0.0);
             setSafety(true);
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X enable");
         }
     }
 
@@ -177,7 +191,9 @@ public class Drive extends Subsystem {
             l_Master.disableControl();
             r_Master.disableControl();
             setSafety(false);
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X disable");
         }
     }
 
@@ -192,7 +208,9 @@ public class Drive extends Subsystem {
             r_Master.changeControlMode(CANJaguar.ControlMode.kSpeed);
             r_Master.setPID(0.7, 0.0, 0.0);
             coastMode();
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X speedMode");
         }
     }
 
@@ -206,13 +224,16 @@ public class Drive extends Subsystem {
             r_Master.changeControlMode(CANJaguar.ControlMode.kPosition);
             r_Master.setPID(0.7, 0.0, 0.0);
             brakeMode();
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X positionMode");
         }
     }
 
     /**
      * see if either position mode pid has reached desired spot that we set with
-     * Straight()=>SetLeftRight()
+     * Straight()=>SetLeftRight
+     * @return ()
      */
     public boolean atPosition() {
         try {
@@ -224,7 +245,9 @@ public class Drive extends Subsystem {
             if (Math.abs(l_Master.getX() - l_Master.getPosition()) < 0.02) {
                 return true;
             }
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X atPosition");
         }
         return false;
     }
@@ -232,7 +255,9 @@ public class Drive extends Subsystem {
     public double getRightPosition() {
         try {
             return r_Master.getPosition();
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X getRightPosition");
         }
         return 0.0;
     }
@@ -245,7 +270,9 @@ public class Drive extends Subsystem {
             double c = j.getOutputCurrent();
             System.out.println(str + " pos= " + p + " speed= " + s + 
                                " current= " + c + "firmware= " + fw);
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X jagDump");
         }
     }
 
@@ -269,7 +296,9 @@ public class Drive extends Subsystem {
 
             j.setX(0.0);
             jagDump(str, j);
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X jagTest");
         }
     }
 
@@ -309,7 +338,9 @@ public class Drive extends Subsystem {
             jagTest("right rear", r_Master);
 
             setSafety(true);
-        } catch (CANTimeoutException e) {
+        } catch (CANTimeoutException e) 
+        {
+            System.out.println("X TEST");
         }
     }
 
