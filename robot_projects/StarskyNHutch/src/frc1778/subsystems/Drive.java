@@ -1,5 +1,5 @@
 /**
- * Drive.java - controls the 4 or 2 jaguars that do wheel driving. Including
+ * Drive.java - controls the 4 or 2 jaguar that do wheel driving. Including
  * dealing with all the dang jag modes. position, speed and current are PID
  * modes (the =JAG= does the PID on board) remaining are NON-PID modes:
  * percentVBus is the usual -1..0..1 usually used. voltage uses and absolute
@@ -15,8 +15,8 @@ import frc1778.RobotMap;
 import frc1778.commands.TankDriveWithJoysticks;
 
 public class Drive extends Subsystem {
-//  master (back) jaguars are the only ones that listen to the encoders.
-//  slave (front) jaguars always follow what the master jaguars do.
+//  master (back) jaguar are the only ones that listen to the encoders.
+//  slave (front) jaguar always follow what the master jaguar do.
 
     CANJaguar l_Master;
     CANJaguar r_Master;
@@ -29,15 +29,20 @@ public class Drive extends Subsystem {
         rMap = new RobotMap();
         rMap.DBG("Drive");
         try {
-        //  master (back) jaguars are the only ones that listen to the encoders.
-        //  slave (front) jaguars always follow what the master jaguars do.	
+        //  master (back) jaguar are the only ones that listen to the encoders.    CANJaguar l_Master;
+        //  slave (front) jaguar always follow what the master jaguar do.	
             l_Master = new CANJaguar(rMap.L_MASTER, CANJaguar.ControlMode.kVoltage);
-            r_Master = new CANJaguar(rMap.R_MASTER, CANJaguar.ControlMode.kVoltage);
-
+            l_Master.disableControl();
         rMap.DBG("Drive a");
+            r_Master = new CANJaguar(rMap.R_MASTER, CANJaguar.ControlMode.kVoltage);
+            r_Master.disableControl();
+        rMap.DBG("Drive b");
+ 
         //  Slaves are always in kVoltage and can never be in anything else.
             l_Slave = new CANJaguar(rMap.L_SLAVE, CANJaguar.ControlMode.kVoltage);
+        rMap.DBG("Drive c");
             r_Slave = new CANJaguar(rMap.R_SLAVE, CANJaguar.ControlMode.kVoltage);
+        rMap.DBG("Drive d");
 
             double voltage = l_Master.getBusVoltage();
             l_Master.configMaxOutputVoltage(voltage);
@@ -45,7 +50,7 @@ public class Drive extends Subsystem {
 //      if (l_Slave) {
             l_Slave.configMaxOutputVoltage(voltage);
             r_Slave.configMaxOutputVoltage(voltage);
-        rMap.DBG("Drive b");
+        rMap.DBG("Drive e");
 //      }
             //  enable GetSpeed()
             l_Master.setSpeedReference(CANJaguar.SpeedReference.kQuadEncoder);
@@ -56,12 +61,12 @@ public class Drive extends Subsystem {
         //  enable GetPosition()
             l_Master.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
             r_Master.setPositionReference(CANJaguar.PositionReference.kQuadEncoder);
-        rMap.DBG("Drive d");
+        rMap.DBG("Drive f");
 
             voltageMode();
-        rMap.DBG("Drive e");
+        rMap.DBG("Drive g");
             disable();
-        rMap.DBG("Drive f");
+        rMap.DBG("Drive h");
         } catch (CANTimeoutException e) 
         {
             System.out.println("X Drive");
@@ -139,7 +144,7 @@ public class Drive extends Subsystem {
             System.out.println("X coastMode");
         }
     }
-
+    
     /**
      * non-PID percent voltage mode(the usual one -1..0..1)
      */
@@ -154,7 +159,7 @@ public class Drive extends Subsystem {
             System.out.println("X percentMode");
         }
     }
-
+    
     /**
      * non-PID absolute voltage mode
      */
@@ -171,7 +176,7 @@ public class Drive extends Subsystem {
     }
 
     /**
-     * Always need to re-enable jaguars when the mode is changed.
+     * Always need to re-enable jaguar when the mode is changed.
      */
     public void enable() {
         rMap.DBG("voltageMode");
