@@ -35,8 +35,9 @@ public class Drive extends Subsystem {
             l_Master.disableControl();
         rMap.DBG("Drive a");
             r_Master = new CANJaguar(rMap.R_MASTER, CANJaguar.ControlMode.kVoltage);
+            rMap.DBG("Drive a 2");
             r_Master.disableControl();
-        rMap.DBG("Drive b");
+            rMap.DBG("Drive b");
  
         //  Slaves are always in kVoltage and can never be in anything else.
             l_Slave = new CANJaguar(rMap.L_SLAVE, CANJaguar.ControlMode.kVoltage);
@@ -97,8 +98,8 @@ public class Drive extends Subsystem {
     public void setLeftRight(double left, double right) {
         System.out.println("setLeftRight " + left + ", " + right);
         try {
-            r_Master.setX(right, (byte) 0);
-            l_Master.setX(-left, (byte) 0);
+            r_Master.setX(-right, (byte) 0);
+            l_Master.setX(left, (byte) 0);
 //          if (l_Slave){ // slaves always stay in voltage mode 
             r_Slave.setX(r_Master.getOutputVoltage(), (byte) 0);
             l_Slave.setX(l_Master.getOutputVoltage(), (byte) 0);
