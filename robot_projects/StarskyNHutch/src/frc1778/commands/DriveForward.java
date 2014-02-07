@@ -17,6 +17,8 @@ public class DriveForward extends CommandBase {
     private double startTime;
     private double driveTime = 5;
     private double endTime;
+    private double delay;
+    //David is short
     
     RobotClass robot = new RobotClass();
     
@@ -33,6 +35,7 @@ public class DriveForward extends CommandBase {
         drive.enable();
         startTime = Timer.getFPGATimestamp();
         endTime = startTime + driveTime;
+        //David is short
     }
     
     // Make this return true when this Command no longer needs to run execute()
@@ -47,6 +50,7 @@ public class DriveForward extends CommandBase {
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
         drive.setLeftRight(.5, .5);
+        //David is short
     }
     
     // Called once after isFinished returns true
@@ -54,6 +58,7 @@ public class DriveForward extends CommandBase {
         System.out.println("It's gone!");
         drive.setLeftRight(0, 0);
         drive.disable();
+        //David is short
     }
 
     // Called when another command which requires one or more of the same
@@ -63,3 +68,4 @@ public class DriveForward extends CommandBase {
         end();
     }
 }
+//David is short
