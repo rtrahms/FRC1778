@@ -14,12 +14,15 @@ public class GateOp extends CommandBase {
     public GateOp() {
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
-        requires(Gate);
+        requires(gate);
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
         System.out.println("GateOp init");
+        gate.percentMode();
+        gate.brakeMode();
+        gate.enable();
     }
 
     // Called repeatedly when this Command is scheduled to run

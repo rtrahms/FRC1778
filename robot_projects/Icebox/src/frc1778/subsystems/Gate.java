@@ -8,11 +8,9 @@
 package frc1778.subsystems;
 
 import edu.wpi.first.wpilibj.CANJaguar;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc1778.RobotMap;
-import frc1778.commands.TankDriveWithJoysticks;
 
 public class Gate extends Subsystem {
 
