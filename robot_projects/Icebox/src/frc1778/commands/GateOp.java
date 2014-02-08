@@ -1,13 +1,17 @@
-//
-
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package frc1778.commands;
 
 /**
+ *
+ * @author veilljai000
  */
-public class ExampleCommand extends CommandBase {
-
-    public ExampleCommand() {
-        // super ("ccommand name");
+public class GateOp extends CommandBase {
+    
+    public GateOp() {
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
     }
