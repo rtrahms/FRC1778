@@ -14,8 +14,11 @@ public class RobotMap {
 
     private static RobotMap instance;
 
+    // for gate subsystem
+    public int GATE_JAG_ID = 4;
+    // for drive subsystem
     public int NUMBER_OF_DRIVE_JAGS = 4;
-
+    
     public int RF_JAG_ID = 8; // front are optional and paired to same gearbox
     public int RB_JAG_ID = 5; // must have 2 drive motors at least
     public int LF_JAG_ID = 2;
