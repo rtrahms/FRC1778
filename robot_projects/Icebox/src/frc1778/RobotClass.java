@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc1778.commands.Autonomous;
+import frc1778.commands.AutoDriveAndShoot;
 import frc1778.commands.CommandBase;
 
 public class RobotClass extends IterativeRobot {
@@ -19,7 +19,7 @@ public class RobotClass extends IterativeRobot {
     //  Initialize all subsystems
         CommandBase.init();
         
-        autonomousCommand = new Autonomous();
+        autonomousCommand = new AutoDriveAndShoot();
         SmartDashboard.putData(autonomousCommand);
         
         // TODO: The user should be able to select more than one autonomous action
