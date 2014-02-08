@@ -3,7 +3,6 @@ package frc1778;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import frc1778.commands.DriveTest;
 import frc1778.commands.TankDriveWithJoysticks;
 
 /**
@@ -95,7 +94,6 @@ public class OI {
 	lButton9->WhenPressed(new SetShooterLimits());
 	lButton10->WhenPressed(new GyroReset());
 */
-	lButton11.whenReleased(new DriveTest());
 	
     //  Right Controller	
         rButton1.whenReleased(new TankDriveWithJoysticks());	

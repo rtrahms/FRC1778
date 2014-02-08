@@ -6,17 +6,11 @@
 package frc1778.commands;
 
 import frc1778.RobotClass;
-import edu.wpi.first.wpilibj.Timer;
 /**
  *
  * @author veilljai000
  */
 public class AutoDriveAndShoot extends CommandBase {
-    
-    private double startTime;
-    private double driveTime = 1; //Do I need these??
-    private double endTime;
-    
     RobotClass robot = new RobotClass();
     
     public AutoDriveAndShoot() {
