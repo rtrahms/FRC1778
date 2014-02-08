@@ -14,10 +14,14 @@ public class RollerOp extends CommandBase {
     public RollerOp() {
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
+        requires(roller);
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
+        System.out.println("RollerOp Init");
+        roller.setRollerSpeed(.25);
+        roller.setSafety(true);
     }
 
     // Called repeatedly when this Command is scheduled to run

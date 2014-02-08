@@ -18,19 +18,22 @@ public class AutoDriveAndShoot extends CommandBase {
         // eg. requires(chassis);
         super ("AutoDriveAndShoot");
         requires(drive);
-        requires(camera);
-        requires(gate);
-        requires(rollers);
+        requires(Camera);
+        requires(Gate);
+        requires(roller);
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
-    System.out.println("Auto DNS init");
+    System.out.println("Auto D'n'S Drive init"); //drive init
     drive.percentMode();
     drive.brakeMode();
     drive.enable();
-        //camera setup
-        //drive setup
+    System.out.println("Auto D'n'S Roller init"); //roller init
+    roller.setRollerSpeed(.25);
+    roller.setSafety(true);
+    System.out.println("Auto D'n'S Camera init");//camera setup
+        
     }
     
     // Called repeatedly when this Command is scheduled to run
