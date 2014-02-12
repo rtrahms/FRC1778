@@ -1,13 +1,8 @@
-/**
- * gate.java - controls the 4 or 2 jaguar that do wheel driving. Including
- * dealing with all the dang jag modes. position, speed and current are PID
- * modes (the =JAG= does the PID on board) remaining are NON-PID modes:
- * percentVBus is the usual -1..0..1 usually used. voltage uses and absolute
- * voltage number - rarely used.
- */
 package frc1778.subsystems;
 
 import edu.wpi.first.wpilibj.CANJaguar;
+import edu.wpi.first.wpilibj.PIDOutput;
+import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc1778.RobotMap;
@@ -52,7 +47,7 @@ public class Gate extends Subsystem {
      *
      * @param left
      * @param right
-     */
+     */ 
     public void setGatePos(double gatepos) {
         System.out.println("set gatepos " + gatepos);
         try {
@@ -216,4 +211,3 @@ public class Gate extends Subsystem {
         }
     }
 }
-
