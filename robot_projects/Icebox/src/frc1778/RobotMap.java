@@ -30,6 +30,8 @@ public class RobotMap {
     public int R_SLAVE = RF_JAG_ID;
     public int L_MASTER = LB_JAG_ID; // has encoder
     public int L_SLAVE = LF_JAG_ID;
+    
+    public int GATE_CONTROL = GATE_JAG_ID;
 
     public int OUTPUT_SPROCKET = 12;
     public int WHEEL_SPROCKET = 36;// will be different for each robot.
