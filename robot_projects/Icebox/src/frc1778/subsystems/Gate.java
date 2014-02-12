@@ -34,7 +34,8 @@ public class Gate extends Subsystem {
         rMap.DBG("gate end");
     }
 
-    public void initDefaultCommand() { // Set the default command for a subsystem here. 
+    public void initDefaultCommand() {
+        
     }
 
     public void setSafety(boolean enabled) {
