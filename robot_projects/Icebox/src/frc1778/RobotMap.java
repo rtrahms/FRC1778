@@ -16,6 +16,8 @@ public class RobotMap {
 
     // for gate subsystem
     public int GATE_JAG_ID = 4;
+    // for roller subsystem
+    public int ROLLER_JAG_ID = 6;
     // for drive subsystem
     public int NUMBER_OF_DRIVE_JAGS = 4;
     
@@ -30,6 +32,8 @@ public class RobotMap {
     public int R_SLAVE = RF_JAG_ID;
     public int L_MASTER = LB_JAG_ID; // has encoder
     public int L_SLAVE = LF_JAG_ID;
+    
+    public int ROLLER_CONTROL = ROLLER_JAG_ID;
     
     public int GATE_CONTROL = GATE_JAG_ID;
 

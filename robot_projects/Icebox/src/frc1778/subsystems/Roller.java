@@ -28,12 +28,12 @@ public class Roller extends Subsystem {
         rMap.DBG("Roller");
     }
     
-    public void setRollerSpeed(double spd){
+    public void setRollerSpeed(double spd) {
         System.out.println("setRollerSpeed" + spd);
         try {
             roller.setX(spd, (byte) 0);
         } catch (CANTimeoutException e) {
-            System.out.println("X setLeftRight");
+            System.out.println("X setRollerSpeed");
         }
     }
 

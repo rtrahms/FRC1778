@@ -5,27 +5,35 @@
  */
 package frc1778.commands;
 
+import edu.wpi.first.wpilibj.Timer;
+import frc1778.RobotClass;
+
 /**
  *
  * @author veilljai000
  */
 public class RollerOp extends CommandBase {
     
+    private double startTime;
+    private double rollTime = 0.5;
+    private double endTime;
+    
+    RobotClass robot = new RobotClass();
+    
     public RollerOp() {
-        // Use requires() here to declare subsystem dependencies
-        // eg. requires(chassis);
+        super("RollerOP");
         requires(roller);
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
         System.out.println("RollerOp Init");
-        roller.setRollerSpeed(.25);
         roller.setSafety(true);
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
+        roller.setRollerSpeed(oi.getJimRightY());
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -35,10 +43,13 @@ public class RollerOp extends CommandBase {
 
     // Called once after isFinished returns true
     protected void end() {
+        roller.setRollerSpeed(0);
     }
 
     // Called when another command which requires one or more of the same
     // subsystems is scheduled to run
     protected void interrupted() {
+        System.out.println("Roller Teleop Interrupted");
+        roller.setRollerSpeed(0);
     }
 }

@@ -35,7 +35,6 @@ public class OI {
     JoystickButton rButton9;
     JoystickButton rButton10;
     JoystickButton rButton11;
-    JoystickButton jimButton11;
     JoystickButton jimButton1;
     JoystickButton jimButton2;
     JoystickButton jimButton3;
@@ -46,6 +45,7 @@ public class OI {
     JoystickButton jimButton8;
     JoystickButton jimButton9;
     JoystickButton jimButton10;
+    JoystickButton jimButton11;
     
     public OI () 
     {
@@ -148,9 +148,12 @@ public class OI {
     public double getJimLeftY () {
         return -jimJoy.getRawAxis (2);
     }
-
-    public double getJimRightY () {
-        return -jimJoy.getRawAxis (4);
+    
+    public double getJimRightX () {
+        return jimJoy.getRawAxis (3);
     }
 
+    public double getJimRightY() {
+        return -jimJoy.getRawAxis (4);
+    }
 }
