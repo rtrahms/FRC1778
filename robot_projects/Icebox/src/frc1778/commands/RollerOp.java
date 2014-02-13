@@ -33,7 +33,7 @@ public class RollerOp extends CommandBase {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-        roller.setRollerSpeed(oi.getJimRightY());
+        roller.setRollerSpeed(oi.getGamepadRightStick());
     }
 
     // Make this return true when this Command no longer needs to run execute()
@@ -50,6 +50,6 @@ public class RollerOp extends CommandBase {
     // subsystems is scheduled to run
     protected void interrupted() {
         System.out.println("Roller Teleop Interrupted");
-        roller.setRollerSpeed(0);
+        end();
     }
 }

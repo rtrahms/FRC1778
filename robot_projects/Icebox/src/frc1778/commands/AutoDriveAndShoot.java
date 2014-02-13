@@ -18,7 +18,7 @@ public class AutoDriveAndShoot extends CommandBase {
         // eg. requires(chassis);
         super ("AutoDriveAndShoot");
         requires(drive);
-        requires(camera);
+        // requires(camera);
         requires(gate);
         requires(roller);
     }

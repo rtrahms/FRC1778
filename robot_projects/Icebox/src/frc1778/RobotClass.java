@@ -19,8 +19,8 @@ public class RobotClass extends IterativeRobot {
     //  Initialize all subsystems
         CommandBase.init();
         
-        autonomousCommand = new AutoDriveAndShoot();
-        SmartDashboard.putData(autonomousCommand);
+        //autonomousCommand = new AutoDriveAndShoot();
+        //SmartDashboard.putData(autonomousCommand);
         
         // TODO: The user should be able to select more than one autonomous action
         // TODO: Selectable via the selectable chooser (smart dashboard)
@@ -28,7 +28,7 @@ public class RobotClass extends IterativeRobot {
     }
 
     public void autonomousInit() {
-        autonomousCommand.start();
+        //autonomousCommand.start();
     }
 
     public void autonomousPeriodic() {
@@ -36,7 +36,7 @@ public class RobotClass extends IterativeRobot {
     }
 
     public void teleopInit() {
-        autonomousCommand.cancel();
+        //autonomousCommand.cancel();
     }
 
     public void teleopPeriodic() {

@@ -1,41 +1,34 @@
 package frc1778.subsystems;
 
 import edu.wpi.first.wpilibj.CANJaguar;
-import edu.wpi.first.wpilibj.PIDOutput;
-import edu.wpi.first.wpilibj.PIDController;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import frc1778.RobotMap;
-
+import frc1778.commands.GateOp;
 public class Gate extends Subsystem {
-
+    final double pid_gate[] = { 0.5, 0.45, 0.6 };
     CANJaguar gate;
     RobotMap rMap;
-
     public Gate() {
         super("Gate");
         rMap = new RobotMap();
-        rMap.DBG("gate");
-        try {
-            gate = new CANJaguar(rMap.GATE_JAG_ID, CANJaguar.ControlMode.kVoltage);
-            gate.disableControl();
-
-            double voltage = gate.getBusVoltage();
-            gate.configMaxOutputVoltage(voltage);
-            
-        //  enable GetPosition()
+        try
+        { 
+            gate = new CANJaguar(4);
+            gate.changeControlMode(CANJaguar.ControlMode.kPosition);
             gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
-            voltageMode();
-            disable();
-        } catch (CANTimeoutException e) 
-        {
-            System.out.println("X gate");
+            gate.setPID(pid_gate[0],pid_gate[1], pid_gate[2]);
+            gate.disableControl();
         }
-        rMap.DBG("gate end");
+        catch(CANTimeoutException e)
+        {
+              e.printStackTrace();
+        }
     }
 
-    public void initDefaultCommand() {
-        
+    public void initDefaultCommand() 
+    {
+        setDefaultCommand(new GateOp());
     }
 
     public void setSafety(boolean enabled) {
@@ -159,7 +152,7 @@ public class Gate extends Subsystem {
     public void positionMode() {
         try {
             gate.changeControlMode(CANJaguar.ControlMode.kPosition);
-            gate.setPID(0.7, 0.0, 0.0);
+            gate.setPID(0.5, 0.45, 0.6);
             brakeMode();
         } catch (CANTimeoutException e) 
         {
