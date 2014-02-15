@@ -21,9 +21,8 @@ public abstract class CommandBase extends Command {
     
     public static void init() {      
         drive = new Drive ();
-
-        // TODO: instantiate new instance of front gate
-        // TODO: Matt should do this
+        roller = new Roller ();
+        gate = new Gate ();
         
         //  MUST be init'd here.  don't move it
         oi = new OI();

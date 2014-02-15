@@ -12,7 +12,6 @@ import frc1778.commands.RollerOp;
 import frc1778.RobotMap;
 
 /**
- *
  * @author hudsodav000
  */ 
 public class Roller extends Subsystem {
@@ -29,11 +28,11 @@ public class Roller extends Subsystem {
     }
     
     public void setRollerSpeed(double spd) {
-        System.out.println("setRollerSpeed" + spd);
+        rMap.DBG("setRollerSpeed" + spd);
         try {
             roller.setX(spd, (byte) 0);
         } catch (CANTimeoutException e) {
-            System.out.println("X setRollerSpeed");
+            rMap.DBG("X setRollerSpeed");
         }
     }
 

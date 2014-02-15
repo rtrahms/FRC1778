@@ -14,7 +14,7 @@ public class Gate extends Subsystem {
         rMap = new RobotMap();
         try
         { 
-            gate = new CANJaguar(4);
+            gate = new CANJaguar(rMap.GATE_JAG_ID);
             gate.changeControlMode(CANJaguar.ControlMode.kPosition);
             gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
             gate.setPID(pid_gate[0],pid_gate[1], pid_gate[2]);
@@ -32,7 +32,7 @@ public class Gate extends Subsystem {
     }
 
     public void setSafety(boolean enabled) {
-        rMap.DBG("setSafety");
+        rMap.DBG("setSafety "+(enabled?"on":"off"));
         gate.setSafetyEnabled(enabled);
     }
 
@@ -43,12 +43,12 @@ public class Gate extends Subsystem {
      * @param right
      */ 
     public void setGatePos(double gatepos) {
-        System.out.println("set gatepos " + gatepos);
+        rMap.DBG("set gatepos " + gatepos);
         try {
             gate.setX(gatepos);
         } catch (CANTimeoutException e)
         {
-            System.out.println("X setGatePos");
+            rMap.DBG("X setGatePos");
         }
     }
 
@@ -61,7 +61,7 @@ public class Gate extends Subsystem {
             gate.configNeutralMode(CANJaguar.NeutralMode.kBrake);
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X brakeMode");
+            rMap.DBG("X brakeMode");
         }
     }
 
@@ -74,7 +74,7 @@ public class Gate extends Subsystem {
             gate.configNeutralMode(CANJaguar.NeutralMode.kCoast);
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X coastMode");
+            rMap.DBG("X coastMode");
         }
     }
     
@@ -88,7 +88,7 @@ public class Gate extends Subsystem {
             coastMode();
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X percentMode");
+            rMap.DBG("X percentMode");
         }
     }
     
@@ -102,7 +102,7 @@ public class Gate extends Subsystem {
             coastMode();
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X voltageMode");
+            rMap.DBG("X voltageMode");
         }
     }
 
@@ -116,7 +116,7 @@ public class Gate extends Subsystem {
             setSafety(true);
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X enable");
+            rMap.DBG("X enable");
         }
     }
 
@@ -127,7 +127,7 @@ public class Gate extends Subsystem {
             setSafety(false);
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X disable");
+            rMap.DBG("X disable");
         }
     }
 
@@ -142,7 +142,7 @@ public class Gate extends Subsystem {
             coastMode();
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X speedMode");
+            rMap.DBG("X speedMode");
         }
     }
 
@@ -156,7 +156,7 @@ public class Gate extends Subsystem {
             brakeMode();
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X positionMode");
+            rMap.DBG("X positionMode");
         }
     }
 
@@ -176,7 +176,7 @@ public class Gate extends Subsystem {
             }
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X atPosition");
+            rMap.DBG("X atPosition");
         }
         return false;
     }
@@ -186,7 +186,7 @@ public class Gate extends Subsystem {
             return gate.getPosition();
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X getRightPosition");
+            rMap.DBG("X getRightPosition");
         }
         return 0.0;
     }
@@ -197,11 +197,11 @@ public class Gate extends Subsystem {
             double p = j.getPosition();
             double s = j.getSpeed();
             double c = j.getOutputCurrent();
-            System.out.println(str + " pos= " + p + " speed= " + s + 
+            rMap.DBG(str + " pos= " + p + " speed= " + s + 
                                " current= " + c + "firmware= " + fw);
         } catch (CANTimeoutException e) 
         {
-            System.out.println("X jagDump");
+            rMap.DBG("X jagDump");
         }
     }
 }
