@@ -8,12 +8,12 @@
 package frc1778;
 
 
-import edu.wpi.first.wpilibj.AnalogChannel;
 import edu.wpi.first.wpilibj.CANJaguar;
-import edu.wpi.first.wpilibj.DriverStationLCD;
+import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 
 /**
@@ -47,13 +47,10 @@ public class SimpleFullControl extends SimpleRobot {
     // drive control
     Joystick leftStick;
     Joystick rightStick;
+    Gyro gyro;
     
     // gate and roller control
     Joystick gamepad;
-    
-    //Gyro gyro;
-    DriverStationLCD display;
-    AnalogChannel ping;
     
     public SimpleFullControl() throws CANTimeoutException {  
         
@@ -62,12 +59,14 @@ public class SimpleFullControl extends SimpleRobot {
         mBackLeft = new CANJaguar(1);
         mFrontRight = new CANJaguar(8);
         mBackRight = new CANJaguar(5);
+        gyro = new Gyro(1);
 
         // set up gate motor (PID-based)
         gate = new CANJaguar(6);
+        getWatchdog().setEnabled(false);
         gate.changeControlMode(CANJaguar.ControlMode.kPosition);
-        gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
-        gate.setPID(PID_GATE[0],PID_GATE[1], PID_GATE[2]);
+        //gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
+        //gate.setPID(PID_GATE[0], PID_GATE[1], PID_GATE[2]);
 
         // set up roller motor
         rollers = new CANJaguar(4);
@@ -82,7 +81,6 @@ public class SimpleFullControl extends SimpleRobot {
         // gate & roller control
         gamepad = new Joystick(3);
         
-        ping = new AnalogChannel(2);
         //gyro = new Gyro(1);
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
@@ -92,21 +90,20 @@ public class SimpleFullControl extends SimpleRobot {
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
     }
     
-    public void debug(String print) {
-        display.println(DriverStationLCD.Line.kUser1,1,print);
-        display.updateLCD();
-    }
-
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
     public void autonomous() {
+        double Kp = 0.03;
         getWatchdog().setEnabled(false);
-        display.clear();
+        gyro.reset();
+        double angle = 0;
         while(isAutonomous()) {
-            double distance = ping.getVoltage()/0.05;
-            debug(Double.toString(distance));
-        }        
+            angle = gyro.getAngle();
+            drive.drive(-.2, -angle*Kp);
+            System.out.println("angle is: " + angle);
+            
+        }
     }
 
     /**
@@ -117,8 +114,8 @@ public class SimpleFullControl extends SimpleRobot {
         int mode = 0;
         
         // enable control for gate & rollers
-        double lock_pos = 0;
-        double step = 0.005;
+        double lock_pos = 0.275;
+        double step = 0.7;
         double increment = 0.0;
         double pot_pos = 0;
         try {    
@@ -128,9 +125,8 @@ public class SimpleFullControl extends SimpleRobot {
         catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
-            
+        
         while(isEnabled() && isOperatorControl()) {
-            
             //************* drive control section
             if(leftStick.getButton(Joystick.ButtonType.kTrigger) == true) {
                 mode = 1-mode;
@@ -146,18 +142,14 @@ public class SimpleFullControl extends SimpleRobot {
             //*********** gate and roller control section
             increment = gamepad.getRawAxis(2)*step;
             lock_pos += increment;
-            lock_pos = Math.max(Math.min(lock_pos, 1),0);
+            lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
             
-            // gate position limiters based on set potentiometer limits
-            if (lock_pos > GATE_CLOSED) lock_pos = GATE_CLOSED;
-            if (lock_pos < GATE_OPEN) lock_pos = GATE_OPEN;
-            
-            System.out.println("" + increment + "  :  " + lock_pos);
+            System.out.println("Current: " + pot_pos + "  :  Goto: " + lock_pos);
             // gate motor operation
             try {
                 pot_pos = gate.getPosition();
                 //System.out.println("Pot pos = "+pot_pos);
-                gate.setX(lock_pos);
+                gate.setX(increment);
                 rollers.setX(gamepad.getRawAxis(4));
             } catch(CANTimeoutException e) {
                 e.printStackTrace();
