@@ -73,7 +73,9 @@ public class SimpleFullControl extends SimpleRobot {
         // set up gate motor (PID-based)
         gate = new CANJaguar(6);
         getWatchdog().setEnabled(false);
-        gate.changeControlMode(CANJaguar.ControlMode.kPosition);
+        
+        // do not uncomment these lines unless you are using PID!!
+        //gate.changeControlMode(CANJaguar.ControlMode.kPosition);
         //gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
         //gate.setPID(PID_GATE[0], PID_GATE[1], PID_GATE[2]);
 
@@ -103,8 +105,15 @@ public class SimpleFullControl extends SimpleRobot {
      * This function is called once each time the robot enters autonomous mode.
      */
     public void autonomous() {
+
+        // CALIBRATION ROBOT1:
+        // autoSpeed constant = 0.5 ====> ~4 ft/sec
+        // autoSpeed constant = 0.375 ====> ~3 ft/sec (best choice for stability/speed)
+        // autoSpeed constant = 0.25  ====> ~2 ft/sec
         
-        double autoSpeed = 0.2;
+        // autoSpeed of 0.375 should cross 18 ft (to goal) in 6 seconds
+        
+        double autoSpeed = 0.375;
         double startTime = Timer.getFPGATimestamp();
         double totalTime;
         int autoState = AUTOSTATE_DRIVE;
@@ -113,7 +122,16 @@ public class SimpleFullControl extends SimpleRobot {
         
         // reset gyro to initial robot position
         gyro.reset();
-        
+
+        // enable control for gate and rollers
+        try {    
+            gate.enableControl();
+            rollers.enableControl();
+        } 
+        catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
+
         while(isAutonomous()) {
             
             // check the total time elapsed
@@ -139,21 +157,22 @@ public class SimpleFullControl extends SimpleRobot {
         
     }
 
-    // auto state methods - NO WHILE LOOPS IN THESE
+    // auto state methods - NO WHILE LOOPS IN THESE METHODS
     // they need to enter and exit in one pass
+    // only one while loop, and that is in autonomous()
         
     private int driveState(double autoSpeed, double travelTime)
     {   
-        final double travelTimeSec = 5;
+        final double travelTimeSec = 6;  // absolute time marker
         int state = AUTOSTATE_DRIVE;
 
         System.out.println("Auto state is drive: timer = " + travelTime);          
         
         if (isPathClear() && travelTime < travelTimeSec)
             driveStraight(autoSpeed);
-        else if (travelTime >= travelTimeSec)
+        //else if (travelTime >= travelTimeSec)
             // at the target!  raise gate
-            state = AUTOSTATE_SHOOT;
+        //    state = AUTOSTATE_SHOOT;
         else
             // obstacle encountered - stop
             state = AUTOSTATE_IDLE;
@@ -163,9 +182,9 @@ public class SimpleFullControl extends SimpleRobot {
     
     private int shootState(double shootTime)
     {
-        final double shootTimeSec = 5;
-        final double rollerStep = 0.7;
-        final double gateStep = 0.7;
+        final double shootTimeSec = 10;  // absolute time marker
+        final double rollerStep = 0.35;
+        final double gateOpen = 0.35;
         
         int state = AUTOSTATE_SHOOT;      
 
@@ -173,7 +192,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         try {    
             rollers.setX(rollerStep);
-            gate.setX(gateStep);
+            gate.setX(gateOpen);
         }
         catch (CANTimeoutException ex) {
             ex.printStackTrace();
@@ -194,6 +213,15 @@ public class SimpleFullControl extends SimpleRobot {
        
         // stop drive if still going
         driveStraight(0);
+        
+        // turn off gate and rollers
+        try {
+            rollers.setX(0);
+            gate.setX(0);
+        }
+        catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
         
         // end state - do not transition out of this state
         
@@ -258,11 +286,12 @@ public class SimpleFullControl extends SimpleRobot {
             lock_pos += increment;
             lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
             
-            System.out.println("Current: " + pot_pos + "  :  Goto: " + lock_pos);
+            System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
             // gate motor operation
             try {
                 pot_pos = gate.getPosition();
                 //System.out.println("Pot pos = "+pot_pos);
+                //gate.setX(lock_pos);     // only used for PID
                 gate.setX(increment);
                 rollers.setX(gamepad.getRawAxis(4));
             } catch(CANTimeoutException e) {
