@@ -8,13 +8,13 @@
 package frc1778;
 
 
-import edu.wpi.first.wpilibj.ADXL345_I2C;
 import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 
 /**
@@ -24,9 +24,14 @@ import edu.wpi.first.wpilibj.can.CANTimeoutException;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
+
 public class SimpleFullControl extends SimpleRobot {
     
-    // PID coefficients for gate jaguar
+    final int AUTOSTATE_IDLE = 0;
+    final int AUTOSTATE_DRIVE = 1;
+    final int AUTOSTATE_SHOOT = 2;
+    
+        // PID coefficients for gate jaguar
     final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // potentiometer values for gate position
@@ -98,21 +103,123 @@ public class SimpleFullControl extends SimpleRobot {
      * This function is called once each time the robot enters autonomous mode.
      */
     public void autonomous() {
-        double Kp = 0.03;
+        
+        double autoSpeed = 0.2;
+        double startTime = Timer.getFPGATimestamp();
+        double totalTime;
+        int autoState = AUTOSTATE_DRIVE;
+        
         getWatchdog().setEnabled(false);
+        
+        // reset gyro to initial robot position
         gyro.reset();
-        double angle = 0;
+        
         while(isAutonomous()) {
+            
+            // check the total time elapsed
+            totalTime = Timer.getFPGATimestamp() - startTime;
+            
+            // autonomous state machine
+            switch (autoState)
+            {
+                case AUTOSTATE_DRIVE:
+                    autoState = driveState(autoSpeed,totalTime);
+                    break;
+                case AUTOSTATE_SHOOT:
+                    autoState = shootState(totalTime);
+                    break;
+                case AUTOSTATE_IDLE:
+                default:
+                    autoState = idleState();
+                    break;
+            }   
+            // time slice
+            //Timer.delay(timeSliceSec);    
+        }
+        
+    }
+
+    // auto state methods - NO WHILE LOOPS IN THESE
+    // they need to enter and exit in one pass
+        
+    private int driveState(double autoSpeed, double travelTime)
+    {   
+        final double travelTimeSec = 5;
+        int state = AUTOSTATE_DRIVE;
+
+        System.out.println("Auto state is drive: timer = " + travelTime);          
+        
+        if (isPathClear() && travelTime < travelTimeSec)
+            driveStraight(autoSpeed);
+        else if (travelTime >= travelTimeSec)
+            // at the target!  raise gate
+            state = AUTOSTATE_SHOOT;
+        else
+            // obstacle encountered - stop
+            state = AUTOSTATE_IDLE;
+            
+        return state;
+    }
+    
+    private int shootState(double shootTime)
+    {
+        final double shootTimeSec = 5;
+        final double rollerStep = 0.7;
+        final double gateStep = 0.7;
+        
+        int state = AUTOSTATE_SHOOT;      
+
+        System.out.println("Auto state is shoot: timer = " + shootTime);          
+        
+        try {    
+            rollers.setX(rollerStep);
+            gate.setX(gateStep);
+        }
+        catch (CANTimeoutException ex) {
+            ex.printStackTrace();
+        }
+
+        if (shootTime >= shootTimeSec)
+            // gate raised! shoot the ball
+            state = AUTOSTATE_IDLE;
+        
+        return state;
+    }
+       
+    private int idleState()
+    {
+        int state = AUTOSTATE_IDLE;
+             
+        System.out.println("Auto state is idle");          
+       
+        // stop drive if still going
+        driveStraight(0);
+        
+        // end state - do not transition out of this state
+        
+        return state;
+    }
+    
+    private boolean isPathClear() {
+        
+        // use ultrasonic here if installed
+        
+        // return false if obstacle closer than threshold
+        
+        return true;
+    }
+    
+    private void driveStraight(double speed) {
+           final double Kp = 0.03;
+           double angle = 0;
             acceleration = accel.getAcceleration(ADXL345_SPI.Axes.kY);
             
             angle = gyro.getAngle();
-            //drive.drive(-.2, -angle*Kp);
-            System.out.println("angle is: " + angle + ", acceleration is: " + acceleration);
-            //Timer.delay(1);
-            
-        }
+            drive.drive(-1*speed, -angle*Kp);
+            //System.out.println("angle is: " + angle + ", acceleration is: " + acceleration);          
     }
-
+    
+    
     /**
      * This function is called once each time the robot enters operator control.
      */
