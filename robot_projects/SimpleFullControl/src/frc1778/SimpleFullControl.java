@@ -106,7 +106,7 @@ public class SimpleFullControl extends SimpleRobot {
      */
     public void autonomous() {
 
-        // CALIBRATION ROBOT1:
+        // CALIBRATION ROBOT 1:
         // autoSpeed constant = 0.5 ====> ~4 ft/sec
         // autoSpeed constant = 0.375 ====> ~3 ft/sec (best choice for stability/speed)
         // autoSpeed constant = 0.25  ====> ~2 ft/sec
@@ -163,7 +163,8 @@ public class SimpleFullControl extends SimpleRobot {
         
     private int driveState(double autoSpeed, double travelTime)
     {   
-        final double travelTimeSec = 6;  // absolute time marker
+        //final double travelTimeSec = 5.6;  // absolute time marker for 18 ft
+        final double travelTimeSec = 2.8;  // absolute time marker for 9 ft
         int state = AUTOSTATE_DRIVE;
 
         System.out.println("Auto state is drive: timer = " + travelTime);          
@@ -231,6 +232,9 @@ public class SimpleFullControl extends SimpleRobot {
     private boolean isPathClear() {
         
         // use ultrasonic here if installed
+        // NOTE 2/18/04: No ultrasonic sensor available
+        // so this function will always return true
+        // WARNING:  Robot may collide with obstacles in autonomous!
         
         // return false if obstacle closer than threshold
         
