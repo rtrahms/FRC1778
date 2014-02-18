@@ -8,12 +8,13 @@
 package frc1778;
 
 
+import edu.wpi.first.wpilibj.ADXL345_I2C;
+import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.CANJaguar;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 
 /**
@@ -48,6 +49,8 @@ public class SimpleFullControl extends SimpleRobot {
     Joystick leftStick;
     Joystick rightStick;
     Gyro gyro;
+    double acceleration;
+    ADXL345_SPI accel;
     
     // gate and roller control
     Joystick gamepad;
@@ -60,6 +63,7 @@ public class SimpleFullControl extends SimpleRobot {
         mFrontRight = new CANJaguar(8);
         mBackRight = new CANJaguar(5);
         gyro = new Gyro(1);
+        accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
         // set up gate motor (PID-based)
         gate = new CANJaguar(6);
@@ -99,9 +103,12 @@ public class SimpleFullControl extends SimpleRobot {
         gyro.reset();
         double angle = 0;
         while(isAutonomous()) {
+            acceleration = accel.getAcceleration(ADXL345_SPI.Axes.kY);
+            
             angle = gyro.getAngle();
-            drive.drive(-.2, -angle*Kp);
-            System.out.println("angle is: " + angle);
+            //drive.drive(-.2, -angle*Kp);
+            System.out.println("angle is: " + angle + ", acceleration is: " + acceleration);
+            //Timer.delay(1);
             
         }
     }
