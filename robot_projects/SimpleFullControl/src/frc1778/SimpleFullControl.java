@@ -1,12 +1,6 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) FIRST 2008. All Rights Reserved.                             */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
+// SimpleFullControl.java
 
 package frc1778;
-
 
 import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.CANJaguar;
@@ -18,21 +12,13 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/**
- * The VM is configured to automatically run this class, and to call the
- * functions corresponding to each mode, as described in the SimpleRobot
- * documentation. If you change the name of this class or the package after
- * creating this project, you must also update the manifest file in the resource
- * directory.
- */
-
 public class SimpleFullControl extends SimpleRobot {
     
     final int AUTOSTATE_IDLE = 0;
     final int AUTOSTATE_DRIVE = 1;
     final int AUTOSTATE_SHOOT = 2;
     
-        // PID coefficients for gate jaguar
+    // PID coefficients for gate jaguar
     final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // potentiometer values for gate position
@@ -40,8 +26,9 @@ public class SimpleFullControl extends SimpleRobot {
     final double GATE_OPEN = 0.57;
     
     // drive motors
-    CANJaguar mFrontLeft;
-    CANJaguar mFrontRight;
+// jag 2 currently dead so drive on ONLY back jags for now
+//  CANJaguar mFrontLeft;
+//  CANJaguar mFrontRight;
     CANJaguar mBackLeft;
     CANJaguar mBackRight;
     
@@ -64,16 +51,16 @@ public class SimpleFullControl extends SimpleRobot {
     public SimpleFullControl() throws CANTimeoutException {  
         
         // drive system
-        mFrontLeft = new CANJaguar(2);
+        getWatchdog().setEnabled(false);
+//      mFrontLeft = new CANJaguar(2);
         mBackLeft = new CANJaguar(1);
-        mFrontRight = new CANJaguar(8);
+//      mFrontRight = new CANJaguar(8);
         mBackRight = new CANJaguar(5);
         gyro = new Gyro(1);
         accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
         // set up gate motor
         gate = new CANJaguar(6);
-        getWatchdog().setEnabled(false);
         
         // do not uncomment these lines unless you are using PID!!
         //gate.changeControlMode(CANJaguar.ControlMode.kPosition);
@@ -84,8 +71,6 @@ public class SimpleFullControl extends SimpleRobot {
         rollers = new CANJaguar(4);
         rollers.changeControlMode(CANJaguar.ControlMode.kPercentVbus);
         
-        getWatchdog().setEnabled(false);
-
         // drive control
         leftStick = new Joystick(1);
         rightStick = new Joystick(2);
@@ -93,17 +78,19 @@ public class SimpleFullControl extends SimpleRobot {
         // gate & roller control
         gamepad = new Joystick(3);
         
-        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
+//2 is dead        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
+        drive = new RobotDrive(mBackLeft, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
-        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+//      drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+//      drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
     }
     
     /**
      * This function is called once each time the robot enters autonomous mode.
      */
     public void autonomous() {
+        getWatchdog().setEnabled(false);
 
         // CALIBRATION ROBOT 1:
         // autoSpeed constant = 0.5 ====> ~4 ft/sec
@@ -120,7 +107,6 @@ public class SimpleFullControl extends SimpleRobot {
         
         autoSpeed = SmartDashboard.getNumber("AutoSpeed",AUTOSPEED_DEFAULT);
         
-        getWatchdog().setEnabled(false);
         
         // reset gyro to initial robot position
         gyro.reset();
@@ -131,7 +117,7 @@ public class SimpleFullControl extends SimpleRobot {
             rollers.enableControl();
         } 
         catch (CANTimeoutException ex) {
-            ex.printStackTrace();
+            System.out.println ("CANTimeoutException happened :(");
         }
 
         while(isAutonomous()) {
@@ -281,7 +267,7 @@ public class SimpleFullControl extends SimpleRobot {
             rollers.enableControl();
         } 
         catch (CANTimeoutException ex) {
-            ex.printStackTrace();
+            System.out.println ("CANTimeoutException :(");
         }
         
         gyro.reset();
