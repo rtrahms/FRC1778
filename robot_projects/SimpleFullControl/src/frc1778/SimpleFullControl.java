@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.can.CANTimeoutException;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -70,7 +71,7 @@ public class SimpleFullControl extends SimpleRobot {
         gyro = new Gyro(1);
         accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
-        // set up gate motor (PID-based)
+        // set up gate motor
         gate = new CANJaguar(6);
         getWatchdog().setEnabled(false);
         
@@ -92,8 +93,6 @@ public class SimpleFullControl extends SimpleRobot {
         // gate & roller control
         gamepad = new Joystick(3);
         
-        //gyro = new Gyro(1);
-        
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
@@ -112,11 +111,14 @@ public class SimpleFullControl extends SimpleRobot {
         // autoSpeed constant = 0.25  ====> ~2 ft/sec
         
         // autoSpeed of 0.375 should cross 18 ft (to goal) in 6 seconds
-        
-        double autoSpeed = 0.375;
+
+        final double AUTOSPEED_DEFAULT = 0.375;
+        double autoSpeed;
         double startTime = Timer.getFPGATimestamp();
         double totalTime;
         int autoState = AUTOSTATE_DRIVE;
+        
+        autoSpeed = SmartDashboard.getNumber("AutoSpeed",AUTOSPEED_DEFAULT);
         
         getWatchdog().setEnabled(false);
         
@@ -162,18 +164,23 @@ public class SimpleFullControl extends SimpleRobot {
     // only one while loop, and that is in autonomous()
         
     private int driveState(double autoSpeed, double travelTime)
-    {   
-        //final double travelTimeSec = 5.6;  // absolute time marker for 18 ft
-        final double travelTimeSec = 2.8;  // absolute time marker for 9 ft
+    {
+        final double TRAVEL_TIME_DEFAULT = 2.8; // absolute time marker for 9 ft
+        //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
+        double travelTimeSec;  
         int state = AUTOSTATE_DRIVE;
 
+        travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
+
+        SmartDashboard.putNumber("travelTime", travelTime);
+        
         System.out.println("Auto state is drive: timer = " + travelTime);          
         
         if (isPathClear() && travelTime < travelTimeSec)
             driveStraight(autoSpeed);
-        //else if (travelTime >= travelTimeSec)
+        else if (travelTime >= travelTimeSec)
             // at the target!  raise gate
-        //    state = AUTOSTATE_SHOOT;
+            state = AUTOSTATE_SHOOT;
         else
             // obstacle encountered - stop
             state = AUTOSTATE_IDLE;
@@ -183,11 +190,16 @@ public class SimpleFullControl extends SimpleRobot {
     
     private int shootState(double shootTime)
     {
-        final double shootTimeSec = 10;  // absolute time marker
+        final double SHOOT_TIME_DEFAULT = 10.0;
+        double shootTimeSec;  // absolute time marker
         final double rollerStep = 0.35;
         final double gateOpen = 0.35;
         
-        int state = AUTOSTATE_SHOOT;      
+        int state = AUTOSTATE_SHOOT;  
+        
+        shootTimeSec = SmartDashboard.getNumber("ShootTimeSec",SHOOT_TIME_DEFAULT);
+        
+        SmartDashboard.putNumber("shootTime", shootTime);
 
         System.out.println("Auto state is shoot: timer = " + shootTime);          
         
@@ -272,6 +284,7 @@ public class SimpleFullControl extends SimpleRobot {
             ex.printStackTrace();
         }
         
+        gyro.reset();
         while(isEnabled() && isOperatorControl()) {
             //************* drive control section
             if(leftStick.getButton(Joystick.ButtonType.kTrigger) == true) {
@@ -301,6 +314,12 @@ public class SimpleFullControl extends SimpleRobot {
             } catch(CANTimeoutException e) {
                 e.printStackTrace();
             }
+            if(mode == 0) {
+                SmartDashboard.putString("Drive Mode", "Tank Drive");
+            } else {
+                SmartDashboard.putString("Drive Mode", "Arcade Drive");
+            }
+            SmartDashboard.putNumber("Direction", gyro.getAngle());
          }
     }
     
