@@ -156,12 +156,14 @@ public class SimpleFullControl extends SimpleRobot {
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE;
 
+        // read in desired drive time from smart dashboard
         travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
 
-        SmartDashboard.putNumber("travelTime", travelTime);
-        
+        // report out current timer value
+        SmartDashboard.putNumber("travelTime", travelTime);      
         System.out.println("Auto state is drive: timer = " + travelTime);          
         
+        // continue driving unless obstacle or drive time exceeded
         if (isPathClear() && travelTime < travelTimeSec)
             driveStraight(autoSpeed);
         else if (travelTime >= travelTimeSec)
@@ -183,10 +185,11 @@ public class SimpleFullControl extends SimpleRobot {
         
         int state = AUTOSTATE_SHOOT;  
         
+        // read in desired shoot time from smart dashboard
         shootTimeSec = SmartDashboard.getNumber("ShootTimeSec",SHOOT_TIME_DEFAULT);
         
+        // report out current timer value
         SmartDashboard.putNumber("shootTime", shootTime);
-
         System.out.println("Auto state is shoot: timer = " + shootTime);          
         
         try {    
@@ -197,6 +200,7 @@ public class SimpleFullControl extends SimpleRobot {
             ex.printStackTrace();
         }
 
+        // shoot time exceeded
         if (shootTime >= shootTimeSec)
             // gate raised! shoot the ball
             state = AUTOSTATE_IDLE;
