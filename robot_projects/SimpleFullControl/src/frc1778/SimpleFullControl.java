@@ -26,17 +26,15 @@ public class SimpleFullControl extends SimpleRobot {
     final double GATE_OPEN = 0.57;
     
     // drive motors
-// jag 2 currently dead so drive on ONLY back jags for now
-//  CANJaguar mFrontLeft;
-//  CANJaguar mFrontRight;
+    CANJaguar mFrontLeft;
+    CANJaguar mFrontRight;
     CANJaguar mBackLeft;
     CANJaguar mBackRight;
+    RobotDrive drive;
     
     // gate and roller motors
     CANJaguar gate;
-    CANJaguar rollers;
-    
-    RobotDrive drive;
+    CANJaguar rollers;   
     
     // drive control
     Joystick leftStick;
@@ -48,13 +46,21 @@ public class SimpleFullControl extends SimpleRobot {
     // gate and roller control
     Joystick gamepad;
     
+    // sensors
+    Camera1778 camera;
+    Ultrasonic1778 ultrasonic;
+    
     public SimpleFullControl() throws CANTimeoutException {  
+        
+        // sensors
+        camera = new Camera1778();
+        ultrasonic = new Ultrasonic1778();
         
         // drive system
         getWatchdog().setEnabled(false);
-//      mFrontLeft = new CANJaguar(2);
+        mFrontLeft = new CANJaguar(2);
         mBackLeft = new CANJaguar(1);
-//      mFrontRight = new CANJaguar(8);
+        mFrontRight = new CANJaguar(8);
         mBackRight = new CANJaguar(5);
         gyro = new Gyro(1);
         accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
@@ -78,12 +84,11 @@ public class SimpleFullControl extends SimpleRobot {
         // gate & roller control
         gamepad = new Joystick(3);
         
-//2 is dead        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive = new RobotDrive(mBackLeft, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
-//      drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-//      drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
     }
     
     /**
@@ -233,13 +238,13 @@ public class SimpleFullControl extends SimpleRobot {
     
     private boolean isPathClear() {
         
-        // use ultrasonic here if installed
-        // NOTE 2/18/04: No ultrasonic sensor available
-        // so this function will always return true
-        // WARNING:  Robot may collide with obstacles in autonomous!
+        final double rangeThresholdMM = 100.0;
         
-        // return false if obstacle closer than threshold
+        // if closer than the range threshold, return false;
+        if (ultrasonic.getRangeMM() < rangeThresholdMM)
+            return false;
         
+        // otherwise return true;
         return true;
     }
     
