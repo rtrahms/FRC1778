@@ -40,8 +40,8 @@ public class SimpleFullControl extends SimpleRobot {
     Joystick leftStick;
     Joystick rightStick;
     Gyro gyro;
-    double acceleration;
-    ADXL345_SPI accel;
+    //double acceleration;
+    //ADXL345_SPI accel;
     
     // gate and roller control
     Joystick gamepad;
@@ -49,6 +49,7 @@ public class SimpleFullControl extends SimpleRobot {
     // sensors
     Camera1778 camera;
     Ultrasonic1778 ultrasonic;
+    double rangeMM = 0;
     
     public SimpleFullControl() throws CANTimeoutException {  
         
@@ -63,7 +64,7 @@ public class SimpleFullControl extends SimpleRobot {
         mFrontRight = new CANJaguar(8);
         mBackRight = new CANJaguar(5);
         gyro = new Gyro(1);
-        accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
+        //accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
         // set up gate motor
         gate = new CANJaguar(6);
@@ -248,10 +249,20 @@ public class SimpleFullControl extends SimpleRobot {
         return true;
     }
     
+    private boolean inRangeMM(double rangeThresholdMM)
+    {
+        // if closer than the range threshold, return false;
+        if (ultrasonic.getRangeMM() > rangeThresholdMM)
+            return false;
+        
+        // otherwise return true;
+        return true;        
+    }
+    
     private void driveStraight(double speed) {
            final double Kp = 0.03;
            double angle = 0;
-            acceleration = accel.getAcceleration(ADXL345_SPI.Axes.kY);
+           //acceleration = accel.getAcceleration(ADXL345_SPI.Axes.kY);
             
             angle = gyro.getAngle();
             drive.drive(-1*speed, -angle*Kp);
@@ -315,6 +326,7 @@ public class SimpleFullControl extends SimpleRobot {
                 SmartDashboard.putString("Drive Mode", "Arcade Drive");
             }
             SmartDashboard.putNumber("Direction", gyro.getAngle());
+            SmartDashboard.putNumber("rangeMM", ultrasonic.getRangeMM());
          }
     }
     
