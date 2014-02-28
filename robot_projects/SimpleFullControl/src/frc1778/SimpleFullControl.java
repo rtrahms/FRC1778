@@ -55,7 +55,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         // sensors
         camera = new Camera1778();
-        ultrasonic = new Ultrasonic1778();
+        //ultrasonic = new Ultrasonic1778();
         
         // drive system
         getWatchdog().setEnabled(false);
@@ -130,7 +130,7 @@ public class SimpleFullControl extends SimpleRobot {
             
             // check the total time elapsed
             totalTime = Timer.getFPGATimestamp() - startTime;
-            
+            camera.runCam();
             // autonomous state machine
             switch (autoState)
             {
@@ -167,7 +167,7 @@ public class SimpleFullControl extends SimpleRobot {
 
         // report out current timer value
         SmartDashboard.putNumber("travelTime", travelTime);      
-        System.out.println("Auto state is drive: timer = " + travelTime);          
+        //System.out.println("Auto state is drive: timer = " + travelTime);          
         
         // continue driving unless obstacle or drive time exceeded
         if (isPathClear() && travelTime < travelTimeSec)
@@ -196,7 +196,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         // report out current timer value
         SmartDashboard.putNumber("shootTime", shootTime);
-        System.out.println("Auto state is shoot: timer = " + shootTime);          
+        //System.out.println("Auto state is shoot: timer = " + shootTime);          
         
         try {    
             rollers.setX(rollerStep);
@@ -218,7 +218,7 @@ public class SimpleFullControl extends SimpleRobot {
     {
         int state = AUTOSTATE_IDLE;
              
-        System.out.println("Auto state is idle");          
+        //System.out.println("Auto state is idle");          
        
         // stop drive if still going
         driveStraight(0);
@@ -242,8 +242,8 @@ public class SimpleFullControl extends SimpleRobot {
         final double rangeThresholdMM = 100.0;
         
         // if closer than the range threshold, return false;
-        if (ultrasonic.getRangeMM() < rangeThresholdMM)
-            return false;
+        //if (ultrasonic.getRangeMM() < rangeThresholdMM)
+        //    return false;
         
         // otherwise return true;
         return true;
@@ -252,8 +252,8 @@ public class SimpleFullControl extends SimpleRobot {
     private boolean inRangeMM(double rangeThresholdMM)
     {
         // if closer than the range threshold, return false;
-        if (ultrasonic.getRangeMM() > rangeThresholdMM)
-            return false;
+        //if (ultrasonic.getRangeMM() > rangeThresholdMM)
+        //    return false;
         
         // otherwise return true;
         return true;        
@@ -309,7 +309,7 @@ public class SimpleFullControl extends SimpleRobot {
             lock_pos += increment;
             lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
             
-            System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
+            //System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
             // gate motor operation
             try {
                 pot_pos = gate.getPosition();
@@ -326,7 +326,7 @@ public class SimpleFullControl extends SimpleRobot {
                 SmartDashboard.putString("Drive Mode", "Arcade Drive");
             }
             SmartDashboard.putNumber("Direction", gyro.getAngle());
-            SmartDashboard.putNumber("rangeMM", ultrasonic.getRangeMM());
+            //SmartDashboard.putNumber("rangeMM", ultrasonic.getRangeMM());
          }
     }
     
