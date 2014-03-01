@@ -2,8 +2,8 @@
 
 package frc1778;
 
-import edu.wpi.first.wpilibj.ADXL345_SPI;
 import edu.wpi.first.wpilibj.CANJaguar;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -14,42 +14,51 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SimpleFullControl extends SimpleRobot {
     
-    final int AUTOSTATE_IDLE = 0;
-    final int AUTOSTATE_DRIVE = 1;
-    final int AUTOSTATE_SHOOT = 2;
+    private final int AUTOSTATE_IDLE = 0;
+    private final int AUTOSTATE_DRIVE_GYRO = 1;
+    private final int AUTOSTATE_DRIVE_CAMERA = 2;
+    private final int AUTOSTATE_SHOOT = 3;
     
     // PID coefficients for gate jaguar
-    final double PID_GATE[] = { 0.5, 0.45, 0.6 };
+    private final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // potentiometer values for gate position
-    final double GATE_CLOSED = 0.8;
-    final double GATE_OPEN = 0.57;
+    private final double GATE_CLOSED = 0.8;
+    private final double GATE_OPEN = 0.57;
+    
+    // how close to the goal before shooting ball
+    private final double AUTO_RANGE_MM = 500;
+    
+    // where do we read the position switch from
+    private final int POSITION_SWITCH_SLOT = 3;
     
     // drive motors
-    CANJaguar mFrontLeft;
-    CANJaguar mFrontRight;
-    CANJaguar mBackLeft;
-    CANJaguar mBackRight;
-    RobotDrive drive;
+    private CANJaguar mFrontLeft;
+    private CANJaguar mFrontRight;
+    private CANJaguar mBackLeft;
+    private CANJaguar mBackRight;
+    private RobotDrive drive;
     
     // gate and roller motors
-    CANJaguar gate;
-    CANJaguar rollers;   
+    private CANJaguar gate;
+    private CANJaguar rollers;   
     
     // drive control
-    Joystick leftStick;
-    Joystick rightStick;
-    Gyro gyro;
-    //double acceleration;
-    //ADXL345_SPI accel;
+    private Joystick leftStick;
+    private Joystick rightStick;
+    private Gyro gyro;
+    //private double acceleration;
+    //private ADXL345_SPI accel;
     
     // gate and roller control
-    Joystick gamepad;
+    private Joystick gamepad;
     
     // sensors
-    Camera1778 camera;
-    Ultrasonic1778 ultrasonic;
-    double rangeMM = 0;
+    private Camera1778 camera;
+    private Ultrasonic1778 ultrasonic;
+    private DigitalInput positionSwitch;
+    private double rangeMM = 0;
+    private boolean isRobotLeft = true;
     
     public SimpleFullControl() throws CANTimeoutException {  
         
@@ -57,6 +66,9 @@ public class SimpleFullControl extends SimpleRobot {
         camera = new Camera1778();
         //ultrasonic = new Ultrasonic1778();
         
+        // read switch and set robot position
+        positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
+       
         // drive system
         getWatchdog().setEnabled(false);
         mFrontLeft = new CANJaguar(2);
@@ -109,11 +121,16 @@ public class SimpleFullControl extends SimpleRobot {
         double autoSpeed;
         double startTime = Timer.getFPGATimestamp();
         double totalTime;
-        int autoState = AUTOSTATE_DRIVE;
+        int autoState = AUTOSTATE_DRIVE_GYRO;
         
         autoSpeed = SmartDashboard.getNumber("AutoSpeed",AUTOSPEED_DEFAULT);
         
-        
+        // tell camera if we are right or left (read from digital switch)
+        isRobotLeft = positionSwitch.get();
+        SmartDashboard.putBoolean("IsRobotLeft", isRobotLeft);      
+        System.out.println("isRobotLeft = " + isRobotLeft);          
+        camera.setLeft(isRobotLeft);
+       
         // reset gyro to initial robot position
         gyro.reset();
 
@@ -130,12 +147,15 @@ public class SimpleFullControl extends SimpleRobot {
             
             // check the total time elapsed
             totalTime = Timer.getFPGATimestamp() - startTime;
-            camera.runCam();
+            
             // autonomous state machine
             switch (autoState)
             {
-                case AUTOSTATE_DRIVE:
-                    autoState = driveState(autoSpeed,totalTime);
+                case AUTOSTATE_DRIVE_GYRO:
+                    autoState = driveStateGyro(autoSpeed,totalTime);
+                    break;
+                case AUTOSTATE_DRIVE_CAMERA:
+                    autoState = driveStateCamera(autoSpeed,totalTime);
                     break;
                 case AUTOSTATE_SHOOT:
                     autoState = shootState(totalTime);
@@ -155,30 +175,89 @@ public class SimpleFullControl extends SimpleRobot {
     // they need to enter and exit in one pass
     // only one while loop, and that is in autonomous()
         
-    private int driveState(double autoSpeed, double travelTime)
+    private int driveStateGyro(double autoSpeed, double travelTime)
     {
         final double TRAVEL_TIME_DEFAULT = 2.8; // absolute time marker for 9 ft
         //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
         double travelTimeSec;  
-        int state = AUTOSTATE_DRIVE;
+        int state = AUTOSTATE_DRIVE_GYRO;
+        double goalRange = 1000;
+        boolean hasVisionTarget;
 
         // read in desired drive time from smart dashboard
         travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
 
         // report out current timer value
-        SmartDashboard.putNumber("travelTime", travelTime);      
-        //System.out.println("Auto state is drive: timer = " + travelTime);          
+        SmartDashboard.putNumber("GyroDriveTime", travelTime);      
+        System.out.println("Auto state is drive_gyro: timer = " + travelTime);          
+
+        // get range to target
+        goalRange = ultrasonic.getRangeMM();
         
-        // continue driving unless obstacle or drive time exceeded
-        if (isPathClear() && travelTime < travelTimeSec)
+        // do we have a vision target?
+        hasVisionTarget = camera.hasTarget();
+
+        // continue driving until either
+        // a) vision target is detected or
+        // b) we are at the goal or
+        // c) drive time exceeded
+        if (hasVisionTarget == false && 
+            (goalRange > AUTO_RANGE_MM) && 
+            (travelTime < travelTimeSec))
             driveStraight(autoSpeed);
-        else if (travelTime >= travelTimeSec)
+        else if (goalRange <= AUTO_RANGE_MM)
             // at the target!  raise gate
             state = AUTOSTATE_SHOOT;
-        else
-            // obstacle encountered - stop
+        else if (travelTime >= travelTimeSec)
+            // times up - stop
             state = AUTOSTATE_IDLE;
+        else
+            // target acquired - switch to camera guidance
+            state = AUTOSTATE_DRIVE_CAMERA;
             
+        return state;
+    }
+    
+    private int driveStateCamera(double autoSpeed, double travelTime)
+    {
+        final double TRAVEL_TIME_DEFAULT = 2.8; // absolute time marker for 9 ft
+        //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
+        double travelTimeSec;  
+        int state = AUTOSTATE_DRIVE_CAMERA;
+        double goalRange = 1000;
+        boolean hasVisionTarget;
+        
+         // read in desired drive time from smart dashboard
+        travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
+
+        // report out current timer value
+        SmartDashboard.putNumber("CameraDriveTime", travelTime);      
+        System.out.println("Auto state is drive_camera: timer = " + travelTime);          
+
+        // get range to target
+        goalRange = ultrasonic.getRangeMM();
+        
+        // do we have a camera target?
+        hasVisionTarget = camera.hasTarget();
+        
+        // continue driving until 
+        // a) we lose the vision target or
+        // b) we are at the goal or 
+        // c) drive time exceeded
+        if (hasVisionTarget == true && 
+            (goalRange > AUTO_RANGE_MM) &&
+            (travelTime < travelTimeSec))
+            driveTowardGoal(autoSpeed);
+        else if (goalRange <= AUTO_RANGE_MM)
+            // at the target!  raise gate
+            state = AUTOSTATE_SHOOT;
+        else if (travelTime >= travelTimeSec)
+            // times up - stop
+            state = AUTOSTATE_IDLE;
+        else
+            // no more vision target - switch back to gyro
+            state = AUTOSTATE_DRIVE_GYRO;
+
         return state;
     }
     
@@ -236,19 +315,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         return state;
     }
-    
-    private boolean isPathClear() {
         
-        final double rangeThresholdMM = 100.0;
-        
-        // if closer than the range threshold, return false;
-        //if (ultrasonic.getRangeMM() < rangeThresholdMM)
-        //    return false;
-        
-        // otherwise return true;
-        return true;
-    }
-    
     private boolean inRangeMM(double rangeThresholdMM)
     {
         // if closer than the range threshold, return false;
@@ -269,6 +336,10 @@ public class SimpleFullControl extends SimpleRobot {
             //System.out.println("angle is: " + angle + ", acceleration is: " + acceleration);          
     }
     
+    private void driveTowardGoal(double speed) {
+    
+            // TODO: use vision target to guide robot to goal
+    }
     
     /**
      * This function is called once each time the robot enters operator control.

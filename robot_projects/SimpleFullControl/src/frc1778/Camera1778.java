@@ -14,14 +14,30 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Camera1778 {
 
-    AxisCamera camera;          // the axis camera object (connected to the switch)
-    CriteriaCollection cc;      // the criteria for doing the particle filter operation
+    private AxisCamera camera;          // the axis camera object (connected to the switch)
+    private CriteriaCollection cc;      // the criteria for doing the particle filter operation
+    private boolean hasTarget;
+    private boolean isRobotLeft;
     
     public Camera1778() {
         camera = AxisCamera.getInstance();  // get an instance ofthe camera
         cc = new CriteriaCollection();      // create the criteria for the particle filter
         cc.addCriteria(MeasurementType.IMAQ_MT_BOUNDING_RECT_WIDTH, 2, 400, false);
         cc.addCriteria(MeasurementType.IMAQ_MT_BOUNDING_RECT_HEIGHT, 2, 400, false);
+        
+        hasTarget = false;
+        isRobotLeft = false;
+    }
+    
+    public boolean hasTarget() {
+        
+        this.runCam();
+        return hasTarget;
+    }
+    
+    public void setLeft(boolean isRobotLeft)
+    {
+        this.isRobotLeft = isRobotLeft;
     }
     
     public void runCam() {
