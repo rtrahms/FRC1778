@@ -27,7 +27,7 @@ public class SimpleFullControl extends SimpleRobot {
     private final double GATE_OPEN = 0.57;
     
     // how close to the goal before shooting ball
-    private final double AUTO_RANGE_MM = 500;
+    private final double AUTO_RANGE_MM = 200;
     
     // where do we read the position switch from
     private final int POSITION_SWITCH_SLOT = 3;
@@ -64,7 +64,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         // sensors
         camera = new Camera1778();
-        //ultrasonic = new Ultrasonic1778();
+        ultrasonic = new Ultrasonic1778();
         
         // read switch and set robot position
         positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
@@ -193,6 +193,8 @@ public class SimpleFullControl extends SimpleRobot {
 
         // get range to target
         goalRange = ultrasonic.getRangeMM();
+        SmartDashboard.putNumber("DistanceMM", goalRange);      
+        //System.out.println("DistanceMM = " + goalRange);          
         
         // do we have a vision target?
         hasVisionTarget = camera.hasTarget();
@@ -236,6 +238,8 @@ public class SimpleFullControl extends SimpleRobot {
 
         // get range to target
         goalRange = ultrasonic.getRangeMM();
+        SmartDashboard.putNumber("DistanceMM", goalRange);      
+        //System.out.println("DistanceMM = " + goalRange);          
         
         // do we have a camera target?
         hasVisionTarget = camera.hasTarget();

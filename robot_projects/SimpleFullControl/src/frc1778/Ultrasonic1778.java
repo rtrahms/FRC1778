@@ -28,6 +28,7 @@ public class Ultrasonic1778 {
         pingChannel = new DigitalOutput(PING_CHANNEL);
         echoChannel = new DigitalInput(ECHO_CHANNEL);
         ultraSensor = new Ultrasonic(pingChannel,echoChannel);
+        ultraSensor.setAutomaticMode(true);
     }
     
     public double getRangeInches() {
