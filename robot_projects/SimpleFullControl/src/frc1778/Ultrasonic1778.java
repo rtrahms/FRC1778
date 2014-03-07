@@ -9,6 +9,7 @@ package frc1778;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
 import edu.wpi.first.wpilibj.Ultrasonic;
+import java.lang.Math.*;
 
 /**
  *
@@ -32,11 +33,39 @@ public class Ultrasonic1778 {
     }
     
     public double getRangeInches() {
+        //ultraSensor.ping();
         return ultraSensor.getRangeInches();
     }
     
     public double getRangeMM() {
+        //ultraSensor.ping();
         return ultraSensor.getRangeMM();
     }
+    
+    public double getRangeLightyears() {
+        double distInches = ultraSensor.getRangeInches();
+        return distInches * 0.00000000000000000268483946;
+    }
+    
+    public double getRangeApples() {
+        double distInches = ultraSensor.getRangeInches();
+        return distInches / 3.25;
+    }
+    
+    public double getRangeSmoots() {
+        double distInches = ultraSensor.getRangeInches();
+        return distInches * 0.0149253731;
+    }
+    
+    public double getRangeAngstroms() {
+        double distInches = ultraSensor.getRangeInches();
+        return distInches * 254000000;
+    }
+    
+    public double getRangeDaylans() {
+        double distInches = ultraSensor.getRangeInches();
+        return distInches / 68;
+    }
+    
 
 }
