@@ -70,11 +70,13 @@ public class SimpleFullControl extends SimpleRobot {
         positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
        
         // drive system
+        
         getWatchdog().setEnabled(false);
         mFrontLeft = new CANJaguar(2);
         mBackLeft = new CANJaguar(1);
         mFrontRight = new CANJaguar(8);
         mBackRight = new CANJaguar(5);
+        
         gyro = new Gyro(1);
         //accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
@@ -102,6 +104,7 @@ public class SimpleFullControl extends SimpleRobot {
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        
     }
     
     /**
@@ -142,9 +145,11 @@ public class SimpleFullControl extends SimpleRobot {
         catch (CANTimeoutException ex) {
             System.out.println ("CANTimeoutException happened :(");
         }
-
+        
         while(isAutonomous()) {
-            
+            double value = ultrasonic.getRangeMM();
+            System.out.println(value);
+            SmartDashboard.putNumber("Distance", value);
             // check the total time elapsed
             totalTime = Timer.getFPGATimestamp() - startTime;
             
@@ -164,7 +169,8 @@ public class SimpleFullControl extends SimpleRobot {
                 default:
                     autoState = idleState();
                     break;
-            }   
+            }
+            
             // time slice
             //Timer.delay(timeSliceSec);    
         }
@@ -181,7 +187,7 @@ public class SimpleFullControl extends SimpleRobot {
         //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE_GYRO;
-        double goalRange = 1000;
+        double goalRangeMM = 250;
         boolean hasVisionTarget;
 
         // read in desired drive time from smart dashboard
@@ -192,9 +198,7 @@ public class SimpleFullControl extends SimpleRobot {
         System.out.println("Auto state is drive_gyro: timer = " + travelTime);          
 
         // get range to target
-        goalRange = ultrasonic.getRangeMM();
-        SmartDashboard.putNumber("DistanceMM", goalRange);      
-        //System.out.println("DistanceMM = " + goalRange);          
+        goalRangeMM = ultrasonic.getRangeMM();
         
         // do we have a vision target?
         hasVisionTarget = camera.hasTarget();
@@ -204,10 +208,10 @@ public class SimpleFullControl extends SimpleRobot {
         // b) we are at the goal or
         // c) drive time exceeded
         if (hasVisionTarget == false && 
-            (goalRange > AUTO_RANGE_MM) && 
+            (goalRangeMM > AUTO_RANGE_MM) && 
             (travelTime < travelTimeSec))
             driveStraight(autoSpeed);
-        else if (goalRange <= AUTO_RANGE_MM)
+        else if (goalRangeMM <= AUTO_RANGE_MM)
             // at the target!  raise gate
             state = AUTOSTATE_SHOOT;
         else if (travelTime >= travelTimeSec)
@@ -226,7 +230,7 @@ public class SimpleFullControl extends SimpleRobot {
         //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE_CAMERA;
-        double goalRange = 1000;
+        double goalRangeMM = 250;
         boolean hasVisionTarget;
         
          // read in desired drive time from smart dashboard
@@ -237,9 +241,7 @@ public class SimpleFullControl extends SimpleRobot {
         System.out.println("Auto state is drive_camera: timer = " + travelTime);          
 
         // get range to target
-        goalRange = ultrasonic.getRangeMM();
-        SmartDashboard.putNumber("DistanceMM", goalRange);      
-        //System.out.println("DistanceMM = " + goalRange);          
+        goalRangeMM = ultrasonic.getRangeMM();
         
         // do we have a camera target?
         hasVisionTarget = camera.hasTarget();
@@ -249,10 +251,10 @@ public class SimpleFullControl extends SimpleRobot {
         // b) we are at the goal or 
         // c) drive time exceeded
         if (hasVisionTarget == true && 
-            (goalRange > AUTO_RANGE_MM) &&
+            (goalRangeMM > AUTO_RANGE_MM) &&
             (travelTime < travelTimeSec))
             driveTowardGoal(autoSpeed);
-        else if (goalRange <= AUTO_RANGE_MM)
+        else if (goalRangeMM <= AUTO_RANGE_MM)
             // at the target!  raise gate
             state = AUTOSTATE_SHOOT;
         else if (travelTime >= travelTimeSec)
@@ -288,6 +290,7 @@ public class SimpleFullControl extends SimpleRobot {
         catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
+        
 
         // shoot time exceeded
         if (shootTime >= shootTimeSec)
@@ -307,6 +310,7 @@ public class SimpleFullControl extends SimpleRobot {
         driveStraight(0);
         
         // turn off gate and rollers
+        /*
         try {
             rollers.setX(0);
             gate.setX(0);
@@ -314,6 +318,7 @@ public class SimpleFullControl extends SimpleRobot {
         catch (CANTimeoutException ex) {
             ex.printStackTrace();
         }
+        */
         
         // end state - do not transition out of this state
         
@@ -367,6 +372,10 @@ public class SimpleFullControl extends SimpleRobot {
         
         gyro.reset();
         while(isEnabled() && isOperatorControl()) {
+            double distanceMM = ultrasonic.getRangeMM();
+            //System.out.println(value);
+            SmartDashboard.putNumber("DistanceMM", distanceMM);
+            
             //************* drive control section
             if(leftStick.getButton(Joystick.ButtonType.kTrigger) == true) {
                 mode = 1-mode;
@@ -380,9 +389,9 @@ public class SimpleFullControl extends SimpleRobot {
             }
             
             //*********** gate and roller control section
-            increment = gamepad.getRawAxis(2)*step;
-            lock_pos += increment;
-            lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
+            increment = -gamepad.getRawAxis(2)*step;
+            //lock_pos += increment;
+            //lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
             
             //System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
             // gate motor operation
@@ -391,7 +400,7 @@ public class SimpleFullControl extends SimpleRobot {
                 //System.out.println("Pot pos = "+pot_pos);
                 //gate.setX(lock_pos);     // only used for PID
                 gate.setX(increment);
-                rollers.setX(gamepad.getRawAxis(4));
+                rollers.setX(-gamepad.getRawAxis(4));
             } catch(CANTimeoutException e) {
                 e.printStackTrace();
             }

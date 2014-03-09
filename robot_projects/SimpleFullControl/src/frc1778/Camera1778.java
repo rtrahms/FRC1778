@@ -18,6 +18,7 @@ public class Camera1778 {
     private CriteriaCollection cc;      // the criteria for doing the particle filter operation
     private boolean hasTarget;
     private boolean isRobotLeft;
+    private ParticleAnalysisReport[] reports;
     
     public Camera1778() {
         camera = AxisCamera.getInstance();  // get an instance ofthe camera
@@ -31,8 +32,9 @@ public class Camera1778 {
     
     public boolean hasTarget() {
         
-        this.runCam();
-        return hasTarget;
+        //this.runCam();
+        //return hasTarget;
+        return false;
     }
     
     public void setLeft(boolean isRobotLeft)
@@ -54,13 +56,8 @@ public class Camera1778 {
             BinaryImage bigObjectsImage = thresholdImage.removeSmallObjects(false, 2);  // remove small artifacts
             BinaryImage convexHullImage = bigObjectsImage.convexHull(false);          // fill in occluded rectangles
             BinaryImage filteredImage = convexHullImage.particleFilter(cc);           // find filled in rectangles
-            ParticleAnalysisReport[] reports = filteredImage.getOrderedParticleAnalysisReports();  // get list of results
-            for (int i = 0; i < reports.length; i++) {                                // print results
-                ParticleAnalysisReport r = reports[i];
-                System.out.println("Particle: " + i + ":  Center of mass x: " + r.center_mass_x);
-                SmartDashboard.putNumber("CameraX", r.center_mass_x_normalized);
-                SmartDashboard.putNumber("CameraY", r.center_mass_y_normalized);
-            }
+            reports = filteredImage.getOrderedParticleAnalysisReports();  // get list of results
+            
             System.out.println(filteredImage.getNumberParticles() + "  " + Timer.getFPGATimestamp());
             filteredImage.free();
             convexHullImage.free();
@@ -74,5 +71,29 @@ public class Camera1778 {
        } catch (NIVisionException ex) {
             ex.printStackTrace();
        }
+    }
+    
+    public double getX() {
+        double total = 0;
+        for (int i = 0; i < reports.length; i++) {                                // print results
+            ParticleAnalysisReport r = reports[i];
+            total += r.center_mass_x_normalized;
+            //System.out.println("Particle: " + i + ":  Center of mass x: " + r.center_mass_x);
+            //SmartDashboard.putNumber("CameraX", r.center_mass_x_normalized);
+            //SmartDashboard.putNumber("CameraY", r.center_mass_y_normalized);
+        }
+        return total/reports.length;
+    }
+    
+    public double getY() {
+        double total = 0;
+        for (int i = 0; i < reports.length; i++) {                                // print results
+            ParticleAnalysisReport r = reports[i];
+            total += r.center_mass_y_normalized;
+            //System.out.println("Particle: " + i + ":  Center of mass x: " + r.center_mass_x);
+            //SmartDashboard.putNumber("CameraX", r.center_mass_x_normalized);
+            //SmartDashboard.putNumber("CameraY", r.center_mass_y_normalized);
+        }
+        return total/reports.length;
     }
 }
