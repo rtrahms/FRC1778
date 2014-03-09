@@ -29,7 +29,11 @@ public class SimpleFullControl extends SimpleRobot {
     // roller throttle (how fast the rollers move, and direction)
     private final double ROLLER_STEP_MAGNITUDE_DEFAULT = 1.0;
     private final double ROLLER_STEP_POLARITY_DEFAULT = -1.0;
-        
+
+    // drive throttle (how fast the drivetrain moves, and direction)
+    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 0.4;
+    private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
+
     // minimum motor increment (for joystick dead zone)
     private final double MIN_INCREMENT = 0.1;
    
@@ -38,7 +42,7 @@ public class SimpleFullControl extends SimpleRobot {
     private final double GATE_OPEN = 0.57;
     
     // how close to the goal before shooting ball
-    private final double AUTO_RANGE_MM = 200;
+    private final double AUTO_RANGE_MM = 250;
     
     // where do we read the position switch from
     private final int POSITION_SWITCH_SLOT = 3;
@@ -198,7 +202,7 @@ public class SimpleFullControl extends SimpleRobot {
         //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE_GYRO;
-        double goalRangeMM = 250;
+        double goalRangeMM = 10000;      // initialize this as a large number
         boolean hasVisionTarget;
 
         // read in desired drive time from smart dashboard
@@ -241,7 +245,7 @@ public class SimpleFullControl extends SimpleRobot {
         //final double TRAVEL_TIME_DEFAULT = 5.6;  // absolute time marker for 18 ft
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE_CAMERA;
-        double goalRangeMM = 250;
+        double goalRangeMM = 10000;      // initialize this as a large number
         boolean hasVisionTarget;
         
          // read in desired drive time from smart dashboard
@@ -378,6 +382,10 @@ public class SimpleFullControl extends SimpleRobot {
         double rollerStep = ROLLER_STEP_MAGNITUDE_DEFAULT;
         double rollerIncrement = 0.0;
         
+        double driveStep = DRIVE_STEP_MAGNITUDE_DEFAULT;
+        double leftDriveIncrement = 0.0;
+        double rightDriveIncrement = 0.0;
+        
         //double lock_pos = 0.275;
         //double pot_pos = 0;
          
@@ -392,7 +400,8 @@ public class SimpleFullControl extends SimpleRobot {
         // reset the gyro
         gyro.reset();
         
-        // read in step size from driver
+        // read in step sizes from driver station
+        driveStep = DRIVE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("driveStepSize", DRIVE_STEP_MAGNITUDE_DEFAULT);
         gateStep = GATE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("gateMotorStepSize",GATE_STEP_MAGNITUDE_DEFAULT);
         rollerStep = ROLLER_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("rollerMotorStepSize",ROLLER_STEP_MAGNITUDE_DEFAULT);
         
@@ -405,7 +414,14 @@ public class SimpleFullControl extends SimpleRobot {
             SmartDashboard.putNumber("Direction", gyro.getAngle());
             
             //**** drive control section (TANK ONLY - Arcade is now disabled by team decision)
-            drive.tankDrive(leftStick, rightStick);
+            //drive.tankDrive(leftStick, rightStick);
+            leftDriveIncrement = leftStick.getRawAxis(2) * driveStep;
+            if (Math.abs(leftDriveIncrement) < MIN_INCREMENT)
+                leftDriveIncrement = 0.0;
+            rightDriveIncrement = rightStick.getRawAxis(2) * driveStep;
+            if (Math.abs(rightDriveIncrement) < MIN_INCREMENT)
+                rightDriveIncrement = 0.0;
+            drive.tankDrive(leftDriveIncrement, rightDriveIncrement);
             
             //*********** gate and roller control section
             gateIncrement = gamepad.getRawAxis(2)*gateStep;
