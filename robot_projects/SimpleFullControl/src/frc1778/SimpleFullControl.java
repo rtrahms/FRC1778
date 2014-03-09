@@ -22,6 +22,17 @@ public class SimpleFullControl extends SimpleRobot {
     // PID coefficients for gate jaguar
     private final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
+    // gate throttle (how fast the gate moves, and direction)
+    private final double GATE_STEP_MAGNITUDE_DEFAULT = 0.9;
+    private final double GATE_STEP_POLARITY_DEFAULT = -1.0;
+
+    // roller throttle (how fast the rollers move, and direction)
+    private final double ROLLER_STEP_MAGNITUDE_DEFAULT = 1.0;
+    private final double ROLLER_STEP_POLARITY_DEFAULT = -1.0;
+        
+    // minimum motor increment (for joystick dead zone)
+    private final double MIN_INCREMENT = 0.1;
+   
     // potentiometer values for gate position
     private final double GATE_CLOSED = 0.8;
     private final double GATE_OPEN = 0.57;
@@ -271,8 +282,10 @@ public class SimpleFullControl extends SimpleRobot {
     {
         final double SHOOT_TIME_DEFAULT = 10.0;
         double shootTimeSec;  // absolute time marker
-        final double rollerStep = 0.35;
-        final double gateOpen = 0.35;
+
+        // enable control for gate & rollers
+        double gateStep = GATE_STEP_MAGNITUDE_DEFAULT;  
+        double rollerStep = ROLLER_STEP_MAGNITUDE_DEFAULT;
         
         int state = AUTOSTATE_SHOOT;  
         
@@ -285,7 +298,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         try {    
             rollers.setX(rollerStep);
-            gate.setX(gateOpen);
+            gate.setX(gateStep);
         }
         catch (CANTimeoutException ex) {
             ex.printStackTrace();
@@ -354,14 +367,20 @@ public class SimpleFullControl extends SimpleRobot {
      * This function is called once each time the robot enters operator control.
      */
     public void operatorControl() {
+ 
         getWatchdog().setEnabled(false);
         int mode = 0;
         
         // enable control for gate & rollers
-        double lock_pos = 0.275;
-        double step = 0.7;
-        double increment = 0.0;
-        double pot_pos = 0;
+        double gateStep = GATE_STEP_MAGNITUDE_DEFAULT;
+        double gateIncrement = 0.0;
+        
+        double rollerStep = ROLLER_STEP_MAGNITUDE_DEFAULT;
+        double rollerIncrement = 0.0;
+        
+        //double lock_pos = 0.275;
+        //double pot_pos = 0;
+         
         try {    
             gate.enableControl();
             rollers.enableControl();
@@ -370,47 +389,50 @@ public class SimpleFullControl extends SimpleRobot {
             System.out.println ("CANTimeoutException :(");
         }
         
+        // reset the gyro
         gyro.reset();
+        
+        // read in step size from driver
+        gateStep = GATE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("gateMotorStepSize",GATE_STEP_MAGNITUDE_DEFAULT);
+        rollerStep = ROLLER_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("rollerMotorStepSize",ROLLER_STEP_MAGNITUDE_DEFAULT);
+        
         while(isEnabled() && isOperatorControl()) {
-            double distanceMM = ultrasonic.getRangeMM();
-            //System.out.println(value);
-            SmartDashboard.putNumber("DistanceMM", distanceMM);
             
-            //************* drive control section
-            if(leftStick.getButton(Joystick.ButtonType.kTrigger) == true) {
-                mode = 1-mode;
-                while(leftStick.getButton(Joystick.ButtonType.kTrigger) == true) {
-                }
-            }
-            if(mode == 0) {
-                drive.tankDrive(leftStick, rightStick);
-            } else {
-                drive.arcadeDrive(leftStick);
-            }
+            double distanceMM = ultrasonic.getRangeMM();
+
+            //System.out.println(distanceMM);
+            SmartDashboard.putNumber("DistanceMM", distanceMM);
+            SmartDashboard.putNumber("Direction", gyro.getAngle());
+            
+            //**** drive control section (TANK ONLY - Arcade is now disabled by team decision)
+            drive.tankDrive(leftStick, rightStick);
             
             //*********** gate and roller control section
-            increment = -gamepad.getRawAxis(2)*step;
+            gateIncrement = gamepad.getRawAxis(2)*gateStep;
+            if (Math.abs(gateIncrement) < MIN_INCREMENT)
+                gateIncrement = 0.0;
+            
+            rollerIncrement = gamepad.getRawAxis(4)*rollerStep;   
+            if (Math.abs(rollerIncrement) < MIN_INCREMENT)
+                   rollerIncrement = 0.0;
+
             //lock_pos += increment;
             //lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
             
             //System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
             // gate motor operation
             try {
-                pot_pos = gate.getPosition();
+                //pot_pos = gate.getPosition();
                 //System.out.println("Pot pos = "+pot_pos);
                 //gate.setX(lock_pos);     // only used for PID
-                gate.setX(increment);
-                rollers.setX(-gamepad.getRawAxis(4));
+                
+                // update gate and roller commands
+                gate.setX(gateIncrement);
+                rollers.setX(rollerIncrement);
+                
             } catch(CANTimeoutException e) {
                 e.printStackTrace();
             }
-            if(mode == 0) {
-                SmartDashboard.putString("Drive Mode", "Tank Drive");
-            } else {
-                SmartDashboard.putString("Drive Mode", "Arcade Drive");
-            }
-            SmartDashboard.putNumber("Direction", gyro.getAngle());
-            //SmartDashboard.putNumber("rangeMM", ultrasonic.getRangeMM());
          }
     }
     
