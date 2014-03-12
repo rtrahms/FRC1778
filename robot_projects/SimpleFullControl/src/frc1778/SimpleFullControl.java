@@ -23,15 +23,15 @@ public class SimpleFullControl extends SimpleRobot {
     private final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // gate throttle (how fast the gate moves, and direction)
-    private final double GATE_STEP_MAGNITUDE_DEFAULT = 0.9;
+    private final double GATE_STEP_MAGNITUDE_DEFAULT = 0.5;
     private final double GATE_STEP_POLARITY_DEFAULT = -1.0;
 
     // roller throttle (how fast the rollers move, and direction)
     private final double ROLLER_STEP_MAGNITUDE_DEFAULT = 1.0;
-    private final double ROLLER_STEP_POLARITY_DEFAULT = -1.0;
+    private final double ROLLER_STEP_POLARITY_DEFAULT = 1.0;
 
     // drive throttle (how fast the drivetrain moves, and direction)
-    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 0.4;
+    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 0.75;
     private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
 
     // minimum motor increment (for joystick dead zone)
@@ -69,7 +69,7 @@ public class SimpleFullControl extends SimpleRobot {
     private Joystick gamepad;
     
     // sensors
-    private Camera1778 camera;
+    //private Camera1778 camera;
     private Ultrasonic1778 ultrasonic;
     private DigitalInput positionSwitch;
     private double rangeMM = 0;
@@ -78,7 +78,7 @@ public class SimpleFullControl extends SimpleRobot {
     public SimpleFullControl() throws CANTimeoutException {  
         
         // sensors
-        camera = new Camera1778();
+        //camera = new Camera1778();
         ultrasonic = new Ultrasonic1778();
         
         // read switch and set robot position
@@ -100,7 +100,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         // do not uncomment these lines unless you are using PID!!
         //gate.changeControlMode(CANJaguar.ControlMode.kPosition);
-        //gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
+        gate.setPositionReference(CANJaguar.PositionReference.kPotentiometer);
         //gate.setPID(PID_GATE[0], PID_GATE[1], PID_GATE[2]);
 
         // set up roller motor
@@ -114,7 +114,8 @@ public class SimpleFullControl extends SimpleRobot {
         // gate & roller control
         gamepad = new Joystick(3);
         
-        drive = new RobotDrive(mBackLeft, mBackRight);
+        //drive = new RobotDrive(mBackLeft, mBackRight);
+        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
@@ -147,7 +148,7 @@ public class SimpleFullControl extends SimpleRobot {
         isRobotLeft = positionSwitch.get();
         SmartDashboard.putBoolean("IsRobotLeft", isRobotLeft);      
         System.out.println("isRobotLeft = " + isRobotLeft);          
-        camera.setLeft(isRobotLeft);
+        //camera.setLeft(isRobotLeft);
        
         // reset gyro to initial robot position
         gyro.reset();
@@ -203,7 +204,7 @@ public class SimpleFullControl extends SimpleRobot {
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE_GYRO;
         double goalRangeMM = 10000;      // initialize this as a large number
-        boolean hasVisionTarget;
+        boolean hasVisionTarget = false;
 
         // read in desired drive time from smart dashboard
         travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
@@ -216,7 +217,7 @@ public class SimpleFullControl extends SimpleRobot {
         goalRangeMM = ultrasonic.getRangeMM();
         
         // do we have a vision target?
-        hasVisionTarget = camera.hasTarget();
+        //hasVisionTarget = camera.hasTarget();
 
         // continue driving until either
         // a) vision target is detected or
@@ -246,7 +247,7 @@ public class SimpleFullControl extends SimpleRobot {
         double travelTimeSec;  
         int state = AUTOSTATE_DRIVE_CAMERA;
         double goalRangeMM = 10000;      // initialize this as a large number
-        boolean hasVisionTarget;
+        boolean hasVisionTarget = true;
         
          // read in desired drive time from smart dashboard
         travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
@@ -259,7 +260,7 @@ public class SimpleFullControl extends SimpleRobot {
         goalRangeMM = ultrasonic.getRangeMM();
         
         // do we have a camera target?
-        hasVisionTarget = camera.hasTarget();
+        //hasVisionTarget = camera.hasTarget();
         
         // continue driving until 
         // a) we lose the vision target or
@@ -387,7 +388,7 @@ public class SimpleFullControl extends SimpleRobot {
         double rightDriveIncrement = 0.0;
         
         //double lock_pos = 0.275;
-        //double pot_pos = 0;
+        double pot_pos = 0;
          
         try {    
             gate.enableControl();
@@ -412,7 +413,7 @@ public class SimpleFullControl extends SimpleRobot {
             //System.out.println(distanceMM);
             SmartDashboard.putNumber("DistanceMM", distanceMM);
             SmartDashboard.putNumber("Direction", gyro.getAngle());
-            
+                        
             //**** drive control section (TANK ONLY - Arcade is now disabled by team decision)
             //drive.tankDrive(leftStick, rightStick);
             leftDriveIncrement = leftStick.getRawAxis(2) * driveStep;
@@ -427,8 +428,11 @@ public class SimpleFullControl extends SimpleRobot {
             gateIncrement = gamepad.getRawAxis(2)*gateStep;
             if (Math.abs(gateIncrement) < MIN_INCREMENT)
                 gateIncrement = 0.0;
+
+            // roller operation via triggers (3), right joystick - Y (5), D-Pad-x (6)
+            rollerIncrement = gamepad.getRawAxis(5)*rollerStep;   
+            //rollerIncrement = gamepad.getRawAxis(3)*rollerStep; 
             
-            rollerIncrement = gamepad.getRawAxis(4)*rollerStep;   
             if (Math.abs(rollerIncrement) < MIN_INCREMENT)
                    rollerIncrement = 0.0;
 
@@ -438,8 +442,8 @@ public class SimpleFullControl extends SimpleRobot {
             //System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
             // gate motor operation
             try {
-                //pot_pos = gate.getPosition();
-                //System.out.println("Pot pos = "+pot_pos);
+                pot_pos = gate.getPosition();
+                System.out.println("Pot pos = "+ pot_pos);
                 //gate.setX(lock_pos);     // only used for PID
                 
                 // update gate and roller commands
@@ -455,7 +459,15 @@ public class SimpleFullControl extends SimpleRobot {
     /**
      * This function is called once each time the robot enters test mode.
      */
-    public void test() {
     
+    public void test() {
+        /*
+        while(isEnabled() && isTest()) { 
+            camera.runCam();
+            double x = camera.getX();
+            double y = camera.getY();
+            System.out.println("Target:" + x);
+        }
+        */
     }
 }

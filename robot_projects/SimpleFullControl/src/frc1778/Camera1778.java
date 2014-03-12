@@ -78,9 +78,7 @@ public class Camera1778 {
         for (int i = 0; i < reports.length; i++) {                                // print results
             ParticleAnalysisReport r = reports[i];
             total += r.center_mass_x_normalized;
-            //System.out.println("Particle: " + i + ":  Center of mass x: " + r.center_mass_x);
-            //SmartDashboard.putNumber("CameraX", r.center_mass_x_normalized);
-            //SmartDashboard.putNumber("CameraY", r.center_mass_y_normalized);
+            SmartDashboard.putNumber("CameraX", r.center_mass_x_normalized);
         }
         return total/reports.length;
     }
@@ -90,9 +88,7 @@ public class Camera1778 {
         for (int i = 0; i < reports.length; i++) {                                // print results
             ParticleAnalysisReport r = reports[i];
             total += r.center_mass_y_normalized;
-            //System.out.println("Particle: " + i + ":  Center of mass x: " + r.center_mass_x);
-            //SmartDashboard.putNumber("CameraX", r.center_mass_x_normalized);
-            //SmartDashboard.putNumber("CameraY", r.center_mass_y_normalized);
+            SmartDashboard.putNumber("CameraY", r.center_mass_y_normalized);
         }
         return total/reports.length;
     }
