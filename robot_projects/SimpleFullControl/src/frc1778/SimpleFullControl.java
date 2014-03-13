@@ -23,7 +23,7 @@ public class SimpleFullControl extends SimpleRobot {
     private final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // gate throttle (how fast the gate moves, and direction)
-    private final double GATE_STEP_MAGNITUDE_DEFAULT = 0.5;
+    private final double GATE_STEP_MAGNITUDE_DEFAULT = 0.85;
     private final double GATE_STEP_POLARITY_DEFAULT = -1.0;
 
     // roller throttle (how fast the rollers move, and direction)
@@ -31,7 +31,7 @@ public class SimpleFullControl extends SimpleRobot {
     private final double ROLLER_STEP_POLARITY_DEFAULT = 1.0;
 
     // drive throttle (how fast the drivetrain moves, and direction)
-    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 0.75;
+    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 0.85;
     private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
 
     // minimum motor increment (for joystick dead zone)
@@ -69,7 +69,7 @@ public class SimpleFullControl extends SimpleRobot {
     private Joystick gamepad;
     
     // sensors
-    //private Camera1778 camera;
+    private Camera1778 camera;
     private Ultrasonic1778 ultrasonic;
     private DigitalInput positionSwitch;
     private double rangeMM = 0;
@@ -78,7 +78,7 @@ public class SimpleFullControl extends SimpleRobot {
     public SimpleFullControl() throws CANTimeoutException {  
         
         // sensors
-        //camera = new Camera1778();
+        camera = new Camera1778();
         ultrasonic = new Ultrasonic1778();
         
         // read switch and set robot position
@@ -114,7 +114,6 @@ public class SimpleFullControl extends SimpleRobot {
         // gate & roller control
         gamepad = new Joystick(3);
         
-        //drive = new RobotDrive(mBackLeft, mBackRight);
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
@@ -429,8 +428,9 @@ public class SimpleFullControl extends SimpleRobot {
             if (Math.abs(gateIncrement) < MIN_INCREMENT)
                 gateIncrement = 0.0;
 
-            // roller operation via triggers (3), right joystick - Y (5), D-Pad-x (6)
+            // roller operation via right joystick
             rollerIncrement = gamepad.getRawAxis(5)*rollerStep;   
+            // roller operation via triggers (3), right joystick - Y (5), D-Pad-x (6)
             //rollerIncrement = gamepad.getRawAxis(3)*rollerStep; 
             
             if (Math.abs(rollerIncrement) < MIN_INCREMENT)
@@ -461,13 +461,11 @@ public class SimpleFullControl extends SimpleRobot {
      */
     
     public void test() {
-        /*
         while(isEnabled() && isTest()) { 
             camera.runCam();
             double x = camera.getX();
             double y = camera.getY();
             System.out.println("Target:" + x);
         }
-        */
     }
 }
