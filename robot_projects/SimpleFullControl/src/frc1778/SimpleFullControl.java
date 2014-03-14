@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SimpleFullControl extends SimpleRobot {
     
+    private final double AUTOSPEED_DEFAULT = 0.375;
     private final int AUTOSTATE_IDLE = 0;
     private final int AUTOSTATE_DRIVE_GYRO = 1;
     private final int AUTOSTATE_DRIVE_CAMERA = 2;
@@ -65,27 +66,25 @@ public class SimpleFullControl extends SimpleRobot {
     private Joystick leftStick;
     private Joystick rightStick;
     private Gyro gyro;
-    //private double acceleration;
-    //private ADXL345_SPI accel;
     
     // gate and roller control
     private Joystick gamepad;
     
     // sensors
-    private Camera1778 camera;
+    //private Camera1778 camera;
+    //private DigitalInput positionSwitch;
     private Ultrasonic1778 ultrasonic;
-    private DigitalInput positionSwitch;
     private double rangeMM = 0;
     private boolean isRobotLeft = true;
     
     public SimpleFullControl() throws CANTimeoutException {  
         
         // sensors
-        camera = new Camera1778();
+        //camera = new Camera1778();
         ultrasonic = new Ultrasonic1778();
         
         // read switch and set robot position
-        positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
+        //positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
        
         // drive system
         
@@ -96,7 +95,6 @@ public class SimpleFullControl extends SimpleRobot {
         mBackRight = new CANJaguar(5);
         
         gyro = new Gyro(1);
-        //accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
         // set up gate motor
         gate = new CANJaguar(6);
@@ -138,18 +136,17 @@ public class SimpleFullControl extends SimpleRobot {
         
         // autoSpeed of 0.375 should cross 18 ft (to goal) in 6 seconds
 
-        final double AUTOSPEED_DEFAULT = 0.375;
         double autoSpeed;
         double startTime = Timer.getFPGATimestamp();
         double totalTime;
         int autoState = AUTOSTATE_DRIVE_GYRO;
         
-        autoSpeed = SmartDashboard.getNumber("AutoSpeed",AUTOSPEED_DEFAULT);
+        autoSpeed = SmartDashboard.getNumber("AutoSpeed", AUTOSPEED_DEFAULT);
         
         // tell camera if we are right or left (read from digital switch)
-        isRobotLeft = positionSwitch.get();
-        SmartDashboard.putBoolean("IsRobotLeft", isRobotLeft);      
-        System.out.println("isRobotLeft = " + isRobotLeft);          
+        //isRobotLeft = positionSwitch.get();
+        //SmartDashboard.putBoolean("IsRobotLeft", isRobotLeft);      
+        //System.out.println("isRobotLeft = " + isRobotLeft);          
         //camera.setLeft(isRobotLeft);
        
         // reset gyro to initial robot position
@@ -165,9 +162,7 @@ public class SimpleFullControl extends SimpleRobot {
         }
         
         while(isAutonomous()) {
-            double value = ultrasonic.getRangeMM();
-            //System.out.println(value);
-            SmartDashboard.putNumber("Distance", value);
+                       
             // check the total time elapsed
             totalTime = Timer.getFPGATimestamp() - startTime;
             
@@ -293,9 +288,9 @@ public class SimpleFullControl extends SimpleRobot {
         double pot_pos;
         final double SHOOT_TIME_DEFAULT = 10.0;
         double shootTimeSec;  // absolute time marker
-        boolean shootEnable = true;
+        boolean shootEnable = false;
         
-        //shootEnable = SmartDashboard.getBoolean("ShootEnable",false);
+        shootEnable = SmartDashboard.getBoolean("ShootEnable",false);
  
         // if we are not shooting this round, go straight to idle state
         if (!shootEnable) {
@@ -361,22 +356,11 @@ public class SimpleFullControl extends SimpleRobot {
         // end state - do not transition out of this state
         
         return state;
-    }
-        
-    private boolean inRangeMM(double rangeThresholdMM)
-    {
-        // if closer than the range threshold, return false;
-        //if (ultrasonic.getRangeMM() > rangeThresholdMM)
-        //    return false;
-        
-        // otherwise return true;
-        return true;        
-    }
+    }       
     
     private void driveStraight(double speed) {
            final double Kp = 0.03;
            double angle = 0;
-           //acceleration = accel.getAcceleration(ADXL345_SPI.Axes.kY);
             
             angle = gyro.getAngle();
             drive.drive(-1*speed, -angle*Kp);
@@ -436,7 +420,7 @@ public class SimpleFullControl extends SimpleRobot {
             SmartDashboard.putNumber("Direction", gyro.getAngle());
                         
             //**** drive control section (TANK ONLY - Arcade is now disabled by team decision)
-            //drive.tankDrive(leftStick, rightStick);
+            
             leftDriveIncrement = leftStick.getRawAxis(2) * driveStep;
             if (Math.abs(leftDriveIncrement) < MIN_INCREMENT)
                 leftDriveIncrement = 0.0;
@@ -444,6 +428,7 @@ public class SimpleFullControl extends SimpleRobot {
             if (Math.abs(rightDriveIncrement) < MIN_INCREMENT)
                 rightDriveIncrement = 0.0;
             drive.tankDrive(leftDriveIncrement, rightDriveIncrement);
+            //drive.tankDrive(leftStick, rightStick);
             
             //*********** gate and roller control section
 
@@ -483,6 +468,7 @@ public class SimpleFullControl extends SimpleRobot {
      */
     
     public void test() {
+        /*
         while(isEnabled() && isTest()) { 
             camera.runCam();
             double x = camera.getX();
@@ -490,5 +476,6 @@ public class SimpleFullControl extends SimpleRobot {
             System.out.println("Target:" + x);
             drive.tankDrive(-x, x);
         }
+        */
     }
 }
