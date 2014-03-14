@@ -23,7 +23,8 @@ public class SimpleFullControl extends SimpleRobot {
     private final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // gate throttle (how fast the gate moves, and direction)
-    private final double GATE_STEP_MAGNITUDE_DEFAULT = 0.5;
+    private final double GATE_STEP_MAGNITUDE_SLOW = 0.2;
+    private final double GATE_STEP_MAGNITUDE_FAST = 0.6;
     private final double GATE_STEP_POLARITY_DEFAULT = -1.0;
 
     // roller throttle (how fast the rollers move, and direction)
@@ -38,8 +39,10 @@ public class SimpleFullControl extends SimpleRobot {
     private final double MIN_INCREMENT = 0.1;
    
     // potentiometer values for gate position
-    private final double GATE_CLOSED = 0.88;
-    private final double GATE_OPEN = 0.55;
+    // gate operation outside these limits will be slow
+    // gate operation inside these limits will be FAST
+    private final double GATE_CLOSED = 0.75;
+    private final double GATE_OPEN = 0.6;
     
     // how close to the goal before shooting ball
     private final double AUTO_RANGE_MM = 300;
@@ -300,7 +303,7 @@ public class SimpleFullControl extends SimpleRobot {
         }
         
         // enable control for gate & rollers
-        double gateStep = GATE_STEP_MAGNITUDE_DEFAULT;  
+        double gateStep = GATE_STEP_MAGNITUDE_SLOW;  
         double rollerStep = ROLLER_STEP_MAGNITUDE_DEFAULT;
         
         int state = AUTOSTATE_SHOOT;  
@@ -312,13 +315,16 @@ public class SimpleFullControl extends SimpleRobot {
         SmartDashboard.putNumber("shootTime", shootTime);
         System.out.println("Auto state is shoot: timer = " + shootTime);          
         
-        try {
+        // if in between gate limits, gate should go fast!  Otherwise, go slow
+         try {
             pot_pos = gate.getPosition();
             System.out.println("Pot pos = "+ pot_pos);
             if(pot_pos < GATE_CLOSED && pot_pos > GATE_OPEN) {
-                rollers.setX(rollerStep);
-                gate.setX(gateStep);
+                gateStep = GATE_STEP_MAGNITUDE_FAST;
             }
+            rollers.setX(rollerStep);
+            gate.setX(gateStep);
+
         }
         catch (CANTimeoutException ex) {
             ex.printStackTrace();
@@ -391,13 +397,13 @@ public class SimpleFullControl extends SimpleRobot {
         int mode = 0;
         
         // enable control for gate & rollers
-        double gateStep = GATE_STEP_MAGNITUDE_DEFAULT;
+        double gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_SLOW;
         double gateIncrement = 0.0;
         
-        double rollerStep = ROLLER_STEP_MAGNITUDE_DEFAULT;
+        double rollerStep = ROLLER_STEP_POLARITY_DEFAULT * ROLLER_STEP_MAGNITUDE_DEFAULT;
         double rollerIncrement = 0.0;
         
-        double driveStep = DRIVE_STEP_MAGNITUDE_DEFAULT;
+        double driveStep = DRIVE_STEP_POLARITY_DEFAULT * DRIVE_STEP_MAGNITUDE_DEFAULT;
         double leftDriveIncrement = 0.0;
         double rightDriveIncrement = 0.0;
         
@@ -416,13 +422,14 @@ public class SimpleFullControl extends SimpleRobot {
         gyro.reset();
         
         // read in step sizes from driver station
-        driveStep = DRIVE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("driveStepSize", DRIVE_STEP_MAGNITUDE_DEFAULT);
-        gateStep = GATE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("gateMotorStepSize",GATE_STEP_MAGNITUDE_DEFAULT);
-        rollerStep = ROLLER_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("rollerMotorStepSize",ROLLER_STEP_MAGNITUDE_DEFAULT);
+        //driveStep = DRIVE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("driveStepSize", DRIVE_STEP_MAGNITUDE_DEFAULT);
+        //gateStep = GATE_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("gateMotorStepSize",GATE_STEP_MAGNITUDE_SLOW);
+        //rollerStep = ROLLER_STEP_POLARITY_DEFAULT * SmartDashboard.getNumber("rollerMotorStepSize",ROLLER_STEP_MAGNITUDE_DEFAULT);
         
         while(isEnabled() && isOperatorControl()) {
             
             double distanceMM = ultrasonic.getRangeMM();
+            gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_SLOW;
 
             //System.out.println(distanceMM);
             SmartDashboard.putNumber("DistanceMM", distanceMM);
@@ -439,32 +446,31 @@ public class SimpleFullControl extends SimpleRobot {
             drive.tankDrive(leftDriveIncrement, rightDriveIncrement);
             
             //*********** gate and roller control section
-            gateIncrement = gamepad.getRawAxis(2)*gateStep;
-            if (Math.abs(gateIncrement) < MIN_INCREMENT)
-                gateIncrement = 0.0;
 
-            // roller operation via right joystick
-            rollerIncrement = gamepad.getRawAxis(5)*rollerStep;   
             // roller operation via triggers (3), right joystick - Y (5), D-Pad-x (6)
-            //rollerIncrement = gamepad.getRawAxis(3)*rollerStep; 
-            
+            rollerIncrement = gamepad.getRawAxis(5)*rollerStep;   
+            //rollerIncrement = gamepad.getRawAxis(3)*rollerStep;     
             if (Math.abs(rollerIncrement) < MIN_INCREMENT)
                    rollerIncrement = 0.0;
 
-            //lock_pos += increment;
-            //lock_pos = Math.max(Math.min(lock_pos, 0.4),0.1);
-            
-            //System.out.println("increment: " + increment + "  :  lock_pos: " + lock_pos);
             // gate motor operation
             try {
+                
+                // if in between gate limits, gate should go fast!  Otherwise, go slow
                 pot_pos = gate.getPosition();
-                System.out.println("Pot pos = "+ pot_pos);
-            //    if(pot_pos < GATE_CLOSED && pot_pos > GATE_OPEN) {
-                    //gate.setX(lock_pos);     // only used for PID
-                    // update gate and roller commands
-                    gate.setX(gateIncrement);
-                    rollers.setX(rollerIncrement);
-              //  }
+                System.out.println("Pot pos = " + pot_pos);
+                if(pot_pos < GATE_CLOSED && pot_pos > GATE_OPEN) {
+                    gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_FAST;  
+                }
+                
+                gateIncrement = gamepad.getRawAxis(2)*gateStep;
+                if (Math.abs(gateIncrement) < MIN_INCREMENT)
+                    gateIncrement = 0.0;
+                
+                // update gate and roller commands
+                gate.setX(gateIncrement);
+                rollers.setX(rollerIncrement);
+
                 
             } catch(CANTimeoutException e) {
                 e.printStackTrace();
