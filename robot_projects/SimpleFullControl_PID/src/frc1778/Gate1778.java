@@ -133,17 +133,32 @@ public class Gate1778 {
     // method used during operator control
     public void manualOp(double joystickValue) {
         
+        boolean usePID = false;
+            
+        // read current potentiometer value
+        double pot_pos = gatePotentiometer.getAverageValue();    
+        System.out.println("Gate1778.manualOp: pot_pos = " + pot_pos);
+        
         gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_FAST;
         gateIncrement = joystickValue*gateStep;
         
-        // read current potentiometer value
-        double set_pos = gatePotentiometer.getAverageValue();
-        System.out.println("Gate1778.manualOp: set_pos = " + set_pos);
-        
-        if(set_pos < GATE_CLOSED && set_pos > GATE_OPEN) {
-            set_pos += gateIncrement;
+        if (!usePID) {
+            // open loop gate control - used for tuning ONLY
+            // do not use in normal operation!!
+            try {
+                gateMotor.setX(gateIncrement);
+            } catch (CANTimeoutException e) {
+                e.printStackTrace();
+            }
         }
-        gateController.setSetpoint(set_pos);
+        else {
+            // use PID to control gate
+            double set_pos = pot_pos;
+            if(set_pos < GATE_CLOSED && set_pos > GATE_OPEN) {
+                set_pos += gateIncrement;
+            }
+            gateController.setSetpoint(set_pos);
+        }
         
         /*
         gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_SLOW;
