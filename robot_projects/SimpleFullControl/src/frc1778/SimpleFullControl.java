@@ -14,6 +14,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class SimpleFullControl extends SimpleRobot {
     
+    private final double TIMESLICE_TELE = 0.010;    // 10ms
+    private final double TIMESLICE_AUTO = 0.010;    // 10ms
+    
     private final int AUTOSTATE_IDLE = 0;
     private final int AUTOSTATE_DRIVE_GYRO = 1;
     private final int AUTOSTATE_DRIVE_CAMERA = 2;
@@ -23,8 +26,8 @@ public class SimpleFullControl extends SimpleRobot {
     private final double PID_GATE[] = { 0.5, 0.45, 0.6 };
     
     // gate throttle (how fast the gate moves, and direction)
-    private final double GATE_STEP_MAGNITUDE_SLOW = 0.4;
-    private final double GATE_STEP_MAGNITUDE_FAST = 0.65;
+    private final double GATE_STEP_MAGNITUDE_SLOW = 1.0;
+    private final double GATE_STEP_MAGNITUDE_FAST = 1.0;
     private final double GATE_STEP_POLARITY_DEFAULT = -1.0;
 
     // roller throttle (how fast the rollers move, and direction)
@@ -32,7 +35,7 @@ public class SimpleFullControl extends SimpleRobot {
     private final double ROLLER_STEP_POLARITY_DEFAULT = -1.0;
 
     // drive throttle (how fast the drivetrain moves, and direction)
-    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 0.85;
+    private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
     private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
 
     // minimum motor increment (for joystick dead zone)
@@ -41,8 +44,10 @@ public class SimpleFullControl extends SimpleRobot {
     // potentiometer values for gate position
     //private final double GATE_CLOSED = 0.88;
     //private final double GATE_OPEN = 0.55;
-    private final double GATE_CLOSED = 0.17;
-    private final double GATE_OPEN = 0.06;
+    private final double GATE_CLOSED = 0.27;
+    private final double GATE_OPEN = 0.0029;
+    private final double GATE_LOWER_BUFFER = 0.269; // Greater than this value
+    private final double GATE_UPPER_BUFFER = 0.00291; // Less than this vale 
     
     // how close to the goal before shooting ball
     private final double AUTO_RANGE_MM = 1000;
@@ -65,6 +70,8 @@ public class SimpleFullControl extends SimpleRobot {
     private Joystick leftStick;
     private Joystick rightStick;
     private Gyro gyro;
+    //private double acceleration;
+    //private ADXL345_SPI accel;
     
     // gate and roller control
     private Joystick gamepad;
@@ -80,7 +87,7 @@ public class SimpleFullControl extends SimpleRobot {
         
         // sensors
         //camera = new Camera1778();
-        //ultrasonic = new Ultrasonic1778();
+        ultrasonic = new Ultrasonic1778();
         
         // read switch and set robot position
         //positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
@@ -94,6 +101,7 @@ public class SimpleFullControl extends SimpleRobot {
         mBackRight = new CANJaguar(5);
         
         gyro = new Gyro(1);
+        //accel = new ADXL345_SPI(1, 1, 2, 3, 4, ADXL345_SPI.DataFormat_Range.k2G);
 
         // set up gate motor
         gate = new CANJaguar(6);
@@ -141,7 +149,8 @@ public class SimpleFullControl extends SimpleRobot {
         double totalTime;
         int autoState = AUTOSTATE_DRIVE_GYRO;
         
-        autoSpeed = SmartDashboard.getNumber("AutoSpeed",AUTOSPEED_DEFAULT);
+        //autoSpeed = SmartDashboard.getNumber("AutoSpeed",AUTOSPEED_DEFAULT);
+        autoSpeed = AUTOSPEED_DEFAULT;
         
         // tell camera if we are right or left (read from digital switch)
         //isRobotLeft = positionSwitch.get();
@@ -187,7 +196,7 @@ public class SimpleFullControl extends SimpleRobot {
             }
             
             // time slice
-            //Timer.delay(timeSliceSec);    
+            //Timer.delay(TIMESLICE_AUTO);    
         }
         
     }
@@ -207,10 +216,11 @@ public class SimpleFullControl extends SimpleRobot {
         boolean hasVisionTarget = false;
 
         // read in desired drive time from smart dashboard
-        travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
+        //travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
+        travelTimeSec = TRAVEL_TIME_DEFAULT;
 
         // report out current timer value
-        SmartDashboard.putNumber("GyroDriveTime", travelTime);      
+        //SmartDashboard.putNumber("GyroDriveTime", travelTime);      
         System.out.println("Auto state is drive_gyro: timer = " + travelTime);          
 
         // get range to target
@@ -252,15 +262,15 @@ public class SimpleFullControl extends SimpleRobot {
         boolean hasVisionTarget = true;
         
          // read in desired drive time from smart dashboard
-        travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
+        //travelTimeSec = SmartDashboard.getNumber("TravelTimeSec",TRAVEL_TIME_DEFAULT);
+        travelTimeSec = TRAVEL_TIME_DEFAULT;
 
         // report out current timer value
-        SmartDashboard.putNumber("CameraDriveTime", travelTime);      
+        //SmartDashboard.putNumber("CameraDriveTime", travelTime);      
         System.out.println("Auto state is drive_camera: timer = " + travelTime);          
 
         // get range to target
         //goalRangeMM = ultrasonic.getRangeMM();
-        //System.out.println("Distance in MM: " + goalRangeMM);
         
         // do we have a camera target?
         //hasVisionTarget = camera.hasTarget();
@@ -307,10 +317,11 @@ public class SimpleFullControl extends SimpleRobot {
         int state = AUTOSTATE_SHOOT;  
         
         // read in desired shoot time from smart dashboard
-        shootTimeSec = SmartDashboard.getNumber("ShootTimeSec",SHOOT_TIME_DEFAULT);
+        //shootTimeSec = SmartDashboard.getNumber("ShootTimeSec",SHOOT_TIME_DEFAULT);
+        shootTimeSec = SHOOT_TIME_DEFAULT;
         
-        // report out current timer value
-        SmartDashboard.putNumber("shootTime", shootTime);
+        //SmartDashboard report out current timer value
+        //SmartDashboard.putNumber("shootTime", shootTime);
         System.out.println("Auto state is shoot: timer = " + shootTime);          
         
         try {
@@ -357,7 +368,17 @@ public class SimpleFullControl extends SimpleRobot {
         
         return state;
     }
-            
+        
+    private boolean inRangeMM(double rangeThresholdMM)
+    {
+        // if closer than the range threshold, return false;
+        //if (ultrasonic.getRangeMM() > rangeThresholdMM)
+        //    return false;
+        
+        // otherwise return true;
+        return true;        
+    }
+    
     private void driveStraight(double speed) {
            final double Kp = 0.03;
            double angle = 0;
@@ -414,8 +435,9 @@ public class SimpleFullControl extends SimpleRobot {
         
         while(isEnabled() && isOperatorControl()) {
             
-            //double distanceMM = ultrasonic.getRangeMM();
-            //System.out.println("range is " + distanceMM);
+            double distanceMM = ultrasonic.getRangeMM();
+
+            System.out.println("range is " + distanceMM);
             //SmartDashboard.putNumber("DistanceMM", distanceMM);
             //SmartDashboard.putNumber("Direction", gyro.getAngle());
                         
@@ -446,14 +468,16 @@ public class SimpleFullControl extends SimpleRobot {
             // gate motor operation
             try {
                 pot_pos = gate.getPosition();
-                //System.out.println("Pot pos = "+ pot_pos);
-                if(pot_pos < GATE_CLOSED && pot_pos > GATE_OPEN) {
-                    gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_FAST;           
-                }
+                System.out.println("Pot pos = "+ pot_pos);
+                //if(pot_pos < GATE_CLOSED && pot_pos > GATE_OPEN) {
+                //    gateStep = GATE_STEP_POLARITY_DEFAULT * GATE_STEP_MAGNITUDE_FAST;           
+                //}
                 gateIncrement = gamepad.getRawAxis(2)*gateStep;
                 if (Math.abs(gateIncrement) < MIN_INCREMENT)
                     gateIncrement = 0.0;
-
+                // Gate Speed Softener using pot and pre defined buffers.
+                if ((pot_pos > GATE_LOWER_BUFFER && gateIncrement <= 0) || (pot_pos < GATE_UPPER_BUFFER && gateIncrement >= 0))
+                    gateIncrement = 0;
                 //gate.setX(lock_pos);     // only used for PID
                 // update gate and roller commands
                 gate.setX(gateIncrement);
@@ -462,6 +486,7 @@ public class SimpleFullControl extends SimpleRobot {
             } catch(CANTimeoutException e) {
                 e.printStackTrace();
             }
+            Timer.delay(TIMESLICE_TELE);
          }
     }
     
