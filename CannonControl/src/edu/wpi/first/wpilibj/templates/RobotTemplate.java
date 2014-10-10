@@ -22,23 +22,26 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 // This is the RobotTemplate class. I guess.
 public class RobotTemplate extends SimpleRobot {
     
-    // Declare Objects
-    /*
+    // drive system
     CANJaguar  mFrontLeft;
     CANJaguar  mFrontRight;
     CANJaguar  mBackLeft;
     CANJaguar  mBackRight;
-    
     RobotDrive drive;
-    */
+
+    // controllers
     Joystick   leftStick;
     Joystick   rightStick;
+    
+    // firing system
     Relay[]    cannonTrigger;
+    
+    // safety lights
     Relay      lightOne;
     Relay      lightTwo;
     
     // Initialize constant barrelOpenSec (how long the barrel will be open)
-    final double barrelOpenSec = 3.0; 
+    final double barrelOpenSec = 0.25; 
     
     // Declare Variables
     boolean barrelOpen; 
@@ -51,69 +54,75 @@ public class RobotTemplate extends SimpleRobot {
     
     public RobotTemplate() throws CANTimeoutException {
         // Initialize Objects
-        /*
+        
         mFrontLeft    = new CANJaguar(5);
         mBackLeft     = new CANJaguar(6);
         mFrontRight   = new CANJaguar(7);
         mBackRight    = new CANJaguar(8);
-        */
+        
         leftStick     = new Joystick(1);
         rightStick    = new Joystick(2);
         
+        // Firing System Relay controls on Digital sidecar
+        // Digital Sidecar is MODULE 1
         cannonTrigger = new Relay[3];
-        //lightOne = new Relay(2, 4, Relay.Direction.kReverse);
-        //lightTwo = new Relay(2, 5, Relay.Direction.kReverse);
-        // MODULE 1
         cannonTrigger[0] = new Relay(1, 1);
         cannonTrigger[1] = new Relay(1, 2);
         cannonTrigger[2] = new Relay(1, 3);
         barrelCount = 0;
         
+        // Light relays on digital sidecar
+        lightOne = new Relay(1, 4);
+        lightTwo = new Relay(1, 5);
+        
         // Initialize RobotDrive class as drive
-        /*
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-        */
+   
     }
     
     // There was an autonomous code here. It's gone now.
 
     // Operator controlled period
-    public void operatorControl() {
+    public void operatorControl() 
+    {
         getWatchdog().setEnabled(false);
-        //lightOne.set(Relay.Value.kOn);
-        //lightTwo.set(Relay.Value.kOn);
-        //display.clear();
-        //gyro.reset();
-        while(isEnabled() && isOperatorControl()) {
-            //double angle = gyro.getAngle();
-            //drive.tankDrive(leftStick, rightStick);
-            //display.println(DriverStationLCD.Line.kUser1,1,Double.toString(angle));
-            //display.updateLCD();
-            
+        
+        // turn on lights
+        lightOne.set(Relay.Value.kForward);
+        lightTwo.set(Relay.Value.kForward);
+                
+        while(isEnabled() && isOperatorControl()) 
+        {
+             
             // If both triggers are pressed and the barrel isn't open
-            if(leftStick.getButton(Joystick.ButtonType.kTrigger) && rightStick.getButton(Joystick.ButtonType.kTrigger) && !barrelOpen){ //verify that both triggers are pressed
-            //if (leftStick.getButton(Joystick.ButtonType.kTrigger)) { //verify that both triggers are pressed
+            if(leftStick.getButton(Joystick.ButtonType.kTrigger) && 
+               rightStick.getButton(Joystick.ButtonType.kTrigger) && 
+               !barrelOpen)
+            { //verify that both triggers are pressed
                 startTime = Timer.getFPGATimestamp();
                 barrelOpen = true;
                 System.out.println("triggered - barrelCount = " + barrelCount);
                 cannonTrigger[barrelCount].set(Relay.Value.kForward);
             }
             
-            // Ensures the Barrel is open for three seconds
-            
-            if(Timer.getFPGATimestamp() - startTime >= barrelOpenSec){
+            // Ensures the Barrel is open for barrelOpenSec before closing          
+            if ((Timer.getFPGATimestamp() - startTime >= barrelOpenSec) &&
+               barrelOpen)
+            {
                 barrelOpen = false;
                 cannonTrigger[barrelCount].set(Relay.Value.kOff);
                 barrelCount = (barrelCount+1) % 3;
             }
             
         }
-        //lightOne.set(Relay.Value.kOff);
-        //lightTwo.set(Relay.Value.kOff);
+        
+        // turn off lights
+        lightOne.set(Relay.Value.kOff);
+        lightTwo.set(Relay.Value.kOff);
     }
     
     public void test() {
@@ -129,19 +138,3 @@ public class RobotTemplate extends SimpleRobot {
         }
     }*/
 }
-
-/*    public void autonomous() {
-        System.out.println("Begin Autonomous");
-        //drive.setSafetyEnabled(false); //removes 100ms timeout
-        //System.out.println("Safety Disabled");
-        getWatchdog().setEnabled(false);
-        System.out.println("Watchdog Disabled");//protects motors
-        for(int n = 0; n < 5000; n++) {
-            System.out.println("Calling Drive n="+n);
-            drive.tankDrive(0.5, -0.5); //turn
-        }
-        System.out.println("Loop finished");
-        drive.tankDrive(0, 0);
-        System.out.println("Exit Autonomous");
-        
-    }*/
