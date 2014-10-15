@@ -59,10 +59,10 @@ public class RobotTemplate extends SimpleRobot {
     public RobotTemplate() throws CANTimeoutException {
         // Initialize Objects
         
-        mFrontLeft    = new CANJaguar(5);
-        mBackLeft     = new CANJaguar(6);
-        mFrontRight   = new CANJaguar(7);
-        mBackRight    = new CANJaguar(8);
+        mFrontLeft    = new CANJaguar(4);
+        mBackRight     = new CANJaguar(5);
+        mFrontRight   = new CANJaguar(6);
+        mBackLeft    = new CANJaguar(8);
         
         leftStick     = new Joystick(1);
         rightStick    = new Joystick(2);
@@ -87,25 +87,23 @@ public class RobotTemplate extends SimpleRobot {
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-   
+        //drive = new RobotDrive(mBackLeft,mBackRight);
     }
     
     // There was an autonomous code here. It's gone now.
 
     // Operator controlled period
-    public void operatorControl() 
-    {
+    public void operatorControl() {
         getWatchdog().setEnabled(false);
                  
-        while(isEnabled() && isOperatorControl()) 
-        {
+        while(isEnabled() && isOperatorControl()) {
             // allow tank drive all the time     
             drive.tankDrive(leftStick, rightStick);
 
             // check state of live fire safety switch
             liveFireEnabled = safetySwitch.get();
-            if (liveFireEnabled)
-            {
+            
+            if (liveFireEnabled) {
                 // turn on warning lights
                 lightOne.set(Relay.Value.kForward);
                 lightTwo.set(Relay.Value.kForward);
@@ -122,16 +120,12 @@ public class RobotTemplate extends SimpleRobot {
                 }
 
                 // Ensures the Barrel is open for barrelOpenSec before closing          
-                if ((Timer.getFPGATimestamp() - startTime >= barrelOpenSec) &&
-                   barrelOpen)
-                {
+                if ((Timer.getFPGATimestamp() - startTime >= barrelOpenSec) && barrelOpen) {
                     barrelOpen = false;
                     cannonTrigger[barrelCount].set(Relay.Value.kOff);
                     barrelCount = (barrelCount+1) % 3;
                 }
-            }
-            else
-            {
+            } else {
                 // turn off warning lights
                 lightOne.set(Relay.Value.kOff);
                 lightTwo.set(Relay.Value.kOff);
