@@ -12,6 +12,7 @@ package edu.wpi.first.wpilibj.templates;
 //Import robotics libraries
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.CANJaguar;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Relay;
@@ -39,6 +40,9 @@ public class RobotTemplate extends SimpleRobot {
     // safety lights
     Relay      lightOne;
     Relay      lightTwo;
+    
+    DigitalInput safetySwitch;
+    boolean liveFireEnabled = false;
     
     // Initialize constant barrelOpenSec (how long the barrel will be open)
     final double barrelOpenSec = 0.25; 
@@ -75,6 +79,8 @@ public class RobotTemplate extends SimpleRobot {
         lightOne = new Relay(1, 4);
         lightTwo = new Relay(1, 5);
         
+        safetySwitch = new DigitalInput(1,1);
+        
         // Initialize RobotDrive class as drive
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
@@ -90,39 +96,47 @@ public class RobotTemplate extends SimpleRobot {
     public void operatorControl() 
     {
         getWatchdog().setEnabled(false);
-        
-        // turn on lights
-        lightOne.set(Relay.Value.kForward);
-        lightTwo.set(Relay.Value.kForward);
-                
+                 
         while(isEnabled() && isOperatorControl()) 
         {
-             
-            // If both triggers are pressed and the barrel isn't open
-            if(leftStick.getButton(Joystick.ButtonType.kTrigger) && 
-               rightStick.getButton(Joystick.ButtonType.kTrigger) && 
-               !barrelOpen)
-            { //verify that both triggers are pressed
-                startTime = Timer.getFPGATimestamp();
-                barrelOpen = true;
-                System.out.println("triggered - barrelCount = " + barrelCount);
-                cannonTrigger[barrelCount].set(Relay.Value.kForward);
-            }
-            
-            // Ensures the Barrel is open for barrelOpenSec before closing          
-            if ((Timer.getFPGATimestamp() - startTime >= barrelOpenSec) &&
-               barrelOpen)
+            // allow tank drive all the time     
+            drive.tankDrive(leftStick, rightStick);
+
+            // check state of live fire safety switch
+            liveFireEnabled = safetySwitch.get();
+            if (liveFireEnabled)
             {
-                barrelOpen = false;
-                cannonTrigger[barrelCount].set(Relay.Value.kOff);
-                barrelCount = (barrelCount+1) % 3;
+                // turn on warning lights
+                lightOne.set(Relay.Value.kForward);
+                lightTwo.set(Relay.Value.kForward);
+             
+                // If both triggers are pressed and the barrel isn't open
+                if(leftStick.getButton(Joystick.ButtonType.kTrigger) && 
+                   rightStick.getButton(Joystick.ButtonType.kTrigger) && 
+                   !barrelOpen)
+                { //verify that both triggers are pressed
+                    startTime = Timer.getFPGATimestamp();
+                    barrelOpen = true;
+                    System.out.println("triggered - barrelCount = " + barrelCount);
+                    cannonTrigger[barrelCount].set(Relay.Value.kForward);
+                }
+
+                // Ensures the Barrel is open for barrelOpenSec before closing          
+                if ((Timer.getFPGATimestamp() - startTime >= barrelOpenSec) &&
+                   barrelOpen)
+                {
+                    barrelOpen = false;
+                    cannonTrigger[barrelCount].set(Relay.Value.kOff);
+                    barrelCount = (barrelCount+1) % 3;
+                }
             }
-            
-        }
-        
-        // turn off lights
-        lightOne.set(Relay.Value.kOff);
-        lightTwo.set(Relay.Value.kOff);
+            else
+            {
+                // turn off warning lights
+                lightOne.set(Relay.Value.kOff);
+                lightTwo.set(Relay.Value.kOff);
+            }
+        }     
     }
     
     public void test() {
