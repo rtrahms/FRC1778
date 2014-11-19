@@ -42,7 +42,7 @@ public class RobotTemplate extends SimpleRobot {
     Relay      lightTwo;
     
     DigitalInput safetySwitch;
-    boolean liveFireEnabled = false;
+    boolean safetyDisabled = false;
     
     // Initialize constant barrelOpenSec (how long the barrel will be open)
     final double barrelOpenSec = 0.25; 
@@ -97,13 +97,15 @@ public class RobotTemplate extends SimpleRobot {
         getWatchdog().setEnabled(false);
                  
         while(isEnabled() && isOperatorControl()) {
-            // allow tank drive all the time     
-            drive.tankDrive(leftStick, rightStick);
 
-            // check state of live fire safety switch
-            liveFireEnabled = safetySwitch.get();
+            // check state of safety switch
+            safetyDisabled = safetySwitch.get();
             
-            if (liveFireEnabled) {
+            if (safetyDisabled) {
+                
+                // allow tank to drive    
+                drive.tankDrive(leftStick, rightStick);
+
                 // turn on warning lights
                 lightOne.set(Relay.Value.kForward);
                 lightTwo.set(Relay.Value.kForward);
@@ -112,7 +114,8 @@ public class RobotTemplate extends SimpleRobot {
                 if(leftStick.getButton(Joystick.ButtonType.kTrigger) && 
                    rightStick.getButton(Joystick.ButtonType.kTrigger) && 
                    !barrelOpen)
-                { //verify that both triggers are pressed
+                { 
+                    //verify that both triggers are pressed
                     startTime = Timer.getFPGATimestamp();
                     barrelOpen = true;
                     System.out.println("triggered - barrelCount = " + barrelCount);
@@ -120,7 +123,7 @@ public class RobotTemplate extends SimpleRobot {
                 }
 
                 // Ensures the Barrel is open for barrelOpenSec before closing          
-                if ((Timer.getFPGATimestamp() - startTime >= barrelOpenSec) && barrelOpen) {
+                if ((Timer.getFPGATimestamp() - startTime > barrelOpenSec) && barrelOpen) {
                     barrelOpen = false;
                     cannonTrigger[barrelCount].set(Relay.Value.kOff);
                     barrelCount = (barrelCount+1) % 3;
