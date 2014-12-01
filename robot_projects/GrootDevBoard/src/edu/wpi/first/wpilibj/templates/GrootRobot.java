@@ -22,32 +22,26 @@ import edu.wpi.first.wpilibj.Victor;
  * directory.
  */
 public class GrootRobot extends SimpleRobot {
-    /**
-     * This function is called once each time the robot enters autonomous mode.
-     */
-   // drive motors
-    private Victor mFrontLeft;
-    private Victor mFrontRight;
-    private Victor mBackLeft;
-    private Victor mBackRight;
-    private RobotDrive drive;
+
+    // drive motors
+    Victor mFrontLeft = new Victor(1,1);
+    Victor mBackLeft = new Victor(1,2);
+    Victor mFrontRight = new Victor(1,3);
+    Victor mBackRight = new Victor(1,4);
+    
+    //RobotDrive drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
+    RobotDrive drive = new RobotDrive(mFrontLeft, mFrontRight);
         
     // drive control
-    private Joystick leftStick;
-    private Joystick rightStick;
+    Joystick leftStick = new Joystick(2);
+    Joystick rightStick = new Joystick(1);
     //private Gyro gyro;
     
-    // gate and roller control
-    private Joystick gamepad;
-    
-    public void autonomous() {
+    // gamepad control
+    Joystick gamepad = new Joystick(3);
+     
+    public GrootRobot() {
         
-    }
-
-    /**
-     * This function is called once each time the robot enters operator control.
-     */
-    public void operatorControl() {
         // sensors
         //camera = new Camera1778();
         //ultrasonic = new Ultrasonic1778();
@@ -56,29 +50,35 @@ public class GrootRobot extends SimpleRobot {
         //positionSwitch = new DigitalInput(POSITION_SWITCH_SLOT);
        
         // drive system
-        
-        getWatchdog().setEnabled(false);
-        mFrontLeft = new Victor(1,1);
-        mBackLeft = new Victor(1,2);
-        mFrontRight = new Victor(1,3);
-        mBackRight = new Victor(1,4);
-
-        
-        //gyro = new Gyro(1);
-        
-        // drive control
-        leftStick = new Joystick(2);
-        rightStick = new Joystick(1);
-
-        // gate & roller control
-        gamepad = new Joystick(3);
-        
-        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
         drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+       
+        //gyro = new Gyro(1);       
+    } 
+    
+    public void autonomous() {
+        
+        getWatchdog().setEnabled(false);
+        
+        while(isAutonomous()) {
+            // No autonomous actions at this time
+        }
+    }
 
+    /**
+     * This function is called once each time the robot enters operator control.
+     */
+    public void operatorControl() {   
+        
+        getWatchdog().setEnabled(false);
+
+        while(isEnabled() && isOperatorControl()) {
+            
+            // feed joystick values directly to drive system
+             drive.tankDrive(leftStick, rightStick);
+        }
     }
     
     /**
