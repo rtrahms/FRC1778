@@ -14,6 +14,10 @@ import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SimpleRobot;
 import edu.wpi.first.wpilibj.Victor;
 
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Timer;
+
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to each mode, as described in the SimpleRobot
@@ -31,7 +35,16 @@ public class GrootRobot extends SimpleRobot {
     
     //RobotDrive drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
     RobotDrive drive = new RobotDrive(mFrontLeft, mFrontRight);
-        
+
+    // pneumatics control
+    int pressureSwitchChannel = 1;
+    int relayChannel = 1;
+    int timeDelay = 1;
+    
+    Compressor compressor = new Compressor(pressureSwitchChannel, relayChannel);
+    DoubleSolenoid pistonOne = new DoubleSolenoid(1, 2);
+    DoubleSolenoid pistonTwo = new DoubleSolenoid(3, 4);
+
     // drive control
     Joystick leftStick = new Joystick(2);
     Joystick rightStick = new Joystick(1);
@@ -39,7 +52,8 @@ public class GrootRobot extends SimpleRobot {
     
     // gamepad control
     Joystick gamepad = new Joystick(3);
-     
+
+
     public GrootRobot() {
         
         // sensors
@@ -78,6 +92,44 @@ public class GrootRobot extends SimpleRobot {
             
             // feed joystick values directly to drive system
              drive.tankDrive(leftStick, rightStick);
+
+             
+            if (gamepad.getRawButton(1)) {
+                if (compressor.enabled()) {
+                    compressor.stop();
+                } else {
+                    compressor.start();
+                }
+            }
+            if (gamepad.getRawButton(6)) {
+                pistonOne.set(DoubleSolenoid.Value.kOff);
+                pistonTwo.set(DoubleSolenoid.Value.kOff);
+            } else {
+                if (gamepad.getRawButton(2)) {
+                    pistonOne.set(DoubleSolenoid.Value.kForward);
+                    Timer.delay(timeDelay);
+                    pistonOne.set(DoubleSolenoid.Value.kOff);
+                } else if (gamepad.getRawButton(3)) {
+                    pistonOne.set(DoubleSolenoid.Value.kReverse);
+                    Timer.delay(timeDelay);
+                    pistonOne.set(DoubleSolenoid.Value.kOff);
+                } else {
+
+                }
+            
+            if (gamepad.getRawButton(5)) {
+                pistonTwo.set(DoubleSolenoid.Value.kForward);
+                Timer.delay(timeDelay);
+                pistonTwo.set(DoubleSolenoid.Value.kOff);
+            } else if (gamepad.getRawButton(4)) {
+                pistonTwo.set(DoubleSolenoid.Value.kReverse);
+                Timer.delay(timeDelay);
+                pistonTwo.set(DoubleSolenoid.Value.kOff);
+            } else {
+                
+            }
+        }
+             
         }
     }
     
