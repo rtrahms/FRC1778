@@ -10,7 +10,10 @@ public class ElevatorAssembly {
 	    
     // minimum increment (for joystick dead zone)
     private final double MIN_INCREMENT = 0.1;
-
+    
+    // Pneumatics control module ID
+    private final int PCM_NODE_ID = 0;
+    
     // the two elevator pneumatics
 	private final int LEFT_RISER_FORWARD_ID = 0;
 	private final int LEFT_RISER_REVERSE_ID = 1;
@@ -41,8 +44,8 @@ public class ElevatorAssembly {
         // elevator control
         gamepad = new Joystick(GAMEPAD_ID);
         
-        // TODO: need to figure out channel, pressure switch ID, etc
-        compressor = new Compressor();
+        compressor = new Compressor(PCM_NODE_ID);
+        compressor.setClosedLoopControl(true);     // automatically turn on & off compressor based on pressure switch value
         
         leftRiser = new DoubleSolenoid(LEFT_RISER_FORWARD_ID, LEFT_RISER_REVERSE_ID);
         rightRiser = new DoubleSolenoid(RIGHT_RISER_FORWARD_ID, RIGHT_RISER_REVERSE_ID);

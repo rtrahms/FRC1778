@@ -16,8 +16,7 @@ public class DriveAssembly {
 	private final int LATERAL_TALON_ID = 6;
 	
 	// joystick ids
-	private final int LEFT_STICK_ID = 1;
-	private final int RIGHT_STICK_ID = 2;
+	private final int JOYSTICK_ID = 0;
 	
     // drive throttle (how fast the drivetrain moves, and direction)
     private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
@@ -33,8 +32,7 @@ public class DriveAssembly {
     private RobotDrive drive;
     
     // drive control
-    private Joystick leftStick;
-    private Joystick rightStick;
+    private Joystick joyStick;
 	
 	// constructor - tank drive
 	public DriveAssembly()
@@ -46,8 +44,7 @@ public class DriveAssembly {
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
-        leftStick = new Joystick(LEFT_STICK_ID);
-        rightStick = new Joystick(RIGHT_STICK_ID);
+        joyStick = new Joystick(JOYSTICK_ID);
         
         hDriveEnabled = false;
 	}
@@ -68,8 +65,7 @@ public class DriveAssembly {
         	drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         }
 
-        leftStick = new Joystick(LEFT_STICK_ID);
-        rightStick = new Joystick(RIGHT_STICK_ID);
+        joyStick = new Joystick(JOYSTICK_ID);
 	}
 
 	public void autoPeriodic()
@@ -80,13 +76,14 @@ public class DriveAssembly {
 	public void teleopPeriodic()
 	{
 		if (!hDriveEnabled)
-			tankDrive();
+	        drive.arcadeDrive(joyStick);
 		else
 			holonomicDrive();
 	}
 	
 	private void tankDrive()
 	{
+		/*
         double driveStep = DRIVE_STEP_POLARITY_DEFAULT * DRIVE_STEP_MAGNITUDE_DEFAULT;
         double leftDriveIncrement = leftStick.getRawAxis(2) * driveStep;
         if (Math.abs(leftDriveIncrement) < MIN_INCREMENT)
@@ -94,12 +91,14 @@ public class DriveAssembly {
         double rightDriveIncrement = rightStick.getRawAxis(2) * driveStep;
         if (Math.abs(rightDriveIncrement) < MIN_INCREMENT)
             rightDriveIncrement = 0.0;
-        drive.tankDrive(leftDriveIncrement, rightDriveIncrement);
+ 
+        drive.tankDrive(leftStick, rightStick);
+        */
 	}
 	
 	private void holonomicDrive()
 	{
-		// todo
+		// todo - incorporate lateral drive motor
 	}
 	
 }

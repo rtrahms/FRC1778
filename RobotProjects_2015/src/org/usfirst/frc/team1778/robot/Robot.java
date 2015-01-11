@@ -2,6 +2,7 @@
 package org.usfirst.frc.team1778.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -21,8 +22,13 @@ public class Robot extends IterativeRobot {
 	AlignmentAssembly aligner;
 	ElevatorAssembly elevator;
 	
+	PowerDistributionPanel pdp;
+	
 	
     public void robotInit() {
+    	
+    	pdp = new PowerDistributionPanel();
+    	pdp.clearStickyFaults();
     	
     	drivetrain = new DriveAssembly();
     	aligner = new AlignmentAssembly();
