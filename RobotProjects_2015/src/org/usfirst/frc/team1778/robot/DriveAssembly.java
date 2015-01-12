@@ -15,6 +15,10 @@ public class DriveAssembly {
 	private final int RIGHT_REAR_TALON_ID = 5;
 	private final int LATERAL_TALON_ID = 6;
 	
+	private final int X_AXIS = 1;
+	private final int Y_AXIS = 2;
+	private final int TWIST_AXIS = 3;
+	
 	// joystick ids
 	private final int JOYSTICK_ID = 0;
 	
@@ -75,10 +79,13 @@ public class DriveAssembly {
 		
 	public void teleopPeriodic()
 	{
-		if (!hDriveEnabled)
-	        drive.arcadeDrive(joyStick);
-		else
-			holonomicDrive();
+		
+		// control robot forward and turn movement with y-axis and twist-axis
+        //drive.arcadeDrive(joyStick);
+		drive.arcadeDrive(joyStick.getY(),joyStick.getTwist());
+
+		// control strafe speed controller with x-axis
+		mLateral.set(joyStick.getX());
 	}
 	
 	private void tankDrive()
@@ -95,10 +102,5 @@ public class DriveAssembly {
         drive.tankDrive(leftStick, rightStick);
         */
 	}
-	
-	private void holonomicDrive()
-	{
-		// todo - incorporate lateral drive motor
-	}
-	
+		
 }
