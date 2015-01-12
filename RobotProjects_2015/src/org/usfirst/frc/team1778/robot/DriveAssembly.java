@@ -20,7 +20,8 @@ public class DriveAssembly {
 	private final int TWIST_AXIS = 3;
 	
 	// joystick ids
-	private final int JOYSTICK_ID = 0;
+	private final int LEFT_JOYSTICK_ID = 0;
+	private final int RIGHT_JOYSTICK_ID = 1;
 	
     // drive throttle (how fast the drivetrain moves, and direction)
     private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
@@ -36,7 +37,7 @@ public class DriveAssembly {
     private RobotDrive drive;
     
     // drive control
-    private Joystick joyStick;
+    private Joystick leftStick, rightStick;
 	
 	// constructor - tank drive
 	public DriveAssembly()
@@ -46,35 +47,18 @@ public class DriveAssembly {
         mFrontRight = new TalonSRX(RIGHT_FRONT_TALON_ID);
         mBackRight = new TalonSRX(RIGHT_REAR_TALON_ID);
         
+        mLateral = new TalonSRX(LATERAL_TALON_ID);
+        
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
-        joyStick = new Joystick(JOYSTICK_ID);
-        
-        hDriveEnabled = false;
+        leftStick = new Joystick(LEFT_JOYSTICK_ID);
+        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	}
 
-	// constructor - H drive
-	public DriveAssembly(boolean hDriveEnabled)
-	{
-        mFrontLeft = new TalonSRX(LEFT_FRONT_TALON_ID);
-        mBackLeft = new TalonSRX(LEFT_REAR_TALON_ID);
-        mFrontRight = new TalonSRX(RIGHT_FRONT_TALON_ID);
-        mBackRight = new TalonSRX(RIGHT_REAR_TALON_ID);
-        
-        this.hDriveEnabled = hDriveEnabled;
-        
-        if (hDriveEnabled)
-        {
-        	mLateral = new TalonSRX(LATERAL_TALON_ID);
-        	drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
-        }
-
-        joyStick = new Joystick(JOYSTICK_ID);
-	}
 
 	public void autoPeriodic()
 	{
-		// todo
+		// todo - autonomous operation of drive
 	}
 		
 	public void teleopPeriodic()
@@ -82,12 +66,15 @@ public class DriveAssembly {
 		
 		// control robot forward and turn movement with y-axis and twist-axis
         //drive.arcadeDrive(joyStick);
-		drive.arcadeDrive(joyStick.getY(),joyStick.getTwist());
-
-		// control strafe speed controller with x-axis
-		mLateral.set(joyStick.getX());
+		//drive.arcadeDrive(joyStick.getY(),joyStick.getTwist());
+		drive.tankDrive(leftStick, rightStick);
+		
+		// control strafe speed controller with x-axis (use left joystick)
+		mLateral.set(leftStick.getX());
 	}
 	
+	// calibrated joystick drive
+	// not currently used
 	private void tankDrive()
 	{
 		/*
