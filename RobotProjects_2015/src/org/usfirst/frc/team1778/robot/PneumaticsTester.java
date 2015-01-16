@@ -16,14 +16,14 @@ public class PneumaticsTester {
     // Pneumatics control module ID
     private final int PCM_NODE_ID = 0;
     	
-	// elevator controller gampad
-	private final int GAMEPAD_ID = 3;
+	// pneumatics controller gampad ID - assumes no other controllers connected
+	private final int GAMEPAD_ID = 1;
 	
-    // elevator control
+    // pneumatics control
     private Joystick gamepad;
     
     private Compressor compressor;
-    private DoubleSolenoid doubleSol;
+    //private DoubleSolenoid doubleSol;
     private Solenoid singleSol;
     
     private boolean toggleValve;
@@ -33,7 +33,7 @@ public class PneumaticsTester {
 	// constructor
 	public PneumaticsTester()
 	{
-        // elevator control
+        // pneumatics control
         gamepad = new Joystick(GAMEPAD_ID);
         
         compressor = new Compressor(PCM_NODE_ID);
@@ -58,9 +58,14 @@ public class PneumaticsTester {
 		long currentTime = Utility.getFPGATime();
 		
 		// if not long enough, just return
-		if ((currentTime - initTime) < CYCLE_MILLISEC)
+		//if ((currentTime - initTime) < CYCLE_MILLISEC)
+		//	return;
+		
+		// if no button push, return
+		if (!gamepad.getRawButton(1))
 			return;
 		
+		// otherwise, toggle the valve
 		if (toggleValve)
 		{
 			singleSol.set(true);
