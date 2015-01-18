@@ -16,11 +16,11 @@ public class AlignmentAssembly {
     private final double RIGHT_STEP_POLARITY_DEFAULT = 1.0;
 
     // Speed Controller IDs
-	private final int LEFT_WHEEL_TALON_ID = 7;
-	private final int RIGHT_WHEEL_TALON_ID = 8;
+	private final int LEFT_WHEEL_TALON_ID = 8;
+	private final int RIGHT_WHEEL_TALON_ID = 9;
 	
 	// elevator controller gampad ID
-	private final int GAMEPAD_ID = 3;
+	private final int GAMEPAD_ID = 2;
 	
     // minimum motor increment (for joystick dead zone)
     private final double MIN_INCREMENT = 0.1;
