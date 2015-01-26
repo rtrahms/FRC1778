@@ -1,5 +1,6 @@
 package org.usfirst.frc.team1778.robot;
 
+import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.TalonSRX;
@@ -11,14 +12,12 @@ public class DriveAssembly {
 	// Speed controller IDs
 	private final int LEFT_FRONT_TALON_ID = 3;
 	private final int LEFT_REAR_TALON_ID = 4;
-	private final int RIGHT_FRONT_TALON_ID = 5;
-	private final int RIGHT_REAR_TALON_ID = 6;
+	private final int RIGHT_FRONT_TALON_ID = 8;
+	private final int RIGHT_REAR_TALON_ID = 7;
 	
-	private final int LATERAL_TALON_ID = 7;
-	
-	//private final int X_AXIS = 1;
-	//private final int Y_AXIS = 2;
-	
+	private final int LATERAL_TALON_ID1 = 5;
+	private final int LATERAL_TALON_ID2 = 6;
+		
 	// joystick ids
 	private final int LEFT_JOYSTICK_ID = 0;
 	private final int RIGHT_JOYSTICK_ID = 1;
@@ -30,8 +29,8 @@ public class DriveAssembly {
     //private final double MIN_INCREMENT = 0.1;
 		
 	// speed controllers and drive class
-	private TalonSRX mFrontLeft, mBackLeft, mFrontRight, mBackRight;
-	private TalonSRX mLateral;
+	private CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
+	private CANTalon mLateral_1, mLateral_2;
     private RobotDrive drive;
     
     // drive control
@@ -40,12 +39,16 @@ public class DriveAssembly {
 	// constructor - tank drive
 	public DriveAssembly()
 	{
-        mFrontLeft = new TalonSRX(LEFT_FRONT_TALON_ID);
-        mBackLeft = new TalonSRX(LEFT_REAR_TALON_ID);
-        mFrontRight = new TalonSRX(RIGHT_FRONT_TALON_ID);
-        mBackRight = new TalonSRX(RIGHT_REAR_TALON_ID);
+        mFrontLeft = new CANTalon(LEFT_FRONT_TALON_ID);
+        mBackLeft = new CANTalon(LEFT_REAR_TALON_ID);
+        mFrontRight = new CANTalon(RIGHT_FRONT_TALON_ID);
+        mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
         
-        mLateral = new TalonSRX(LATERAL_TALON_ID);
+        mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
+        mLateral_1.enableBrakeMode(true);
+        
+        mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
+        mLateral_2.enableBrakeMode(true);
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
@@ -62,13 +65,13 @@ public class DriveAssembly {
 	public void teleopPeriodic()
 	{
 		
-		// control robot forward and turn movement with y-axis and twist-axis
-        //drive.arcadeDrive(joyStick);
-		//drive.arcadeDrive(joyStick.getY(),joyStick.getTwist());
+		// control robot forward and turn movement with tank drive
 		drive.tankDrive(leftStick, rightStick);
 		
 		// control strafe speed controller with x-axis (use left joystick)
-		mLateral.set(leftStick.getX());
+		double lateralValue = leftStick.getX();
+		mLateral_1.set(lateralValue);
+		mLateral_2.set(lateralValue);
 		
 		System.out.println("Drivetrain: LeftY = " + leftStick.getY() + " RightY = " + rightStick.getY() + " LeftX = " + leftStick.getX());
 	}
