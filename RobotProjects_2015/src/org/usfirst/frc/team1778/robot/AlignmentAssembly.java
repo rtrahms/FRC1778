@@ -1,5 +1,6 @@
 package org.usfirst.frc.team1778.robot;
 
+import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TalonSRX;
 
@@ -16,8 +17,8 @@ public class AlignmentAssembly {
     private final double RIGHT_STEP_POLARITY_DEFAULT = 1.0;
 
     // Speed Controller IDs
-	private final int LEFT_WHEEL_TALON_ID = 8;
-	private final int RIGHT_WHEEL_TALON_ID = 9;
+	private final int LEFT_WHEEL_TALON_ID = 9;
+	private final int RIGHT_WHEEL_TALON_ID = 10;
 	
 	// elevator controller gampad ID
 	private final int GAMEPAD_ID = 2;
@@ -25,7 +26,7 @@ public class AlignmentAssembly {
     // minimum motor increment (for joystick dead zone)
     private final double MIN_INCREMENT = 0.1;
 
-	private TalonSRX mLeftWheel, mRightWheel;
+	private CANTalon mLeftWheel, mRightWheel;
 	
 	private Joystick gamepad;
 	
@@ -34,8 +35,8 @@ public class AlignmentAssembly {
 	// constructor
 	public AlignmentAssembly()
 	{
-		mLeftWheel = new TalonSRX(LEFT_WHEEL_TALON_ID);
-		mRightWheel = new TalonSRX(RIGHT_WHEEL_TALON_ID);
+		mLeftWheel = new CANTalon(LEFT_WHEEL_TALON_ID);
+		mRightWheel = new CANTalon(RIGHT_WHEEL_TALON_ID);
 		
         // wheel control
         gamepad = new Joystick(GAMEPAD_ID);

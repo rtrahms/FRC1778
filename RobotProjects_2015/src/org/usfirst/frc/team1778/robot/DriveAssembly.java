@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.TalonSRX;
 
+
 //Chill Out 1778 class for controlling the drivetrain
 
 public class DriveAssembly {
@@ -14,10 +15,13 @@ public class DriveAssembly {
 	private final int LEFT_REAR_TALON_ID = 4;
 	private final int RIGHT_FRONT_TALON_ID = 8;
 	private final int RIGHT_REAR_TALON_ID = 7;
-	
 	private final int LATERAL_TALON_ID1 = 5;
 	private final int LATERAL_TALON_ID2 = 6;
-		
+	
+	//private final int X_AXIS = 1;
+	//private final int Y_AXIS = 2;
+	
+	
 	// joystick ids
 	private final int LEFT_JOYSTICK_ID = 0;
 	private final int RIGHT_JOYSTICK_ID = 1;
@@ -45,10 +49,7 @@ public class DriveAssembly {
         mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
         
         mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
-        mLateral_1.enableBrakeMode(true);
-        
         mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
-        mLateral_2.enableBrakeMode(true);
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
@@ -65,15 +66,15 @@ public class DriveAssembly {
 	public void teleopPeriodic()
 	{
 		
-		// control robot forward and turn movement with tank drive
+		// control robot forward and turn movement with y-axis and twist-axis
+        //drive.arcadeDrive(joyStick);
+		//drive.arcadeDrive(joyStick.getY(),joyStick.getTwist());
 		drive.tankDrive(leftStick, rightStick);
-		
 		// control strafe speed controller with x-axis (use left joystick)
-		double lateralValue = leftStick.getX();
-		mLateral_1.set(lateralValue);
-		mLateral_2.set(lateralValue);
 		
-		System.out.println("Drivetrain: LeftY = " + leftStick.getY() + " RightY = " + rightStick.getY() + " LeftX = " + leftStick.getX());
+		double strafeValue = leftStick.getX();
+		mLateral_1.set(strafeValue);
+		mLateral_2.set(strafeValue);
 	}
 	
 	// calibrated joystick drive

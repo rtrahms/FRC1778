@@ -3,54 +3,58 @@ package org.usfirst.frc.team1778.robot;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Utility;
 
 //Chill Out 1778 class for controlling the elevator & pusher pneumatic mechanisms
 
 public class ElevatorAssembly {
 	    
     // minimum increment (for joystick dead zone)
-    private final long CYCLE_USEC = 250000;
+    private final double MIN_INCREMENT = 0.1;
     
-    // Pneumatics control module ID - must match CANbus ID of PCM!!
-    private final int PCM_NODE_ID = 2;
+    // Pneumatics control module ID
+    private final int PCM_NODE_ID = 0;
     
-    // elevator and pusher pneumatic solenoid IDs
-	private final int ELEVATOR_FORWARD_ID = 0;
-	private final int ELEVATOR_REVERSE_ID = 1;
-	private final int PUSHER_FORWARD_ID = 2;
-	private final int PUSHER_REVERSE_ID = 3;
-		
-	// elevator controller gampad - assumes drive joysticks are 0 and 1
-	private final int GAMEPAD_ID = 2;
+    // the two elevator pneumatics
+	private final int LEFT_RISER_FORWARD_ID = 0;
+	private final int LEFT_RISER_REVERSE_ID = 1;
+	private final int RIGHT_RISER_FORWARD_ID = 2;
+	private final int RIGHT_RISER_REVERSE_ID = 3;
+	
+	// the two pneumatics used for pushing stacks out
+	//private final int LEFT_PUSHER_FORWARD_ID = 4;
+	//private final int LEFT_PUSHER_REVERSE_ID = 5;
+	//private final int RIGHT_PUSHER_FORWARD_ID = 6;
+	//private final int RIGHT_PUSHER_REVERSE_ID = 7;
+	
+	// elevator controller gampad
+	private final int GAMEPAD_ID = 3;
 	
     // elevator control
     private Joystick gamepad;
     
-    private DoubleSolenoid elevatorValve;
-    private DoubleSolenoid pusherValve;
+    private Compressor compressor;
+    private DoubleSolenoid leftRiser, rightRiser;
+    //private DoubleSolenoid leftPusher, rightPusher;
     
-    // toggle (state) variables
     private boolean toggleElevator;
-    private boolean togglePusher;
-    
-    private long initTime;
+    //private boolean togglePusher;
 
 	// constructor
 	public ElevatorAssembly()
 	{
-        // elevator & pusher control
+        // elevator control
         gamepad = new Joystick(GAMEPAD_ID);
-                
-        elevatorValve = new DoubleSolenoid(PCM_NODE_ID, ELEVATOR_FORWARD_ID, ELEVATOR_REVERSE_ID);
-        elevatorValve.set(DoubleSolenoid.Value.kOff);
+        
+        compressor = new Compressor(PCM_NODE_ID);
+        compressor.setClosedLoopControl(true);     // automatically turn on & off compressor based on pressure switch value
+        
+        leftRiser = new DoubleSolenoid(LEFT_RISER_FORWARD_ID, LEFT_RISER_REVERSE_ID);
+        rightRiser = new DoubleSolenoid(RIGHT_RISER_FORWARD_ID, RIGHT_RISER_REVERSE_ID);
         toggleElevator = false;
 
-        pusherValve = new DoubleSolenoid(PCM_NODE_ID, PUSHER_FORWARD_ID, PUSHER_REVERSE_ID);
-        pusherValve.set(DoubleSolenoid.Value.kOff);
-        togglePusher = false;
-        
-        initTime = Utility.getFPGATime();
+        //leftPusher = new DoubleSolenoid(LEFT_PUSHER_FORWARD_ID, LEFT_PUSHER_REVERSE_ID);
+        //rightPusher = new DoubleSolenoid(RIGHT_PUSHER_FORWARD_ID, RIGHT_PUSHER_REVERSE_ID);   
+        //togglePusher = false;
 	}
 	
 	public void autoPeriodic()
@@ -59,43 +63,52 @@ public class ElevatorAssembly {
 		
 	public void teleopPeriodic()
 	{
-		long currentTime = Utility.getFPGATime();
 		
-		// if not long enough, just return
-		if ((currentTime - initTime) < CYCLE_USEC)
-			return;
-		
-        // elevator valve operation via gamepad button X
-        if (gamepad.getRawButton(1))
+        // elevator operation via gamepad triggers
+		DoubleSolenoid.Value elevatorValue;	
+        double elevatorIncrement = gamepad.getRawAxis(3);
+        
+        if (Math.abs(elevatorIncrement) < MIN_INCREMENT)
         {
-        	DoubleSolenoid.Value elevatorValue;
-        	
-	        if (!toggleElevator)
-	        	elevatorValue = DoubleSolenoid.Value.kForward;
-	        else
-	        	elevatorValue = DoubleSolenoid.Value.kReverse;
-	        
+            elevatorValue = DoubleSolenoid.Value.kOff;
+        }
+        else if (!toggleElevator)
+        {
+        	elevatorValue = DoubleSolenoid.Value.kForward;
         	toggleElevator = !toggleElevator;
-    		elevatorValve.set(elevatorValue);
-       }
-
-        // pusher valve operation via gamepad button Y
-        if (gamepad.getRawButton(2))
+        }
+        else
         {
-        	DoubleSolenoid.Value pusherValue;
-        	
-	        if (!toggleElevator)
-	        	pusherValue = DoubleSolenoid.Value.kForward;
-	        else
-	        	pusherValue = DoubleSolenoid.Value.kReverse;
-	        
-	        togglePusher = !togglePusher;
-    		pusherValve.set(pusherValue);
-       }
+        	elevatorValue = DoubleSolenoid.Value.kReverse;
+        	toggleElevator = !toggleElevator;
+        }
+            
+		leftRiser.set(elevatorValue);
+		rightRiser.set(elevatorValue);
 
-		// set up for next cycle
-		initTime = Utility.getFPGATime();
+        // pusher operation via RIGHT joystick
+		/*
+		DoubleSolenoid.Value pusherValue;
+        double pusherIncrement = gamepad.getRawAxis(3);
+        
+        if (Math.abs(pusherIncrement) < MIN_INCREMENT)
+        {
+            pusherValue = DoubleSolenoid.Value.kOff;
+        }
+        else if (!togglePusher)
+        {
+        	pusherValue = DoubleSolenoid.Value.kForward;
+        	togglePusher = !togglePusher;
+        }
+        else
+        {
+        	pusherValue = DoubleSolenoid.Value.kReverse;
+        	togglePusher = !togglePusher;
+        }
 
+		leftPusher.set(pusherValue);
+		rightPusher.set(pusherValue);
+		*/
 	}
 
 }
