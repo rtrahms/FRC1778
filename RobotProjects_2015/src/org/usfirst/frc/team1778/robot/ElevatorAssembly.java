@@ -9,52 +9,37 @@ import edu.wpi.first.wpilibj.Joystick;
 public class ElevatorAssembly {
 	    
     // minimum increment (for joystick dead zone)
-    private final double MIN_INCREMENT = 0.1;
+    private final long CYCLE_USEC = 250000;
     
-    // Pneumatics control module ID
-    private final int PCM_NODE_ID = 0;
-    
-    // the two elevator pneumatics
-	private final int LEFT_RISER_FORWARD_ID = 0;
-	private final int LEFT_RISER_REVERSE_ID = 1;
-	private final int RIGHT_RISER_FORWARD_ID = 2;
-	private final int RIGHT_RISER_REVERSE_ID = 3;
+    // Pneumatics control module CANBus ID
+    private final int PCM_NODE_ID = 2;
+    	
+	// pneumatics controller gampad ID - assumes drive joysticks are 0 and 1
+	private final int GAMEPAD_ID = 2;
 	
-	// the two pneumatics used for pushing stacks out
-	//private final int LEFT_PUSHER_FORWARD_ID = 4;
-	//private final int LEFT_PUSHER_REVERSE_ID = 5;
-	//private final int RIGHT_PUSHER_FORWARD_ID = 6;
-	//private final int RIGHT_PUSHER_REVERSE_ID = 7;
-	
-	// elevator controller gampad
-	private final int GAMEPAD_ID = 3;
-	
-    // elevator control
+    // pneumatics control
     private Joystick gamepad;
     
     private Compressor compressor;
-    private DoubleSolenoid leftRiser, rightRiser;
-    //private DoubleSolenoid leftPusher, rightPusher;
+    private DoubleSolenoid doubleSol_1;
     
-    private boolean toggleElevator;
-    //private boolean togglePusher;
+    private boolean toggleValve_1;
+    
+    private long initTime;
 
 	// constructor
 	public ElevatorAssembly()
 	{
-        // elevator control
+        // pneumatics control
         gamepad = new Joystick(GAMEPAD_ID);
         
-        compressor = new Compressor(PCM_NODE_ID);
-        compressor.setClosedLoopControl(true);     // automatically turn on & off compressor based on pressure switch value
+        //compressor = new Compressor(PCM_NODE_ID);
+        //compressor.setClosedLoopControl(true);     // automatically turn on & off compressor based on pressure switch value
         
-        leftRiser = new DoubleSolenoid(LEFT_RISER_FORWARD_ID, LEFT_RISER_REVERSE_ID);
-        rightRiser = new DoubleSolenoid(RIGHT_RISER_FORWARD_ID, RIGHT_RISER_REVERSE_ID);
-        toggleElevator = false;
-
-        //leftPusher = new DoubleSolenoid(LEFT_PUSHER_FORWARD_ID, LEFT_PUSHER_REVERSE_ID);
-        //rightPusher = new DoubleSolenoid(RIGHT_PUSHER_FORWARD_ID, RIGHT_PUSHER_REVERSE_ID);   
-        //togglePusher = false;
+        doubleSol_1 = new DoubleSolenoid(PCM_NODE_ID, 0, 1);
+        toggleValve_1 = true;
+        
+        initTime = Utility.getFPGATime();
 	}
 	
 	public void autoPeriodic()
@@ -63,52 +48,42 @@ public class ElevatorAssembly {
 		
 	public void teleopPeriodic()
 	{
+		// currently just cycles a valve on and off at a periodic interval
 		
-        // elevator operation via gamepad triggers
-		DoubleSolenoid.Value elevatorValue;	
-        double elevatorIncrement = gamepad.getRawAxis(3);
-        
-        if (Math.abs(elevatorIncrement) < MIN_INCREMENT)
-        {
-            elevatorValue = DoubleSolenoid.Value.kOff;
-        }
-        else if (!toggleElevator)
-        {
-        	elevatorValue = DoubleSolenoid.Value.kForward;
-        	toggleElevator = !toggleElevator;
-        }
-        else
-        {
-        	elevatorValue = DoubleSolenoid.Value.kReverse;
-        	toggleElevator = !toggleElevator;
-        }
-            
-		leftRiser.set(elevatorValue);
-		rightRiser.set(elevatorValue);
-
-        // pusher operation via RIGHT joystick
-		/*
-		DoubleSolenoid.Value pusherValue;
-        double pusherIncrement = gamepad.getRawAxis(3);
-        
-        if (Math.abs(pusherIncrement) < MIN_INCREMENT)
-        {
-            pusherValue = DoubleSolenoid.Value.kOff;
-        }
-        else if (!togglePusher)
-        {
-        	pusherValue = DoubleSolenoid.Value.kForward;
-        	togglePusher = !togglePusher;
-        }
-        else
-        {
-        	pusherValue = DoubleSolenoid.Value.kReverse;
-        	togglePusher = !togglePusher;
-        }
-
-		leftPusher.set(pusherValue);
-		rightPusher.set(pusherValue);
-		*/
-	}
-
+		long currentTime = Utility.getFPGATime();
+		
+		// if not long enough, just return
+		if ((currentTime - initTime) < CYCLE_USEC)
+			return;
+		
+		// if x button push, toggle valve 1
+		if (gamepad.getRawButton(1))
+		{
+			// otherwise, toggle the valve
+			if (toggleValve_1)
+			{
+				System.out.println("enabling double solenoid!");
+				//singleSol.set(true);
+				doubleSol_1.set(DoubleSolenoid.Value.kForward);
+			}
+			else
+			{
+				System.out.println("reversing double solenoid!");
+				//singleSol.set(false);
+				doubleSol_1.set(DoubleSolenoid.Value.kReverse);
+			}
+			
+			// set up for next cycle
+			initTime = Utility.getFPGATime();
+			toggleValve_1 = !toggleValve_1;
+		}
+				
+		//long currentTime = Utility.getFPGATime();
+		
+		// if not long enough, just return
+		//if ((currentTime - initTime) < CYCLE_USEC)
+		//	return;
+		
+		//System.out.println("game pad button pressed!");
+	}			
 }

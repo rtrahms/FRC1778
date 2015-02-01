@@ -53,6 +53,11 @@ public class DriveAssembly {
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
+        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+        
         leftStick = new Joystick(LEFT_JOYSTICK_ID);
         rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	}

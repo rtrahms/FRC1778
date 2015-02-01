@@ -19,8 +19,8 @@ public class Robot extends IterativeRobot {
 	
 	// Chill Out 1778 major subassemblies
 	DriveAssembly drivetrain;
-	AlignmentAssembly aligner;
 	ElevatorAssembly elevator;
+	AlignmentAssembly aligner;
 	PneumaticsTester pneumTest;
 	
 	PowerDistributionPanel pdp;
@@ -32,8 +32,8 @@ public class Robot extends IterativeRobot {
     	pdp.clearStickyFaults();
     	
     	drivetrain = new DriveAssembly();
+    	elevator = new ElevatorAssembly();
     	//aligner = new AlignmentAssembly();
-    	//elevator = new ElevatorAssembly();
     	//pneumTest = new PneumaticsTester();
     }
 
@@ -42,8 +42,8 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	drivetrain.autoPeriodic();
+    	elevator.autoPeriodic();
     	//aligner.autoPeriodic();
-    	//elevator.autoPeriodic();
     	//pneumTest.autoPeriodic();
     }
 
@@ -55,8 +55,8 @@ public class Robot extends IterativeRobot {
 		//System.out.println("Chill out teleopPeriodic call!");
 
     	drivetrain.teleopPeriodic();
+        elevator.teleopPeriodic();
         //aligner.teleopPeriodic();
-        //elevator.teleopPeriodic();
         //pneumTest.teleopPeriodic();
     }
     
