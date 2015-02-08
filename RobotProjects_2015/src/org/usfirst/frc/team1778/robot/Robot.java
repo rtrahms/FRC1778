@@ -21,7 +21,7 @@ public class Robot extends IterativeRobot {
 	DriveAssembly drivetrain;
 	ElevatorAssembly elevator;
 	AlignmentAssembly aligner;
-	PneumaticsTester pneumTest;
+	//PneumaticsTester pneumTest;
 	
 	PowerDistributionPanel pdp;
 	
@@ -33,7 +33,7 @@ public class Robot extends IterativeRobot {
     	
     	drivetrain = new DriveAssembly();
     	elevator = new ElevatorAssembly();
-    	//aligner = new AlignmentAssembly();
+    	aligner = new AlignmentAssembly();
     	//pneumTest = new PneumaticsTester();
     }
 
@@ -43,7 +43,7 @@ public class Robot extends IterativeRobot {
     public void autonomousPeriodic() {
     	drivetrain.autoPeriodic();
     	elevator.autoPeriodic();
-    	//aligner.autoPeriodic();
+    	aligner.autoPeriodic();
     	//pneumTest.autoPeriodic();
     }
 
@@ -56,7 +56,7 @@ public class Robot extends IterativeRobot {
 
     	drivetrain.teleopPeriodic();
         elevator.teleopPeriodic();
-        //aligner.teleopPeriodic();
+        aligner.teleopPeriodic();
         //pneumTest.teleopPeriodic();
     }
     

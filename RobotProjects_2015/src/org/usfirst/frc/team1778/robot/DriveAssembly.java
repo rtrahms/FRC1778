@@ -17,21 +17,22 @@ public class DriveAssembly {
 	private final int RIGHT_REAR_TALON_ID = 7;
 	private final int LATERAL_TALON_ID1 = 5;
 	private final int LATERAL_TALON_ID2 = 6;
+	private final int LEFT_GRABBER_TALON_ID = 9;
+	private final int RIGHT_GRABBER_TALON_ID = 10;
 	
-	//private final int X_AXIS = 1;
-	//private final int Y_AXIS = 2;
+	// joystick axis ids
+	private final int JOY_X_AXIS = 0;
+	private final int JOY_Y_AXIS = 1;
+	private final int JOY_Z_AXIS = 2;
+	private final int JOY_SLIDER_AXIS = 3;
 	
-	
-	// joystick ids
+	// joystick device ids
 	private final int LEFT_JOYSTICK_ID = 0;
 	private final int RIGHT_JOYSTICK_ID = 1;
 	
-    // drive throttle (how fast the drivetrain moves, and direction)
-    //private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
-    //private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
-    // minimum motor increment (for joystick dead zone)
-    //private final double MIN_INCREMENT = 0.1;
-		
+	//dead zone constant - any input less than this is translated as zero movement
+	private final double DEADZONE = .4;
+			
 	// speed controllers and drive class
 	private CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
 	private CANTalon mLateral_1, mLateral_2;
@@ -39,6 +40,7 @@ public class DriveAssembly {
     
     // drive control
     private Joystick leftStick, rightStick;
+    private Joystick arcadeStick;
 	
 	// constructor - tank drive
 	public DriveAssembly()
@@ -49,7 +51,9 @@ public class DriveAssembly {
         mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
         
         mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
+        mLateral_1.enableBrakeMode(true);
         mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
+        mLateral_2.enableBrakeMode(true);
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
@@ -71,32 +75,43 @@ public class DriveAssembly {
 	public void teleopPeriodic()
 	{
 		
-		// control robot forward and turn movement with y-axis and twist-axis
-        //drive.arcadeDrive(joyStick);
-		//drive.arcadeDrive(joyStick.getY(),joyStick.getTwist());
-		drive.tankDrive(leftStick, rightStick);
-		// control strafe speed controller with x-axis (use left joystick)
+		// left stick z-axis will serve as throttle control
+		// normalized (0.0-1.0)
+		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS)) + 1.0)/2.0;
 		
-		double strafeValue = leftStick.getX();
+		boolean useSquaredInputs = true;
+		
+		//*****************  TANK DRIVE SECTION (uses two y axes) **********/
+		// control robot forward and turn movement with y-axis and twist-axis
+		
+		double leftValue = throttleVal*leftStick.getY();
+		double rightValue = throttleVal*rightStick.getY();
+		//drive.tankDrive(leftStick, rightStick);
+		drive.tankDrive(leftValue, rightValue, useSquaredInputs);
+		
+		//*****************  TANK DRIVE SECTION ****************************/
+		
+		//**************  ARCADE DRIVE SECTION (uses one Y and one Z) **********/
+		/*
+		double moveValue = throttleVal*arcadeStick.getRawAxis(JOY_Y_AXIS);
+		double rotateValue = throttleVal*arcadeStick.getRawAxis(JOY_Z_AXIS);
+		drive.arcadeDrive(moveValue, rotateValue);
+		*/
+		//**************  ARCADE DRIVE SECTION ****************************/
+		
+		//************** STRAFE DRIVE SECTION  (uses one X axis) *********/
+		// control strafe speed controller with x-axis (use left joystick)		
+		double strafeValue = throttleVal*leftStick.getX();
+
+		if(Math.abs(strafeValue) <= DEADZONE)
+		{
+			strafeValue = 0;
+		}
+		
 		mLateral_1.set(strafeValue);
 		mLateral_2.set(strafeValue);
-	}
-	
-	// calibrated joystick drive
-	// not currently used
-	private void tankDrive()
-	{
-		/*
-        double driveStep = DRIVE_STEP_POLARITY_DEFAULT * DRIVE_STEP_MAGNITUDE_DEFAULT;
-        double leftDriveIncrement = leftStick.getRawAxis(2) * driveStep;
-        if (Math.abs(leftDriveIncrement) < MIN_INCREMENT)
-            leftDriveIncrement = 0.0;
-        double rightDriveIncrement = rightStick.getRawAxis(2) * driveStep;
-        if (Math.abs(rightDriveIncrement) < MIN_INCREMENT)
-            rightDriveIncrement = 0.0;
- 
-        drive.tankDrive(leftStick, rightStick);
-        */
+		/*************** STRAFE DRIVE SECTION ****************************/
+
 	}
 		
 }

@@ -3,6 +3,7 @@ package org.usfirst.frc.team1778.robot;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Utility;
 
 //Chill Out 1778 class for controlling the elevator & pusher pneumatic mechanisms
 
@@ -11,10 +12,10 @@ public class ElevatorAssembly {
     // minimum increment (for joystick dead zone)
     private final long CYCLE_USEC = 250000;
     
-    // Pneumatics control module CANBus ID
+    // Pneumatics control module ID
     private final int PCM_NODE_ID = 2;
     	
-	// pneumatics controller gampad ID - assumes drive joysticks are 0 and 1
+	// pneumatics controller gampad ID - assumes no other controllers connected
 	private final int GAMEPAD_ID = 2;
 	
     // pneumatics control
@@ -48,6 +49,7 @@ public class ElevatorAssembly {
 		
 	public void teleopPeriodic()
 	{
+		
 		// currently just cycles a valve on and off at a periodic interval
 		
 		long currentTime = Utility.getFPGATime();
@@ -57,27 +59,25 @@ public class ElevatorAssembly {
 			return;
 		
 		// if x button push, toggle valve 1
-		if (gamepad.getRawButton(1))
+		if (gamepad.getRawButton(2))
 		{
 			// otherwise, toggle the valve
 			if (toggleValve_1)
 			{
 				System.out.println("enabling double solenoid!");
-				//singleSol.set(true);
 				doubleSol_1.set(DoubleSolenoid.Value.kForward);
 			}
 			else
 			{
 				System.out.println("reversing double solenoid!");
-				//singleSol.set(false);
 				doubleSol_1.set(DoubleSolenoid.Value.kReverse);
 			}
 			
 			// set up for next cycle
 			initTime = Utility.getFPGATime();
-			toggleValve_1 = !toggleValve_1;
+			toggleValve_1 = !toggleValve_1;		
 		}
-				
+		
 		//long currentTime = Utility.getFPGATime();
 		
 		// if not long enough, just return
@@ -85,5 +85,6 @@ public class ElevatorAssembly {
 		//	return;
 		
 		//System.out.println("game pad button pressed!");
-	}			
+	}
+
 }
