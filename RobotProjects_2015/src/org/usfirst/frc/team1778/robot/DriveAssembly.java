@@ -29,10 +29,18 @@ public class DriveAssembly {
 	// joystick device ids
 	private final int LEFT_JOYSTICK_ID = 0;
 	private final int RIGHT_JOYSTICK_ID = 1;
+	//private final int ARCADE_JOYSTICK_ID = 0;
 	
-	//dead zone constant - any input less than this is translated as zero movement
-	private final double DEADZONE = .4;
-			
+	//dead zone constant
+	private final double DEADZONE = .5;
+	
+	
+    // drive throttle (how fast the drivetrain moves, and direction)
+    //private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
+    //private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
+    // minimum motor increment (for joystick dead zone)
+    //private final double MIN_INCREMENT = 0.1;
+		
 	// speed controllers and drive class
 	private CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
 	private CANTalon mLateral_1, mLateral_2;
@@ -51,9 +59,7 @@ public class DriveAssembly {
         mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
         
         mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
-        mLateral_1.enableBrakeMode(true);
         mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
-        mLateral_2.enableBrakeMode(true);
         
         drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
         
@@ -64,6 +70,7 @@ public class DriveAssembly {
         
         leftStick = new Joystick(LEFT_JOYSTICK_ID);
         rightStick = new Joystick(RIGHT_JOYSTICK_ID);
+        //arcadeStick = new Joystick(ARCADE_JOYSTICK_ID);
 	}
 
 
@@ -77,7 +84,9 @@ public class DriveAssembly {
 		
 		// left stick z-axis will serve as throttle control
 		// normalized (0.0-1.0)
-		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS)) + 1.0)/2.0;
+		//double throttleVal = 1.0f;
+		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
+		//double throttleVal = (arcadeStick.getRawAxis(JOY_SLIDER_AXIS) + 1.0)/2.0;
 		
 		boolean useSquaredInputs = true;
 		
@@ -102,12 +111,10 @@ public class DriveAssembly {
 		//************** STRAFE DRIVE SECTION  (uses one X axis) *********/
 		// control strafe speed controller with x-axis (use left joystick)		
 		double strafeValue = throttleVal*leftStick.getX();
-
-		if(Math.abs(strafeValue) <= DEADZONE)
-		{
+		//double strafeValue = throttleVal*arcadeStick.getRawAxis(JOY_X_AXIS);
+		if(Math.abs(strafeValue) <= DEADZONE){
 			strafeValue = 0;
 		}
-		
 		mLateral_1.set(strafeValue);
 		mLateral_2.set(strafeValue);
 		/*************** STRAFE DRIVE SECTION ****************************/
