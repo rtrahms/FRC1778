@@ -1,8 +1,6 @@
 
 package org.usfirst.frc.team1778.robot;
 
-import org.usfirst.frc.team1778.robot.camera.Camera;
-
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
@@ -23,8 +21,7 @@ public class Robot extends IterativeRobot {
 	DriveAssembly drivetrain;
 	ElevatorAssembly elevator;
 	AlignmentAssembly aligner;
-	//Camera camera;
-	PneumaticsTester pneumTest;
+	//PneumaticsTester pneumTest;
 	
 	PowerDistributionPanel pdp;
 	
@@ -38,19 +35,16 @@ public class Robot extends IterativeRobot {
     	elevator = new ElevatorAssembly();
     	aligner = new AlignmentAssembly();
     	//pneumTest = new PneumaticsTester();
-    	
-    	//camera = new Camera("169.254.26.13");
     }
 
-    public void autonomousInit() {
-    	drivetrain.autoInit();
-    }
-    
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
     	drivetrain.autoPeriodic();
+    	elevator.autoPeriodic();
+    	aligner.autoPeriodic();
+    	//pneumTest.autoPeriodic();
     }
 
     /**
