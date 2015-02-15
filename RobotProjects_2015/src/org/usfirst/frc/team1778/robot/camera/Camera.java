@@ -32,10 +32,10 @@ public class Camera {
 	public BinaryImage filterImage(ColorImage image) {
 		int redLow = LOW_FILTER_THRESHOLD[0];
 		int redHigh = HIGH_FILTER_THRESHOLD[0];
-		int greenLow = LOW_FILTER_THRESHOLD[0];
-		int greenHigh = HIGH_FILTER_THRESHOLD[0];
-		int blueLow = LOW_FILTER_THRESHOLD[0];
-		int blueHigh = HIGH_FILTER_THRESHOLD[0];
+		int greenLow = LOW_FILTER_THRESHOLD[1];
+		int greenHigh = HIGH_FILTER_THRESHOLD[1];
+		int blueLow = LOW_FILTER_THRESHOLD[2];
+		int blueHigh = HIGH_FILTER_THRESHOLD[2];
 		try {
 			return image.thresholdRGB(redLow, redHigh, greenLow, greenHigh, blueLow, blueHigh);
 		} catch (NIVisionException e) {
