@@ -48,10 +48,19 @@ public class PneumaticsTester {
         initTime = Utility.getFPGATime();
 	}
 	
+	public void autoInit() {
+		
+	}
+	
 	public void autoPeriodic()
 	{
 	}
 		
+	public void teleopInit()
+	{
+		
+	}
+	
 	public void teleopPeriodic()
 	{
 		

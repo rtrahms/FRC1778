@@ -3,6 +3,7 @@ package org.usfirst.frc.team1778.robot;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Utility;
 
 //Chill Out 1778 class for controlling the elevator & pusher pneumatic mechanisms
@@ -14,18 +15,17 @@ public class ElevatorAssembly {
     
     // Pneumatics control module ID
     private final int PCM_NODE_ID = 2;
-    	
-	// pneumatics controller gampad ID - assumes no other controllers connected
+        	
+	// elevator controller gamepad ID - assumes no other controllers connected
 	private final int GAMEPAD_ID = 2;
 	
-    // pneumatics control
+    // pneumatics control objects
     private Joystick gamepad;
     
     private Compressor compressor;
     private DoubleSolenoid doubleSol_1;
-    
     private boolean toggleValve_1;
-    
+       
     private long initTime;
 
 	// constructor
@@ -39,14 +39,22 @@ public class ElevatorAssembly {
         
         doubleSol_1 = new DoubleSolenoid(PCM_NODE_ID, 0, 1);
         toggleValve_1 = true;
-        
+                
         initTime = Utility.getFPGATime();
+	}
+	
+	public void autoInit() {
+		
 	}
 	
 	public void autoPeriodic()
 	{
 	}
 		
+	public void teleopInit() {
+		
+	}
+	
 	public void teleopPeriodic()
 	{
 		
@@ -58,7 +66,7 @@ public class ElevatorAssembly {
 		if ((currentTime - initTime) < CYCLE_USEC)
 			return;
 		
-		// if x button push, toggle valve 1
+		// if A button push, toggle valve 1
 		if (gamepad.getRawButton(2))
 		{
 			// otherwise, toggle the valve
@@ -77,13 +85,7 @@ public class ElevatorAssembly {
 			initTime = Utility.getFPGATime();
 			toggleValve_1 = !toggleValve_1;		
 		}
-		
-		//long currentTime = Utility.getFPGATime();
-		
-		// if not long enough, just return
-		//if ((currentTime - initTime) < CYCLE_USEC)
-		//	return;
-		
+						
 		//System.out.println("game pad button pressed!");
 	}
 

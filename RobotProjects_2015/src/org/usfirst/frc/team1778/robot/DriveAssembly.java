@@ -111,7 +111,8 @@ public class DriveAssembly {
 
 			System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
 			//drive.drive(AUTO_DRIVE_SPEED,driveAngle);
-			drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED, -driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED);
+			drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED, 
+						    -driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED);
 		}
 		else
 		{
@@ -120,6 +121,10 @@ public class DriveAssembly {
 		}
 	}
 		
+	public void teleopInit() {
+		
+	}
+	
 	public void teleopPeriodic() {
 		
 		// left stick z-axis will serve as throttle control

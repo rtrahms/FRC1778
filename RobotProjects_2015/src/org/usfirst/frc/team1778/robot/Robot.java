@@ -42,8 +42,12 @@ public class Robot extends IterativeRobot {
     	//camera = new Camera("169.254.26.13");
     }
 
+    // called one tim on entry into autonomous
     public void autonomousInit() {
     	drivetrain.autoInit();
+    	elevator.autoInit();
+    	aligner.autoInit();
+    	//pneumTest.autoInit();
     }
     
     /**
@@ -53,6 +57,14 @@ public class Robot extends IterativeRobot {
     	drivetrain.autoPeriodic();
     }
 
+    // called one time on entry into teleop
+    public void teleopInit() {
+    	drivetrain.teleopInit();
+    	elevator.teleopInit();
+    	aligner.teleopInit();
+    	//pneumTest.teleopInit();
+    }
+    
     /**
      * This function is called periodically during operator control
      */

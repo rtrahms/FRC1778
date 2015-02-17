@@ -13,7 +13,7 @@ public class AlignmentAssembly {
     private static final double MIN_INCREMENT = 0.1;
 	private final double LEFT_POLARITY = -1.0;
     private final double RIGHT_POLARITY = 1.0;
-    private final double WHEEL_THROTTLE = 0.75;   
+    private final double WHEEL_THROTTLE = 0.5;   
 
     // Speed Controller IDs
 	private final int LEFT_WHEEL_TALON_ID = 9;
@@ -22,9 +22,6 @@ public class AlignmentAssembly {
 	// elevator controller gampad ID
 	private final int GAMEPAD_ID = 2;
 	
-    // minimum motor increment (for joystick dead zone)
-    //private final double MIN_INCREMENT = 0.1;
-
 	private CANTalon mLeftWheel, mRightWheel;
 	
 	private Joystick gamepad;
@@ -42,10 +39,20 @@ public class AlignmentAssembly {
         
 	}
 	
+	public void autoInit()
+	{
+		
+	}
+	
 	public void autoPeriodic()
 	{
 	}
 		
+	public void teleopInit()
+	{
+	
+	}
+	
 	public void teleopPeriodic()
 	{
         // right and left wheel operation via right joystick
