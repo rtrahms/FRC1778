@@ -3,6 +3,9 @@ package org.usfirst.frc.team1778.robot;
 
 import org.usfirst.frc.team1778.robot.camera.Camera;
 
+import StateMachine.AutoStateMachine;
+import Systems.DriveAssembly;
+import Systems.PneumaticsTester;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
@@ -19,42 +22,50 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 public class Robot extends IterativeRobot {
 
 	
-	// Chill Out 1778 major subassemblies
-	DriveAssembly drivetrain;
+	// Chill Out 1778 major subassemblies - now static classes
+	//DriveAssembly drivetrain;
+	//PneumaticsTester pneumTest;
 	//Camera camera;
-	PneumaticsTester pneumTest;
+	
+	// autonomous state machine object
+	AutoStateMachine autoSM;
 	
 	PowerDistributionPanel pdp;
 	
 	
     public void robotInit() {
     	
+    	autoSM = new AutoStateMachine();
+    	
     	pdp = new PowerDistributionPanel();
     	pdp.clearStickyFaults();
     	
-    	drivetrain = new DriveAssembly();
+    	DriveAssembly.initialize();
+    	//drivetrain = new DriveAssembly();
     	//pneumTest = new PneumaticsTester();
     	
     	//camera = new Camera("169.254.26.13");
     }
 
     // called one tim on entry into autonomous
-    public void autonomousInit() {
-    	drivetrain.autoInit();
-    	//pneumTest.autoInit();
+    public void autonomousInit() {    	
+    	autoSM.start();
     }
     
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
-    	drivetrain.autoPeriodic();
+    public void autonomousPeriodic() {    	
+    	autoSM.process();
     }
 
     // called one time on entry into teleop
     public void teleopInit() {
-    	drivetrain.teleopInit();
+
+    	DriveAssembly.teleopInit();
+    	//drivetrain.teleopInit();
     	//pneumTest.teleopInit();
+
     }
     
     /**
@@ -62,9 +73,8 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
 
-		//System.out.println("Chill out teleopPeriodic call!");
-
-    	drivetrain.teleopPeriodic();
+    	DriveAssembly.teleopPeriodic();
+    	//drivetrain.teleopPeriodic();
         //pneumTest.teleopPeriodic();
     }
     

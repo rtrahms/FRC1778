@@ -67,19 +67,9 @@ public class ElevatorAssembly {
 			return;
 		
 		// if A button push, toggle valve 1
-		if (gamepad.getRawButton(2))
-		{
+		if (gamepad.getRawButton(2)) {
 			// otherwise, toggle the valve
-			if (toggleValve_1)
-			{
-				System.out.println("enabling double solenoid!");
-				doubleSol_1.set(DoubleSolenoid.Value.kForward);
-			}
-			else
-			{
-				System.out.println("reversing double solenoid!");
-				doubleSol_1.set(DoubleSolenoid.Value.kReverse);
-			}
+			setLift(toggleValve_1);
 			
 			// set up for next cycle
 			initTime = Utility.getFPGATime();
@@ -87,6 +77,20 @@ public class ElevatorAssembly {
 		}
 						
 		//System.out.println("game pad button pressed!");
+	}
+	
+	public void setLift(boolean lift) {
+		if (lift) {
+			System.out.println("enabling double solenoid!");
+			//singleSol.set(true);
+			doubleSol_1.set(DoubleSolenoid.Value.kForward);
+		}
+		else
+		{
+			System.out.println("reversing double solenoid!");
+			//singleSol.set(false);
+			doubleSol_1.set(DoubleSolenoid.Value.kReverse);
+		}
 	}
 
 }

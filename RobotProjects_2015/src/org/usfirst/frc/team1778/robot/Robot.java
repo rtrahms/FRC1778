@@ -47,6 +47,7 @@ public class Robot extends IterativeRobot {
     	drivetrain.autoInit();
     	elevator.autoInit();
     	aligner.autoInit();
+    	RobotAuto.autoInit(this);
     	//pneumTest.autoInit();
     }
     
@@ -54,7 +55,8 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {
-    	drivetrain.autoPeriodic();
+    	//drivetrain.autoPeriodic();
+    	RobotAuto.autoPeriodic(this);
     }
 
     // called one time on entry into teleop

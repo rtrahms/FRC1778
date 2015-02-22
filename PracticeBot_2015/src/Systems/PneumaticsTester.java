@@ -1,4 +1,4 @@
-package org.usfirst.frc.team1778.robot;
+package Systems;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -9,43 +9,49 @@ import edu.wpi.first.wpilibj.Utility;
 
 public class PneumaticsTester {
 	    
+	private static boolean initialized = false;
+	
     // minimum increment (for joystick dead zone)
-    private final long CYCLE_USEC = 250000;
+    private static final long CYCLE_USEC = 250000;
     
     // Pneumatics control module ID
-    private final int PCM_NODE_ID = 2;
+    private static final int PCM_NODE_ID = 2;
     	
 	// pneumatics controller gampad ID - assumes no other controllers connected
-	private final int GAMEPAD_ID = 0;
+	private static final int GAMEPAD_ID = 0;
 	
     // pneumatics control
-    private Joystick gamepad;
+    private static Joystick gamepad;
     
-    private Compressor compressor;
-    private DoubleSolenoid doubleSol_1;
-    private DoubleSolenoid doubleSol_2;
-    //private Solenoid singleSol;
+    private static Compressor compressor;
+    private static DoubleSolenoid doubleSol_1;
+    private static DoubleSolenoid doubleSol_2;
+    //private static Solenoid singleSol;
     
-    private boolean toggleValve_1, toggleValve_2;
+    private static boolean toggleValve_1, toggleValve_2;
     
-    private long initTime;
+    private static long initTime;
     
-	// constructor
-	public PneumaticsTester()
+	public static void initialize()
 	{
-        // pneumatics control
-        gamepad = new Joystick(GAMEPAD_ID);
-        
-        //compressor = new Compressor(PCM_NODE_ID);
-        //compressor.setClosedLoopControl(true);     // automatically turn on & off compressor based on pressure switch value
-        
-        doubleSol_1 = new DoubleSolenoid(PCM_NODE_ID, 0, 1);
-        doubleSol_2 = new DoubleSolenoid(PCM_NODE_ID, 2, 3);
-        //singleSol = new Solenoid(PCM_NODE_ID,0);
-        toggleValve_1 = true;
-        toggleValve_2 = true;
-        
-        initTime = Utility.getFPGATime();
+		if (!initialized)
+		{
+	        // pneumatics control
+	        gamepad = new Joystick(GAMEPAD_ID);
+	        
+	        //compressor = new Compressor(PCM_NODE_ID);
+	        //compressor.setClosedLoopControl(true);     // automatically turn on & off compressor based on pressure switch value
+	        
+	        doubleSol_1 = new DoubleSolenoid(PCM_NODE_ID, 0, 1);
+	        doubleSol_2 = new DoubleSolenoid(PCM_NODE_ID, 2, 3);
+	        //singleSol = new Solenoid(PCM_NODE_ID,0);
+	        toggleValve_1 = true;
+	        toggleValve_2 = true;
+	        
+	        initTime = Utility.getFPGATime();
+	        
+	        initialized = true;
+		}
 	}
 	
 	public void autoInit() {
