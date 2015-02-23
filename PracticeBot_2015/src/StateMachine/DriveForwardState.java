@@ -1,16 +1,17 @@
 package StateMachine;
 
-import Systems.DriveAssembly;
+import Systems.PWMDriveAssembly;
 
 public class DriveForwardState extends AutoState {
 
+	// PWMDriveAssembly is now a static class (no instantiation needed)
 	//DriveAssembly driveAssembly;
 	
 	public DriveForwardState()
 	{
 		this.name = "<Drive Forward State>";
 		
-		DriveAssembly.initialize();
+		PWMDriveAssembly.initialize();
 		//driveAssembly = new DriveAssembly();
 	}
 	
@@ -18,7 +19,7 @@ public class DriveForwardState extends AutoState {
 	{
 		this.name =  name;
 		
-		DriveAssembly.initialize();
+		PWMDriveAssembly.initialize();
 		//driveAssembly = new DriveAssembly();
 	}
 	
@@ -26,7 +27,7 @@ public class DriveForwardState extends AutoState {
 	public void enter() {
 		// do some drivey initialization
 		
-		DriveAssembly.autoInit();
+		PWMDriveAssembly.autoInit();
 		//driveAssembly.autoInit();
 		
 		super.enter();
@@ -37,7 +38,7 @@ public class DriveForwardState extends AutoState {
 		
 		// do some drivey stuff
 		
-		DriveAssembly.autoPeriodic();
+		PWMDriveAssembly.autoPeriodic();
 		//driveAssembly.autoPeriodic();
 		
 		return super.process();

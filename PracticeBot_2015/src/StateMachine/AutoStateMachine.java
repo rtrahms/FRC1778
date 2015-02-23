@@ -62,7 +62,12 @@ public class AutoStateMachine {
 		}
 	}
 	
+	// exmaple method to create a simple state network
+	// 1) be idle for a number of sec
+	// 2) drive forward for a number of sec
+	// 3) go back to idle and stay there 
 	private void createStateNet0() {
+
 		// create states
 		IdleState startIdle = new IdleState("<Start Idle State>");
 		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>");

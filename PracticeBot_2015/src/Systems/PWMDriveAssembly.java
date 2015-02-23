@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj.Utility;
 
 //Chill Out 1778 class for controlling the drivetrain
 
-public class DriveAssembly {
+public class PWMDriveAssembly {
 
 	private static boolean initialized = false;
 	
@@ -18,27 +18,32 @@ public class DriveAssembly {
 	private static final int LEFT_REAR_TALON_PWM_ID = 0;
 	private static final int RIGHT_FRONT_TALON_PWM_ID = 2;
 	private static final int RIGHT_REAR_TALON_PWM_ID = 3;
+	
+	// joystick axis ids
+	private static final int JOY_X_AXIS = 0;
+	private static final int JOY_Y_AXIS = 1;
+	private static final int JOY_Z_AXIS = 2;
+	private static final int JOY_SLIDER_AXIS = 3;
 		
 	// joystick device ids
 	private static final int LEFT_JOYSTICK_ID = 0;
 	private static final int RIGHT_JOYSTICK_ID = 1;
+		
+	//threshold constants
+	private static final double LATERAL_DEADZONE = 0.3;
+	private static final double DRIVE_DEADZONE = 0.2;
+	private static final double EQUALIZATION_THRESHOLD = 0.1;
 	
-	//dead zone constant
-	private static final double DEADZONE = .5;
-	private static final double EQUALIZATION_DEADZONE = 0.05;
+	//other constants
+	private static final boolean USE_SQUARED_INPUTS = true;
+	private static final double GYRO_CORRECT_COEFF = 0.125;
 	
 	// autonomous constants
 	// drive time 3 seconds
 	private static final long AUTO_DRIVE_TIME_SEC = 4;
 	private static final double AUTO_DRIVE_SPEED = -0.5;
 	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.125;
-	
-    // drive throttle (how fast the drivetrain moves, and direction)
-    //private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
-    //private final double DRIVE_STEP_POLARITY_DEFAULT = 1.0;
-    // minimum motor increment (for joystick dead zone)
-    //private final double MIN_INCREMENT = 0.1;
-		
+			
 	// speed controllers and drive class
 	private static TalonSRX mFrontLeft, mBackLeft, mFrontRight, mBackRight;
     private static RobotDrive drive;
@@ -114,43 +119,68 @@ public class DriveAssembly {
 	}
 		
 	public static void teleopInit() {
-        // initialize auto drive timer
-		startTimeUs = Utility.getFPGATime();		
+		gyro.reset();
 	}
 	
 	public static void teleopPeriodic() {
 		
-		// left stick z-axis will serve as throttle control
-		// normalized (0.0-1.0)
-		
-		//double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
-		double throttleVal = 1.0 - ((leftStick.getZ())+1.0)/2.0;
-		
-		boolean useSquaredInputs = true;
-		
-		//*****************  TANK DRIVE SECTION (uses two y axes) **********/
-		// control robot forward and turn movement with y-axis and twist-axis
+		// Left Stick Throttle Control
+		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
 		
 		double leftValue = throttleVal*leftStick.getY();
 		double rightValue = throttleVal*rightStick.getY();
+		double strafeValue = throttleVal*leftStick.getX();
 		
+		// Deadzones
+		if(Math.abs(leftValue) <= DRIVE_DEADZONE) {
+			leftValue = 0;
+		}
+		if(Math.abs(rightValue) <= DRIVE_DEADZONE) {
+			rightValue = 0;
+		}
+		if(Math.abs(strafeValue) <= LATERAL_DEADZONE) {
+			strafeValue = 0;
+		}
+		
+		// Throttle Equalization Compensation
+		if(Math.abs(leftValue-rightValue) <= EQUALIZATION_THRESHOLD) {
+			double avgValue = (leftValue+rightValue)/2;
+			//System.out.println("EQUALIZING: "+avgValue);
+			leftValue = avgValue;
+			rightValue = avgValue;
+		}
+		
+		// Slowmode
 		if(leftStick.getRawButton(1)) {
 			leftValue /= 1.5;
 			rightValue /= 1.5;
+			strafeValue /= 1.5;
 		}
-		//drive.tankDrive(leftStick, rightStick);
-		//System.out.println("Drive: " + leftValue +", " + rightValue);
-		drive.tankDrive(leftValue, rightValue, useSquaredInputs);
 		
-		/*
-		double gyroAngle = gyro.getAngle();
-		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
-		System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
-		*/
+		//Set the drive train 
+		drive(leftValue, rightValue, strafeValue);
 		
-		//*****************  TANK DRIVE SECTION ****************************/
-		
-		
+	}
+	
+	private static void drive(double left, double right, double strafe) {
+		drive.tankDrive(left, right, USE_SQUARED_INPUTS);
+	}
+	
+	public static void driveDirection(double angle, double speed) {
+		double gyroAngle = getAngle();
+		double driveAngle = (angle-gyroAngle)*GYRO_CORRECT_COEFF;
+		drive(driveAngle+speed, -driveAngle+speed, 0);
+	}
+	
+	public static void turnToDirection(double angle, double power) {
+		double gyroAngle = getAngle();
+		double driveAngle = (angle-gyroAngle)*(1/360)*power;
+		drive(driveAngle, -driveAngle, 0);
+	}
+	
+	private static double getAngle() {
+		double angle = gyro.getAngle();
+		return angle;
 	}
 		
 }

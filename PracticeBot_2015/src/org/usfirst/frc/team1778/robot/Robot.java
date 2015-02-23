@@ -4,7 +4,7 @@ package org.usfirst.frc.team1778.robot;
 import org.usfirst.frc.team1778.robot.camera.Camera;
 
 import StateMachine.AutoStateMachine;
-import Systems.DriveAssembly;
+import Systems.CANDriveAssembly;
 import Systems.PneumaticsTester;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -40,7 +40,7 @@ public class Robot extends IterativeRobot {
     	pdp = new PowerDistributionPanel();
     	pdp.clearStickyFaults();
     	
-    	DriveAssembly.initialize();
+    	CANDriveAssembly.initialize();
     	//drivetrain = new DriveAssembly();
     	//pneumTest = new PneumaticsTester();
     	
@@ -62,7 +62,7 @@ public class Robot extends IterativeRobot {
     // called one time on entry into teleop
     public void teleopInit() {
 
-    	DriveAssembly.teleopInit();
+    	CANDriveAssembly.teleopInit();
     	//drivetrain.teleopInit();
     	//pneumTest.teleopInit();
 
@@ -73,7 +73,7 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
 
-    	DriveAssembly.teleopPeriodic();
+    	CANDriveAssembly.teleopPeriodic();
     	//drivetrain.teleopPeriodic();
         //pneumTest.teleopPeriodic();
     }
