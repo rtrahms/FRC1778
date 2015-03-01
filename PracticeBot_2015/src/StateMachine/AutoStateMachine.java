@@ -20,7 +20,13 @@ public class AutoStateMachine {
 	private void createStateNetworks()
 	{	
 		// drive straight network
-		createStateNet0();
+		//createStateNet0();
+		
+		// stop-start-repeat network
+		createStateNet1();
+		
+		// turning network
+		//createStateNet2();
 	}
 	
 	public AutoState getState() {
@@ -74,19 +80,19 @@ public class AutoStateMachine {
 		IdleState deadEnd = new IdleState("<Dead End State>");
 		
 		// create events
-		TimeEvent timer1 = new TimeEvent(1.0);  // 1s timer event
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
 		TimeEvent timer2 = new TimeEvent(5.0);  // 5s timer event
-		UltrasonicSensorEvent ultra1 = new UltrasonicSensorEvent(500);  // 0.5 M detection event
+		//UltrasonicSensorEvent ultra1 = new UltrasonicSensorEvent(500);  // 0.5 M detection event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
 		timer2.associateNextState(deadEnd);
-		ultra1.associateNextState(deadEnd);
+		//ultra1.associateNextState(deadEnd);
 		
 		// add events to each state
 		startIdle.addEvent(timer1);
 		driveForward.addEvent(timer2);
-		driveForward.addEvent(ultra1);
+		//driveForward.addEvent(ultra1);
 	
 		// store everything
 		autoStates0.add(startIdle);
@@ -95,7 +101,79 @@ public class AutoStateMachine {
 		
 		autoEvents0.add(timer1);
 		autoEvents0.add(timer2);
-		autoEvents0.add(ultra1);
+		//autoEvents0.add(ultra1);
 
 	}
+	
+	// another state network - doing more complex ops
+	private void createStateNet1() {
+
+		// create states
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		DriveForwardState driveForward1 = new DriveForwardState("<Drive Forward State 1>");
+		IdleState interimIdle1 = new IdleState("<Interim Idle State 1>");
+		DriveForwardState driveForward2 = new DriveForwardState("<Drive Forward State 2>");
+		IdleState interimIdle2 = new IdleState("<Interim Idle State 2>");
+		DriveForwardState driveForward3 = new DriveForwardState("<Drive Forward State 3>");
+		IdleState interimIdle3 = new IdleState("<Interim Idle State 3>");
+		DriveForwardState driveForward4 = new DriveForwardState("<Drive Forward State 4>");
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events
+		TimeEvent timer1 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer3 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer4 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer5 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer6 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer7 = new TimeEvent(1.0);  // 0.5s timer event
+		TimeEvent timer8 = new TimeEvent(1.0);  // 0.5s timer event
+		//UltrasonicSensorEvent ultra1 = new UltrasonicSensorEvent(500);  // 0.5 M detection event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(driveForward1);
+		timer2.associateNextState(interimIdle1);
+		timer3.associateNextState(driveForward2);
+		timer4.associateNextState(interimIdle2);
+		timer5.associateNextState(driveForward3);
+		timer6.associateNextState(interimIdle3);
+		timer7.associateNextState(driveForward4);
+		timer8.associateNextState(deadEnd);
+		//ultra1.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		driveForward1.addEvent(timer2);
+		interimIdle1.addEvent(timer3);
+		driveForward2.addEvent(timer4);
+		interimIdle2.addEvent(timer5);
+		driveForward3.addEvent(timer6);
+		interimIdle3.addEvent(timer7);
+		driveForward4.addEvent(timer8);
+		//driveForward.addEvent(ultra1);
+	
+		// store everything
+		autoStates0.add(startIdle);
+		autoStates0.add(driveForward1);
+		autoStates0.add(driveForward2);
+		autoStates0.add(driveForward3);
+		autoStates0.add(driveForward4);
+		autoStates0.add(interimIdle1);
+		autoStates0.add(interimIdle2);
+		autoStates0.add(interimIdle3);
+		autoStates0.add(deadEnd);
+		
+		autoEvents0.add(timer1);
+		autoEvents0.add(timer2);
+		autoEvents0.add(timer3);
+		autoEvents0.add(timer4);
+		autoEvents0.add(timer5);
+		autoEvents0.add(timer6);
+		autoEvents0.add(timer7);
+		autoEvents0.add(timer8);
+
+		//autoEvents0.add(ultra1);
+
+	}
+
 }

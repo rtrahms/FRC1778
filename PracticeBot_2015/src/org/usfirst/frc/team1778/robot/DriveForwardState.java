@@ -1,28 +1,27 @@
-package StateMachine;
-
-import Systems.PWMDriveAssembly;
+package org.usfirst.frc.team1778.robot;
 
 public class DriveForwardState extends AutoState {
+
+	//DriveAssembly driveAssembly;
 	
 	public DriveForwardState()
 	{
 		this.name = "<Drive Forward State>";
 		
-		PWMDriveAssembly.initialize();
+		//driveAssembly = new DriveAssembly();
 	}
 	
 	public DriveForwardState(String name)
 	{
 		this.name =  name;
 		
-		PWMDriveAssembly.initialize();
+		//driveAssembly = new DriveAssembly();
 	}
 	
 	// state entry
 	public void enter() {
 		// do some drivey initialization
-		
-		PWMDriveAssembly.autoInit();
+		//driveAssembly.autoInit();
 		
 		super.enter();
 	}
@@ -31,8 +30,7 @@ public class DriveForwardState extends AutoState {
 	public AutoState process()  {
 		
 		// do some drivey stuff
-		
-		PWMDriveAssembly.autoPeriodicStraight();
+		//driveAssembly.autoPeriodic();
 		
 		return super.process();
 	}
@@ -40,7 +38,7 @@ public class DriveForwardState extends AutoState {
 	// state cleanup and exit
 	public void exit() {
 		// do some drivey cleanup
-		PWMDriveAssembly.autoStop();
+		//driveAssembly.autoStop();
 		
 		// cleanup base class
 		super.exit();

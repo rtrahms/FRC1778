@@ -2,18 +2,22 @@ package StateMachine;
 
 import Systems.PWMDriveAssembly;
 
-public class DriveForwardState extends AutoState {
+public class TurnState extends AutoState {
 	
-	public DriveForwardState()
+	private double angleToTurn = 0.0;
+	
+	public TurnState(double angleToTurn)
 	{
-		this.name = "<Drive Forward State>";
+		this.name = "<Turn State>";
+		this.angleToTurn = angleToTurn;
 		
 		PWMDriveAssembly.initialize();
 	}
 	
-	public DriveForwardState(String name)
+	public TurnState(String name, double angleToTurn)
 	{
 		this.name =  name;
+		this.angleToTurn = angleToTurn;
 		
 		PWMDriveAssembly.initialize();
 	}
@@ -32,7 +36,7 @@ public class DriveForwardState extends AutoState {
 		
 		// do some drivey stuff
 		
-		PWMDriveAssembly.autoPeriodicStraight();
+		PWMDriveAssembly.autoPeriodicTurn();
 		
 		return super.process();
 	}
@@ -45,4 +49,5 @@ public class DriveForwardState extends AutoState {
 		// cleanup base class
 		super.exit();
 	}
+
 }

@@ -1,7 +1,11 @@
 
 package org.usfirst.frc.team1778.robot;
 
-import org.usfirst.frc.team1778.robot.camera.Camera;
+import canStateMachine.AutoStateMachine;
+import Systems.CANDriveAssembly;
+import Systems.ElevatorAssembly;
+import Systems.AlignmentAssembly;
+import Systems.PneumaticsTester;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -18,53 +22,47 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 public class Robot extends IterativeRobot {
 
-	
-	// Chill Out 1778 major subassemblies
-	DriveAssembly drivetrain;
-	ElevatorAssembly elevator;
-	AlignmentAssembly aligner;
 	//Camera camera;
-	PneumaticsTester pneumTest;
 	
 	PowerDistributionPanel pdp;
 	
+	// autonomous state machine object
+	AutoStateMachine autoSM;
+
 	
     public void robotInit() {
     	
+    	autoSM = new AutoStateMachine();
+
     	pdp = new PowerDistributionPanel();
     	pdp.clearStickyFaults();
     	
-    	drivetrain = new DriveAssembly();
-    	elevator = new ElevatorAssembly();
-    	aligner = new AlignmentAssembly();
-    	//pneumTest = new PneumaticsTester();
-    	
+    	CANDriveAssembly.initialize();
+    	ElevatorAssembly.initialize();
+    	AlignmentAssembly.initialize();
+    	//PneumaticsTester.initialize();
     	//camera = new Camera("169.254.26.13");
     }
 
     // called one tim on entry into autonomous
-    public void autonomousInit() {
-    	drivetrain.autoInit();
-    	elevator.autoInit();
-    	aligner.autoInit();
-    	RobotAuto.autoInit(this);
-    	//pneumTest.autoInit();
+    public void autonomousInit() {    	
+    	autoSM.start();
     }
     
     /**
      * This function is called periodically during autonomous
      */
-    public void autonomousPeriodic() {
-    	//drivetrain.autoPeriodic();
-    	RobotAuto.autoPeriodic(this);
+    public void autonomousPeriodic() {    	
+    	autoSM.process();
     }
 
     // called one time on entry into teleop
     public void teleopInit() {
-    	drivetrain.teleopInit();
-    	elevator.teleopInit();
-    	aligner.teleopInit();
-    	//pneumTest.teleopInit();
+    	
+    	CANDriveAssembly.teleopInit();
+    	ElevatorAssembly.teleopInit();
+    	AlignmentAssembly.teleopInit();
+    	//PneumaticsTester.teleopInit();
     }
     
     /**
@@ -73,11 +71,11 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 
 		//System.out.println("Chill out teleopPeriodic call!");
-
-    	drivetrain.teleopPeriodic();
-        elevator.teleopPeriodic();
-        aligner.teleopPeriodic();
-        //pneumTest.teleopPeriodic();
+    	
+    	CANDriveAssembly.teleopPeriodic();
+    	ElevatorAssembly.teleopPeriodic();
+    	AlignmentAssembly.teleopPeriodic();
+    	//PneumaticsTester.teleopPeriodic();
     }
     
     /**
