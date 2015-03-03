@@ -6,9 +6,11 @@ import Systems.PWMDriveAssembly;
 public class DriveForwardState extends AutoState {
 	
 	private boolean isPWM = false;
+	private double speed = 0.0;
 	
-	public DriveForwardState(boolean isPWM)
+	public DriveForwardState(boolean isPWM, double speed)
 	{
+		this.speed = speed;
 		this.isPWM = isPWM;
 		if (isPWM)
 		{
@@ -22,9 +24,10 @@ public class DriveForwardState extends AutoState {
 		}
 	}
 	
-	public DriveForwardState(String name, boolean isPWM)
+	public DriveForwardState(String name, boolean isPWM, double speed)
 	{
 		this.name =  name;
+		this.speed = speed;
 		this.isPWM = isPWM;
 		
 		if (isPWM)
@@ -50,9 +53,9 @@ public class DriveForwardState extends AutoState {
 		
 		// do some drivey stuff
 		if (isPWM)
-			PWMDriveAssembly.autoPeriodicStraight();
+			PWMDriveAssembly.autoPeriodicStraight(speed);
 		else
-			CANDriveAssembly.autoPeriodicStraight();
+			CANDriveAssembly.autoPeriodicStraight(speed);
 		
 		return super.process();
 	}

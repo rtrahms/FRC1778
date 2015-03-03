@@ -20,11 +20,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 /* Team 1778 Practice Robot Code - no pneumatics, no elevator - only drivetrain */
 
 public class Robot extends IterativeRobot {
-
 	
-	// Chill Out 1778 major subassemblies - now static classes
-	//DriveAssembly drivetrain;
-	//PneumaticsTester pneumTest;
 	//Camera camera;
 	
 	// autonomous state machine object
@@ -40,10 +36,7 @@ public class Robot extends IterativeRobot {
     	pdp.clearStickyFaults();
     	
     	PWMDriveAssembly.initialize();
-    	
-    	//drivetrain = new DriveAssembly();
-    	//pneumTest = new PneumaticsTester();
-    	
+    	    	
     	//camera = new Camera("169.254.26.13");
     }
 
@@ -63,9 +56,6 @@ public class Robot extends IterativeRobot {
     public void teleopInit() {
 
     	PWMDriveAssembly.teleopInit();
-    	//drivetrain.teleopInit();
-    	//pneumTest.teleopInit();
-
     }
     
     /**
@@ -73,10 +63,7 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
 
-    	PWMDriveAssembly.teleopPeriodic();
-    	//drivetrain.teleopPeriodic();
-        //pneumTest.teleopPeriodic();
-    	
+    	PWMDriveAssembly.teleopPeriodic();    	
     }
     
     /**

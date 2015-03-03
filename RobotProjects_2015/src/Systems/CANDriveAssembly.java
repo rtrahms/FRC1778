@@ -100,6 +100,7 @@ public class CANDriveAssembly {
 		//startTimeUs = Utility.getFPGATime();
 	}
 	
+	/*
 	public static void autoPeriodicStraight() {
 		// autonomous operation of drive straight
 		
@@ -110,7 +111,20 @@ public class CANDriveAssembly {
 		drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED, 
 						 -driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED);
 	}
-	
+	*/
+
+	public static void autoPeriodicStraight(double speed) {
+		// autonomous operation of drive straight
+		
+		double gyroAngle = gyro.getAngle();
+		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
+		//System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
+
+		speed *= -1.0;
+		drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF+speed, 
+						-driveAngle*AUTO_DRIVE_CORRECT_COEFF+speed);
+	}
+
 	public static void autoStop() {
 		drive.drive(0.0, 0.0);
 	}

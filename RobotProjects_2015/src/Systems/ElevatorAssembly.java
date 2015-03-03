@@ -42,30 +42,49 @@ public class ElevatorAssembly {
 	        
 	        doubleSol_1 = new DoubleSolenoid(PCM_NODE_ID, 0, 1);
 	        toggleValve_1 = true;
-	                
-	        initTime = Utility.getFPGATime();
-	        
+	                	        
 	        initialized = true;
 		}
 	}
 	
 	public static void autoInit() {
-		
+        initTime = Utility.getFPGATime();
 	}
 	
-	public static void autoPeriodic()
+	public static void autoPeriodic(boolean liftCommand)
 	{
+		long currentTime = Utility.getFPGATime();
+
+		// if not long enough, just return
+		if ((currentTime - initTime) < CYCLE_USEC)
+			return;
+
+		// if the current state of the solenoid doesn't match the commanded state
+		if (toggleValve_1 != liftCommand)
+		{
+			// switch the state
+			toggleValve_1 = !toggleValve_1;		
+
+			// toggle the valve
+			setLift(toggleValve_1);
+			
+			// set up for next cycle
+			initTime = Utility.getFPGATime();
+		}
+	}
+	
+	public static void autoStop()
+	{
+		// nothing to clean up here
 	}
 		
 	public static void teleopInit() {
+        initTime = Utility.getFPGATime();
 		
 	}
 	
 	public static void teleopPeriodic()
-	{
-		
-		// currently just cycles a valve on and off at a periodic interval
-		
+	{		
 		long currentTime = Utility.getFPGATime();
 		
 		// if not long enough, just return
