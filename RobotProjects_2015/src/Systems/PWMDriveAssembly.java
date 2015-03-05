@@ -53,9 +53,6 @@ public class PWMDriveAssembly {
 	
     // timers
     private static long startTimeUs;
-    
-    // sensors and feels
-    private static Gyro gyro;
     	
 	public static void initialize()
 	{
@@ -76,7 +73,7 @@ public class PWMDriveAssembly {
 	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
 	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	        
-	        gyro = new Gyro(0);
+	        GyroSensor.initialize();
 	        
 	        initialized = true;
 		}
@@ -86,7 +83,7 @@ public class PWMDriveAssembly {
 	public static void autoInit()
 	{
 		// initialize drive gyro
-        gyro.reset();	
+		GyroSensor.reset();
         
         // initialize auto drive timer
 		//startTimeUs = Utility.getFPGATime();
@@ -108,7 +105,7 @@ public class PWMDriveAssembly {
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
-		double gyroAngle = gyro.getAngle();
+		double gyroAngle = GyroSensor.getAngle();
 		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
 		//System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
 
@@ -122,7 +119,7 @@ public class PWMDriveAssembly {
 	}
 		
 	public static void teleopInit() {
-		gyro.reset();
+		GyroSensor.reset();
 	}
 	
 	public static void teleopPeriodic() {
@@ -170,19 +167,30 @@ public class PWMDriveAssembly {
 	}
 	
 	public static void driveDirection(double angle, double speed) {
+		double adjustCoeff = 0.025;
 		double gyroAngle = getAngle();
 		double driveAngle = (angle-gyroAngle)*GYRO_CORRECT_COEFF;
-		drive(driveAngle+speed, -driveAngle+speed, 0);
+		drive(driveAngle*adjustCoeff+speed, -driveAngle*adjustCoeff+speed, 0);
 	}
-	
+		
 	public static void turnToDirection(double angle, double power) {
 		double gyroAngle = getAngle();
-		double driveAngle = (angle-gyroAngle)*(1/360)*power;
+		double driveAngle = (angle-gyroAngle)*power/360.0;
 		drive(driveAngle, -driveAngle, 0);
 	}
 	
+	public static void rotateLeft(double speed) {
+		drive(-speed, speed, 0);
+	}
+
+	public static void rotateRight(double speed) {
+		drive(speed, -speed, 0);
+	}
+
+	
 	private static double getAngle() {
-		double angle = gyro.getAngle();
+		
+		double angle = GyroSensor.getAngle();
 		return angle;
 	}
 		

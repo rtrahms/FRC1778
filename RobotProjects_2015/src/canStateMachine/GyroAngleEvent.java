@@ -1,5 +1,6 @@
 package canStateMachine;
 
+import Systems.GyroSensor;
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Utility;
 
@@ -7,21 +8,19 @@ import edu.wpi.first.wpilibj.Utility;
 public class GyroAngleEvent extends Event {
 	
 	private double angleToTurn = 0.0;
-	private Gyro myGyro;
 	private double accuracyDeg = 2.0;
 	
 	public GyroAngleEvent(double angleToTurn)
 	{
 		this.angleToTurn = angleToTurn;
-        myGyro = new Gyro(0);
+		GyroSensor.initialize();
 	}
 	
 	// overloaded initialize method
 	public void initialize()
 	{
 		//System.out.println("GyroAngleEvent initialized!");
-		myGyro.reset();
-		
+		GyroSensor.reset();
 		super.initialize();
 	}
 	
@@ -29,7 +28,7 @@ public class GyroAngleEvent extends Event {
 	public boolean isTriggered()
 	{
 		//System.out.println("angle = " + myGyro.getAngle() + " angleToTurn = " + angleToTurn);
-		if (Math.abs(myGyro.getAngle() - angleToTurn) < accuracyDeg)
+		if (Math.abs(GyroSensor.getAngle() - angleToTurn) < accuracyDeg)
 		{
 			System.out.println("GyroAngleEvent triggered!");
 			return true;
