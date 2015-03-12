@@ -178,12 +178,12 @@ public class AutoStateMachine {
 		// create states
 		boolean isPwm = false;
 		IdleState startIdle = new IdleState("<Start Idle State>");
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.5);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.65);
 		IdleState deadEnd = new IdleState("<Dead End State>");
 		
 		// create events (betwen the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(8.0);  // 5s timer event
+		TimeEvent timer2 = new TimeEvent(3.25);  // 5s timer event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
@@ -226,7 +226,7 @@ public class AutoStateMachine {
 		DriveForwardState driveForward1 = new DriveForwardState("<Drive Forward State 1>", isPwm, 0.5);
 		LiftState liftUp1 = new LiftState("<Lift Up 1>", true);
 		TurnState turnRight1 = new TurnState("<Turn Right 1>", 90.0, 0.5, isPwm);
-		DriveForwardState driveForward2 = new DriveForwardState("<Drive Forward State 2>", isPwm, 0.6);
+		DriveForwardState driveForward2 = new DriveForwardState("<Drive Forward State 2>", isPwm, 0.65);
 		LiftState liftDown2 = new LiftState("<Lift Down 2>", false);
 		DriveForwardState driveBackward1 = new DriveForwardState("<Drive Backward State 1>", isPwm, -0.5);
 		IdleState deadEnd = new IdleState("<Dead End State>");
@@ -237,9 +237,9 @@ public class AutoStateMachine {
 		TimeEvent timer_driveForward1 = new TimeEvent(2.0);  // timer event for drive forward 1
 		TimeEvent timer_liftUp1 = new TimeEvent(2.0);  // timer event for lift up 1
 		GyroAngleEvent gyro_turnRight1 = new GyroAngleEvent(-90.0);  // gyro event 90 deg angle turn to right
-		TimeEvent timer_driveForward2 = new TimeEvent(8.0);  // timer event for drive forward 3
+		TimeEvent timer_driveForward2 = new TimeEvent(3.0);  // timer event for drive forward 3
 		TimeEvent timer_liftDown2 = new TimeEvent(2.0);  // timer event for lift down 3
-		TimeEvent timer_driveBackward1 = new TimeEvent(2.0);  // timer event for drive backward 1
+		TimeEvent timer_driveBackward1 = new TimeEvent(1.5);  // timer event for drive backward 1
 		
 		// connect each event with a state to move to
 		timer_idle.associateNextState(liftDown1);
@@ -291,11 +291,12 @@ public class AutoStateMachine {
 	
 	// ***** CARRY RECYCLE CAN STATE MACHINE *****
 	// 1) be idle
-	// 2) picks up recycle can
-	// 3) turns to left
-	// 4) moves into auto zone
-	// 5) lowers recycle can
-	// 6) backs up a bit
+	// 2) picked up recycle can
+	// 3) turned to left
+	// 4) moved into auto zone
+	// 5) lowered recycle can
+	// 6) backed up a bit
+	// 7) mfw the can fell off the stack
 	private void createCarryRecycleCanSM(int index) {
 		
 		// create states
@@ -305,7 +306,7 @@ public class AutoStateMachine {
 		DriveForwardState driveForward1 = new DriveForwardState("<Drive Forward State 1>", isPwm, 0.5);
 		LiftState liftUp1 = new LiftState("<Lift Up 1>", true);
 		TurnState turnLeft1 = new TurnState("<Turn Left 1>", -90.0, 0.5, isPwm);
-		DriveForwardState driveForward2 = new DriveForwardState("<Drive Forward State 2>", isPwm, 0.6);
+		DriveForwardState driveForward2 = new DriveForwardState("<Drive Forward State 2>", isPwm, 0.65);
 		LiftState liftDown2 = new LiftState("<Lift Down 2>", false);
 		DriveForwardState driveBackward1 = new DriveForwardState("<Drive Backward State 1>", isPwm, -0.5);
 		IdleState deadEnd = new IdleState("<Dead End State>");
@@ -316,9 +317,9 @@ public class AutoStateMachine {
 		TimeEvent timer_driveForward1 = new TimeEvent(2.0);  // timer event for drive forward 1
 		TimeEvent timer_liftUp1 = new TimeEvent(2.0);  // timer event for lift up 1
 		GyroAngleEvent gyro_turnLeft1 = new GyroAngleEvent(90.0);  // gyro event 90 deg angle turn to left
-		TimeEvent timer_driveForward2 = new TimeEvent(8.0);  // timer event for drive forward 3
+		TimeEvent timer_driveForward2 = new TimeEvent(3.0);  // timer event for drive forward 3
 		TimeEvent timer_liftDown2 = new TimeEvent(2.0);  // timer event for lift down 3
-		TimeEvent timer_driveBackward1 = new TimeEvent(2.0);  // timer event for drive backward 1
+		TimeEvent timer_driveBackward1 = new TimeEvent(1.5);  // timer event for drive backward 1
 		
 		// connect each event with a state to move to
 		timer_idle.associateNextState(liftDown1);
@@ -388,7 +389,7 @@ public class AutoStateMachine {
 		LiftState liftDown2 = new LiftState("<Lift Down 2>", false);
 		LiftState liftUp2 = new LiftState("<Lift Up 2>", true);
 		TurnState turnLeft1 = new TurnState("<Turn Left 1>", -90.0, 0.5, isPwm);
-		DriveForwardState driveForward3 = new DriveForwardState("<Drive Forward State 3>", isPwm, 0.6);
+		DriveForwardState driveForward3 = new DriveForwardState("<Drive Forward State 3>", isPwm, 0.65);
 		LiftState liftDown3 = new LiftState("<Lift Down 3>", false);
 		DriveForwardState driveBackward1 = new DriveForwardState("<Drive Backward State 1>", isPwm, -0.5);
 		IdleState deadEnd = new IdleState("<Dead End State>");
@@ -402,9 +403,9 @@ public class AutoStateMachine {
 		TimeEvent timer_liftDown2 = new TimeEvent(2.0);  // timer event for lift down 2
 		TimeEvent timer_liftUp2 = new TimeEvent(2.0);  // timer event for lift up 2
 		GyroAngleEvent gyro_turnLeft1 = new GyroAngleEvent(90.0);  // gyro event -90 deg angle turn
-		TimeEvent timer_driveForward3 = new TimeEvent(8.0);  // timer event for drive forward 3
+		TimeEvent timer_driveForward3 = new TimeEvent(3.0);  // timer event for drive forward 3
 		TimeEvent timer_liftDown3 = new TimeEvent(2.0);  // timer event for lift down 3
-		TimeEvent timer_driveBackward1 = new TimeEvent(2.0);  // timer event for drive backward 1
+		TimeEvent timer_driveBackward1 = new TimeEvent(1.5);  // timer event for drive backward 1
 		
 		// connect each event with a state to move to
 		timer_idle.associateNextState(liftDown1);
