@@ -4,6 +4,7 @@ package org.usfirst.frc.team1778.robot;
 import pwmStateMachine.AutoStateMachine;
 import Systems.PWMDriveAssembly;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Relay;
@@ -20,14 +21,17 @@ import edu.wpi.first.wpilibj.Relay;
 
 public class Robot extends IterativeRobot {
 	
-	//Camera camera;
+    // Pneumatics control module ID
+    private static final int PCM_NODE_ID = 2;
+
+    //Camera camera;
 	
     // safety lights
     Relay      lightOne;
     Relay      lightTwo;
     DigitalInput safetySwitch;
     boolean safetyDisabled = false;
-    	
+        	
 	// autonomous state machine object
 	AutoStateMachine autoSM;
 	
@@ -45,26 +49,25 @@ public class Robot extends IterativeRobot {
         // Light relays on digital sidecar
         lightOne = new Relay(0);
         lightTwo = new Relay(1);
-        safetySwitch = new DigitalInput(0);
+        //safetySwitch = new DigitalInput(2);
 
     	//camera = new Camera("169.254.26.13");
     }
 
     // called one tim on entry into autonomous
     public void autonomousInit() {    	
-    	autoSM.start();
     }
     
     /**
      * This function is called periodically during autonomous
      */
     public void autonomousPeriodic() {    	
-    	autoSM.process();
     }
 
     // called one time on entry into teleop
     public void teleopInit() {
-
+    	    	
+    	//System.out.println("initializing");
     	PWMDriveAssembly.teleopInit();
     }
     
@@ -82,6 +85,7 @@ public class Robot extends IterativeRobot {
         if (safetyDisabled) {
 
         	// turn on warning lights
+        	//System.out.println("driving");
         	lightOne.set(Relay.Value.kForward);
         	lightTwo.set(Relay.Value.kForward);
 

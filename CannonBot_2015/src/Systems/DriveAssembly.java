@@ -1,4 +1,4 @@
-package org.usfirst.frc.team1778.robot;
+package Systems;
 
 import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
@@ -11,31 +11,27 @@ import edu.wpi.first.wpilibj.Utility;
 
 public class DriveAssembly {
 
+	private static boolean initialized = false;
+	
 	// Speed controller IDs
-	private final int LEFT_FRONT_TALON_PWM_ID = 1;
-	private final int LEFT_REAR_TALON_PWM_ID = 0;
-	private final int RIGHT_FRONT_TALON_PWM_ID = 2;
-	private final int RIGHT_REAR_TALON_PWM_ID = 3;
-	
-	// joystick axis ids
-	private final int JOY_X_AXIS = 0;
-	private final int JOY_Y_AXIS = 1;
-	private final int JOY_Z_AXIS = 2;
-	private final int JOY_SLIDER_AXIS = 3;
-	
+	private static final int LEFT_FRONT_TALON_PWM_ID = 1;
+	private static final int LEFT_REAR_TALON_PWM_ID = 0;
+	private static final int RIGHT_FRONT_TALON_PWM_ID = 2;
+	private static final int RIGHT_REAR_TALON_PWM_ID = 3;
+		
 	// joystick device ids
-	private final int LEFT_JOYSTICK_ID = 0;
-	private final int RIGHT_JOYSTICK_ID = 1;
+	private static final int LEFT_JOYSTICK_ID = 0;
+	private static final int RIGHT_JOYSTICK_ID = 1;
 	
 	//dead zone constant
-	private final double DEADZONE = .5;
-	private final double EQUALIZATION_DEADZONE = 0.05;
+	private static final double DEADZONE = .5;
+	private static final double EQUALIZATION_DEADZONE = 0.05;
 	
 	// autonomous constants
 	// drive time 3 seconds
-	private final long AUTO_DRIVE_TIME_SEC = 4;
-	private final double AUTO_DRIVE_SPEED = -0.5;
-	private final double AUTO_DRIVE_CORRECT_COEFF = 0.125;
+	private static final long AUTO_DRIVE_TIME_SEC = 4;
+	private static final double AUTO_DRIVE_SPEED = -0.5;
+	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.125;
 	
     // drive throttle (how fast the drivetrain moves, and direction)
     //private final double DRIVE_STEP_MAGNITUDE_DEFAULT = 1.0;
@@ -44,41 +40,45 @@ public class DriveAssembly {
     //private final double MIN_INCREMENT = 0.1;
 		
 	// speed controllers and drive class
-	private TalonSRX mFrontLeft, mBackLeft, mFrontRight, mBackRight;
-    private RobotDrive drive;
+	private static TalonSRX mFrontLeft, mBackLeft, mFrontRight, mBackRight;
+    private static RobotDrive drive;
     
     // drive control
-    private Joystick leftStick, rightStick;
+    private static Joystick leftStick, rightStick;
 	
     // timers
-    private long startTimeUs;
+    private static long startTimeUs;
     
     // sensors and feels
-    private Gyro gyro;
-    
-	// constructor - tank drive
-	public DriveAssembly()
+    private static Gyro gyro;
+    	
+	public static void initialize()
 	{
-        mFrontLeft = new TalonSRX(LEFT_FRONT_TALON_PWM_ID);
-        mBackLeft = new TalonSRX(LEFT_REAR_TALON_PWM_ID);
-        mFrontRight = new TalonSRX(RIGHT_FRONT_TALON_PWM_ID);
-        mBackRight = new TalonSRX(RIGHT_REAR_TALON_PWM_ID);
-                
-        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
-        
-        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
-        
-        leftStick = new Joystick(LEFT_JOYSTICK_ID);
-        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
-        
-        gyro = new Gyro(0);
+		if (!initialized)
+		{
+	        mFrontLeft = new TalonSRX(LEFT_FRONT_TALON_PWM_ID);
+	        mBackLeft = new TalonSRX(LEFT_REAR_TALON_PWM_ID);
+	        mFrontRight = new TalonSRX(RIGHT_FRONT_TALON_PWM_ID);
+	        mBackRight = new TalonSRX(RIGHT_REAR_TALON_PWM_ID);
+	                
+	        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
+	        
+	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+	        
+	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
+	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
+	        
+	        gyro = new Gyro(0);
+	        
+	        initialized = true;
+		}
 	}
 
 
-	public void autoInit()
+	public static void autoInit()
 	{
 		// initialize drive gyro
         gyro.reset();	
@@ -87,7 +87,7 @@ public class DriveAssembly {
 		//startTimeUs = Utility.getFPGATime();
 	}
 	
-	public void autoPeriodic() {
+	public static void autoPeriodic() {
 		// todo - autonomous operation of drive
 		
 		//double currentPeriodSec = (Utility.getFPGATime() - startTimeUs)/1000000.0;
@@ -109,24 +109,22 @@ public class DriveAssembly {
 		//}
 	}
 	
-	public void autoStop() {
+	public static void autoStop() {
 		drive.drive(0.0, 0.0);
 	}
 		
-	public void teleopInit() {
+	public static void teleopInit() {
         // initialize auto drive timer
 		startTimeUs = Utility.getFPGATime();		
 	}
 	
-	public void teleopPeriodic() {
+	public static void teleopPeriodic() {
 		
 		// left stick z-axis will serve as throttle control
 		// normalized (0.0-1.0)
-		//double throttleVal = 1.0f;
-		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
-		//double throttleVal = (arcadeStick.getRawAxis(JOY_SLIDER_AXIS) + 1.0)/2.0;
-
-		double currentPeriodSec = (Utility.getFPGATime() - startTimeUs)/1000000.0;
+		
+		//double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
+		double throttleVal = 1.0 - ((leftStick.getZ())+1.0)/2.0;
 		
 		boolean useSquaredInputs = true;
 		
@@ -152,13 +150,6 @@ public class DriveAssembly {
 		
 		//*****************  TANK DRIVE SECTION ****************************/
 		
-		//**************  ARCADE DRIVE SECTION (uses one Y and one Z) **********/
-		/*
-		double moveValue = throttleVal*arcadeStick.getRawAxis(JOY_Y_AXIS);
-		double rotateValue = throttleVal*arcadeStick.getRawAxis(JOY_Z_AXIS);
-		drive.arcadeDrive(moveValue, rotateValue);
-		*/
-		//**************  ARCADE DRIVE SECTION ****************************/
 		
 	}
 		

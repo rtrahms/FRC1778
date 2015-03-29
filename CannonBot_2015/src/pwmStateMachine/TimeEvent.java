@@ -1,7 +1,8 @@
-package org.usfirst.frc.team1778.robot;
+package pwmStateMachine;
 
 import edu.wpi.first.wpilibj.Utility;
 
+// event triggered when timer gets to a certain predetermined angle
 public class TimeEvent extends Event {
 	
 	private double durationSec;
