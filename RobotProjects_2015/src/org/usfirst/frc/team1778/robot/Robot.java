@@ -39,7 +39,7 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.initialize();
     	ElevatorAssembly.initialize();
-    	AlignmentAssembly.initialize();
+    	//AlignmentAssembly.initialize();
     	//PneumaticsTester.initialize();
     	//camera = new Camera("169.254.26.13");
     }
@@ -61,7 +61,7 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.teleopInit();
     	ElevatorAssembly.teleopInit();
-    	AlignmentAssembly.teleopInit();
+    	//AlignmentAssembly.teleopInit();
     	//PneumaticsTester.teleopInit();
     }
     
@@ -74,7 +74,7 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.teleopPeriodic();
     	ElevatorAssembly.teleopPeriodic();
-    	AlignmentAssembly.teleopPeriodic();
+    	//AlignmentAssembly.teleopPeriodic();
     	//PneumaticsTester.teleopPeriodic();
     }
     

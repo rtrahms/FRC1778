@@ -29,6 +29,7 @@ public class ElevatorAssembly {
     private static boolean toggleValve_1;
        
     private static long initTime;
+    private static boolean pressed;
 
 	// static initializer
 	public static void initialize()
@@ -44,6 +45,7 @@ public class ElevatorAssembly {
 	        toggleValve_1 = true;
 	                	        
 	        initialized = true;
+	        pressed = false;
 		}
 	}
 	
@@ -92,13 +94,16 @@ public class ElevatorAssembly {
 			return;
 		
 		// if A button push, toggle valve 1
-		if (gamepad.getRawButton(2)) {
+		if (gamepad.getRawButton(2) && !pressed) {
 			// otherwise, toggle the valve
 			setLift(toggleValve_1);
 			
 			// set up for next cycle
 			initTime = Utility.getFPGATime();
-			toggleValve_1 = !toggleValve_1;		
+			toggleValve_1 = !toggleValve_1;
+			pressed = true;
+		} else {
+			pressed = false;
 		}
 						
 		//System.out.println("game pad button pressed!");

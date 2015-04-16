@@ -237,9 +237,9 @@ public class AutoStateMachine {
 		TimeEvent timer_driveForward1 = new TimeEvent(2.0);  // timer event for drive forward 1
 		TimeEvent timer_liftUp1 = new TimeEvent(2.0);  // timer event for lift up 1
 		GyroAngleEvent gyro_turnRight1 = new GyroAngleEvent(-90.0);  // gyro event 90 deg angle turn to right
-		TimeEvent timer_driveForward2 = new TimeEvent(3.0);  // timer event for drive forward 3
+		TimeEvent timer_driveForward2 = new TimeEvent(3.5);  // timer event for drive forward 3
 		TimeEvent timer_liftDown2 = new TimeEvent(2.0);  // timer event for lift down 3
-		TimeEvent timer_driveBackward1 = new TimeEvent(1.5);  // timer event for drive backward 1
+		TimeEvent timer_driveBackward1 = new TimeEvent(1.25);  // timer event for drive backward 1
 		
 		// connect each event with a state to move to
 		timer_idle.associateNextState(liftDown1);
@@ -317,9 +317,9 @@ public class AutoStateMachine {
 		TimeEvent timer_driveForward1 = new TimeEvent(2.0);  // timer event for drive forward 1
 		TimeEvent timer_liftUp1 = new TimeEvent(2.0);  // timer event for lift up 1
 		GyroAngleEvent gyro_turnLeft1 = new GyroAngleEvent(90.0);  // gyro event 90 deg angle turn to left
-		TimeEvent timer_driveForward2 = new TimeEvent(3.0);  // timer event for drive forward 3
+		TimeEvent timer_driveForward2 = new TimeEvent(3.5);  // timer event for drive forward 3
 		TimeEvent timer_liftDown2 = new TimeEvent(2.0);  // timer event for lift down 3
-		TimeEvent timer_driveBackward1 = new TimeEvent(1.5);  // timer event for drive backward 1
+		TimeEvent timer_driveBackward1 = new TimeEvent(1.25);  // timer event for drive backward 1
 		
 		// connect each event with a state to move to
 		timer_idle.associateNextState(liftDown1);
@@ -403,9 +403,9 @@ public class AutoStateMachine {
 		TimeEvent timer_liftDown2 = new TimeEvent(2.0);  // timer event for lift down 2
 		TimeEvent timer_liftUp2 = new TimeEvent(2.0);  // timer event for lift up 2
 		GyroAngleEvent gyro_turnLeft1 = new GyroAngleEvent(90.0);  // gyro event -90 deg angle turn
-		TimeEvent timer_driveForward3 = new TimeEvent(3.0);  // timer event for drive forward 3
+		TimeEvent timer_driveForward3 = new TimeEvent(3.5);  // timer event for drive forward 3
 		TimeEvent timer_liftDown3 = new TimeEvent(2.0);  // timer event for lift down 3
-		TimeEvent timer_driveBackward1 = new TimeEvent(1.5);  // timer event for drive backward 1
+		TimeEvent timer_driveBackward1 = new TimeEvent(1.25);  // timer event for drive backward 1
 		
 		// connect each event with a state to move to
 		timer_idle.associateNextState(liftDown1);
