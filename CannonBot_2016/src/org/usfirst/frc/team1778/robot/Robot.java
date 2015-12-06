@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 
 /**
- * FIRST 1778 I2C RioDuino test- this code is for the Roborio side
+ * FIRST 1778 CannonBot 2016 -now with RioDuino communication!
  */
 public class Robot extends IterativeRobot {
     /**
