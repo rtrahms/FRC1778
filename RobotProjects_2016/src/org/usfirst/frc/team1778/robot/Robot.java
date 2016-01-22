@@ -65,10 +65,12 @@ public class Robot extends IterativeRobot {
     	System.out.println("in autonomousInit(), station #" + teamLocation);
     	
     	// start up the robot team color
+    	/*
     	if (teamColor == DriverStation.Alliance.Blue)
     		RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Blue);
     	else
     		RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Red);
+    	*/
     	
     	// start up camera scan mode
     	CameraAssembly.setScanMode(true);
@@ -104,6 +106,8 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 
 		//System.out.println("Chill out teleopPeriodic call!");
+    	
+    	CameraAssembly.scanForTarget();
     	
     	CANDriveAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
