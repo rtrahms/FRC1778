@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.vision.AxisCamera;
 public class CameraAssembly {
 	private static boolean initialized = false;
 	
-	private static AxisCamera myCamera;
-	
+	private static TargetFinder tf;
+		
 	private static final long TARGET_SCAN_PERIOD_USEC = 250000;
 	private static final int TARGET_CENTER_TOLERANCE_PIXELS = 100;
 	private static final int OFF_TARGET_VALUE = 1000;
@@ -19,14 +19,15 @@ public class CameraAssembly {
 	private static int targetCenterX, targetCenterY;
 	private static boolean targetSeen;
 	
-	private static HSLImage capturedImage, referenceTargetImage;
-
 	public static void initialize() {
 		if (!initialized)
 		{
-			myCamera = new AxisCamera("10.17.78.21");
+			//myImage = new HSLImage();
 			scanningMode = false;
 			initTime = Utility.getFPGATime();
+			
+			tf = new TargetFinder();
+			tf.initCamera("10.17.78.20");
 			
 			targetCenterX = OFF_TARGET_VALUE;
 			targetCenterY = OFF_TARGET_VALUE;
@@ -52,10 +53,9 @@ public class CameraAssembly {
 		if ((currentTime - initTime) < TARGET_SCAN_PERIOD_USEC)
 			return;
 		
-		// grab an image from the camera
-		//capturedImage = myCamera.getImage();
+		// check targetfinder object
 		
-		// check for target, get position relative to center of image
+		// get position relative to center of image
 			
 		// if we are lined up with target, flag green
 		if (targetCenterY < TARGET_CENTER_TOLERANCE_PIXELS)

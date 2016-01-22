@@ -95,6 +95,7 @@ public class Robot extends IterativeRobot {
     	CatapultAssembly.teleopInit();
     	RioDuinoAssembly.teleopInit();
     	//AlignmentAssembly.teleopInit();
+    	RioDuinoAssembly.SendString("robotGreen");
     }
     
     /**

@@ -1,5 +1,5 @@
 
-package org.usfirst.frc.team1778.robot.subsystems;
+package Systems;
 
 import edu.wpi.first.wpilibj.vision.AxisCamera;
 import edu.wpi.first.wpilibj.vision.AxisCamera.*;
@@ -9,7 +9,7 @@ import com.ni.vision.NIVision.*;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.image.*;
 
-public class CameraSubsystem extends Subsystem {
+public class TargetFinder {
 	
 	private static final Resolution DEFAULT_RESOLUTION = Resolution.k320x240;
 	private static final int DEFAULT_FPS = 24;
@@ -46,10 +46,9 @@ public class CameraSubsystem extends Subsystem {
 
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.
-	public static void initCamera(String address) {
+	public void initCamera(String address) {
 		if (this.address != address)
 			this.camera = new AxisCamera(address);
-		else return;
 		
 		this.address = address;
 		
