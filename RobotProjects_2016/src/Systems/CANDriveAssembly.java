@@ -18,10 +18,10 @@ public class CANDriveAssembly {
 	private static final int LEFT_REAR_TALON_ID = 4;
 	private static final int RIGHT_FRONT_TALON_ID = 8;
 	private static final int RIGHT_REAR_TALON_ID = 7;
-	private static final int LATERAL_TALON_ID1 = 5;
-	private static final int LATERAL_TALON_ID2 = 6;
-	private static final int LEFT_GRABBER_TALON_ID = 9;
-	private static final int RIGHT_GRABBER_TALON_ID = 10;
+	
+	// no strafing motors in 2016 robot
+	//private static final int LATERAL_TALON_ID1 = 5;
+	//private static final int LATERAL_TALON_ID2 = 6;
 	
 	// joystick axis ids
 	private static final int JOY_X_AXIS = 0;
@@ -48,7 +48,7 @@ public class CANDriveAssembly {
 	
 	// speed controllers and drive class
 	private static CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
-	private static CANTalon mLateral_1, mLateral_2;
+	//private static CANTalon mLateral_1, mLateral_2;
     private static RobotDrive drive;
     
     // drive control
@@ -66,10 +66,11 @@ public class CANDriveAssembly {
 	        mFrontRight = new CANTalon(RIGHT_FRONT_TALON_ID);
 	        mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
 	        
-	        mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
-	        mLateral_1.enableBrakeMode(true);
-	        mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
-	        mLateral_2.enableBrakeMode(true);
+	        // no strafing motors in 2016 robot
+	        //mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
+	        //mLateral_1.enableBrakeMode(true);
+	        //mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
+	        //mLateral_2.enableBrakeMode(true);
 	        
 	        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
 	        
@@ -92,24 +93,8 @@ public class CANDriveAssembly {
 	{
 		// initialize drive gyro
 		GyroSensor.reset();
-        
-        // initialize auto drive timer
-		//startTimeUs = Utility.getFPGATime();
-	}
+   	}
 	
-	/*
-	public static void autoPeriodicStraight() {
-		// autonomous operation of drive straight
-		
-		double gyroAngle = gyro.getAngle();
-		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
-		//System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
-
-		drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED, 
-						 -driveAngle*AUTO_DRIVE_CORRECT_COEFF+AUTO_DRIVE_SPEED);
-	}
-	*/
-
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
@@ -137,7 +122,8 @@ public class CANDriveAssembly {
 		
 		double leftValue = throttleVal*leftStick.getY();
 		double rightValue = throttleVal*rightStick.getY();
-		double strafeValue = throttleVal*leftStick.getX();
+		//double strafeValue = throttleVal*leftStick.getX();
+		double strafeValue = 0; // no strafing in 2016 robot
 		
 		// Deadzones
 		if(Math.abs(leftValue) <= DRIVE_DEADZONE) {
@@ -172,8 +158,8 @@ public class CANDriveAssembly {
 	
 	private static void drive(double left, double right, double strafe) {
 		drive.tankDrive(left, right, USE_SQUARED_INPUTS);
-		mLateral_1.set(strafe);
-		mLateral_2.set(strafe);
+		//mLateral_1.set(strafe);
+		//mLateral_2.set(strafe);
 	}
 	
 	public static void driveDirection(double angle, double speed) {
