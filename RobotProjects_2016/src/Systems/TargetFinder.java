@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.vision.AxisCamera.*;
 import edu.wpi.first.wpilibj.image.*;
 
 public class TargetFinder {
+	private static boolean initialized = false;
 	
 	private static final Resolution DEFAULT_RESOLUTION = Resolution.k320x240;
 	private static final int DEFAULT_FPS = 24;
@@ -14,6 +15,7 @@ public class TargetFinder {
 	private static final int DEFAULT_COLORLEVEL = 50;
 	private static final WhiteBalance DEFAULT_WHITEBALANCE = WhiteBalance.kFixedIndoor;
 	
+	// these HSV filter values will have to be calibrated at EACH game field to ensure reasonable target recognition
 	private static final int H_LOW = 37;
 	private static final int S_LOW = 32;
 	private static final int V_LOW = 117;
@@ -37,46 +39,29 @@ public class TargetFinder {
 	private static final double FOCAL_LENGTH = 0.0;	// F=(P*D)/TARGET_WIDTH
 	
 	private static AxisCamera camera;
-	private static ColorImage image;
-	private static BinaryImage binaryImage;
 	private static String address;
 	private static boolean hasTarget;
-	
-	
+		
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.
 	public static void initCamera(String address) {
-		camera = new AxisCamera(address);
-		try {
-			image = new HSLImage();
-			binaryImage = new BinaryImage();
-		} catch (NIVisionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!initialized)
+		{
+			camera = new AxisCamera(address);
+			//address = address;
+			/*
+			camera.writeResolution(DEFAULT_RESOLUTION);
+			camera.writeMaxFPS(DEFAULT_FPS);
+			camera.writeBrightness(DEFAULT_BRIGHTNESS);
+			camera.writeCompression(DEFAULT_COMPRESSION);
+			camera.writeColorLevel(DEFAULT_COLORLEVEL);
+			camera.writeWhiteBalance(DEFAULT_WHITEBALANCE);
+			*/
+			
+			initialized = true;
 		}
-		//address = address;
-		/*
-		camera.writeResolution(DEFAULT_RESOLUTION);
-		camera.writeMaxFPS(DEFAULT_FPS);
-		camera.writeBrightness(DEFAULT_BRIGHTNESS);
-		camera.writeCompression(DEFAULT_COMPRESSION);
-		camera.writeColorLevel(DEFAULT_COLORLEVEL);
-		camera.writeWhiteBalance(DEFAULT_WHITEBALANCE);
-		*/
 	}
-	
-	public static boolean updateImage() {
-		if (camera != null && camera.isFreshImage()) {
-			return camera.getImage(image);
-		}
-		System.out.println("Camera not initialized");
-		return false;
-	}
-	
-	public static ColorImage getImage() {
-		return image;
-	}
-
+		
 	public static Resolution getResolution() {
 		if(camera != null)
 			return camera.getResolution();
@@ -111,11 +96,30 @@ public class TargetFinder {
 		return false;
 	}
 	
-	public static ParticleAnalysisReport getTarget(ColorImage image) throws NIVisionException {
-		binaryImage = filterHSV(image);
+	public static ParticleAnalysisReport getTarget() throws NIVisionException {
+
+		// if no camera, return null
+		if (camera == null)
+			return null;
+		
+		// if no new images, return null
+		if (!camera.isFreshImage())
+			return null;
+
+		// otherwise, grab and process an image from the camera
+		// output is a particle analysis report (array)
+		ColorImage image = camera.getImage();
+		BinaryImage binaryImage = filterHSV(image);
 		binaryImage = erode(binaryImage,EROSIONS);
 		binaryImage = convexHull(binaryImage);
 		ParticleAnalysisReport[] reports = getReports(binaryImage);
+		
+		// VERY IMPORTANT: Since images are allocated from C data structures,
+		// they must be freed after use for target recognition.  Not doing so will result in a memory leak!
+		image.free();
+		binaryImage.free();
+		
+		// return best target report if one exists, otherwise return null
 		if(hasTarget(reports)) {
 			hasTarget = true;
 			return reports[0];
@@ -126,7 +130,7 @@ public class TargetFinder {
 	}
 	
 	public boolean seenTarget() {
-		return this.hasTarget;
+		return hasTarget;
 	}
 	
 	public static double getNormX(ParticleAnalysisReport target) {

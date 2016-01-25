@@ -50,29 +50,27 @@ public class CameraAssembly {
 		if ((currentTime - initTime) < TARGET_SCAN_PERIOD_USEC)
 			return;
 
-		// check targetfinder object
-
-		if (TargetFinder.updateImage()) {
-			if (TargetFinder.getImage() != null) {
-				ParticleAnalysisReport target = null;
-				try {
-					target = TargetFinder.getTarget(TargetFinder.getImage());
-				} catch (NIVisionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if (target != null) {
-					System.out.println("X:" + TargetFinder.getNormX(target));
-					System.out.println("H:" + TargetFinder.getHeight(target));
-					System.out.println("W:" + TargetFinder.getWidth(target));
-					System.out.println("A:" + TargetFinder.getArea(target));
-				}
-			}
+		// check Targetfinder class to see if target is seen
+		ParticleAnalysisReport target = null;
+		try {
+			target = TargetFinder.getTarget();
+		} catch (NIVisionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// print out stats on best target found if one exists
+		if (target != null) {
+			System.out.println("Target!  X: " + TargetFinder.getNormX(target) +
+							   " Height: " + TargetFinder.getHeight(target) + 
+							   " Width: " + TargetFinder.getWidth(target) + 
+							   " Area: " + TargetFinder.getArea(target));
 		}
 
 		// get position relative to center of image
 
-		// if we are lined up with target, flag green
+		// if target exists but not lined up, flag LED yellow
+		// if we are lined up with target, flag LED green
 		/*
 		 * if (targetCenterY < TARGET_CENTER_TOLERANCE_PIXELS)
 		 * RioDuinoAssembly.sendColor(RioDuinoAssembly.Color.Green); else if
