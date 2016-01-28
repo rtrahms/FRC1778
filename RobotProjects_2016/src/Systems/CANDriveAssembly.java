@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj.Gyro;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Utility;
+import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 
 //Chill Out 1778 class for controlling the drivetrain
@@ -83,7 +84,7 @@ public class CANDriveAssembly {
 	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	        
 	        GyroSensor.initialize();
-	        
+	        	        
 	        initialized = true;
 		}
 	}
@@ -150,7 +151,7 @@ public class CANDriveAssembly {
 			rightValue /= 1.5;
 			strafeValue /= 1.5;
 		}
-		
+				
 		//Set the drive train 
 		drive(leftValue, rightValue, strafeValue);
 		
