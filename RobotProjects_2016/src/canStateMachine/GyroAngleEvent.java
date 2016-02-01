@@ -1,7 +1,7 @@
 package canStateMachine;
 
 import Systems.GyroSensor;
-import edu.wpi.first.wpilibj.Gyro;
+import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Utility;
 
 // event triggered when gyro gets to a certain predetermined angle
