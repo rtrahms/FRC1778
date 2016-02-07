@@ -65,9 +65,10 @@ public class CatapultAssembly {
 	        	//catapultMotor.setPID(0.5, 0, 2.0);
 	        	//catapultMotor.setPID(0.1, 0, 0.5);    // good but weak
 	        		        	
+	        	// enable brake mode, but no soft limits needed
 	        	catapultMotor.enableBrakeMode(true);
-	        	//catapultMotor.enableForwardSoftLimit(false);
-	        	//catapultMotor.enableReverseSoftLimit(false);
+	        	catapultMotor.enableForwardSoftLimit(false);
+	        	catapultMotor.enableReverseSoftLimit(false);
 	        	catapultMotor.set(catapultMotor.getPosition());
 	        	catapultMotor.enableControl();
 	        	
@@ -133,13 +134,7 @@ public class CatapultAssembly {
 		
 		// check for catapult trigger
 		if (gamepad.getRawButton(1) && !pressed)
-		{
 			pressed = true;
-			System.out.println("TRIGGER: pressed = " + pressed);
-		
-		}
-		else
-			pressed = false;
 				
 		System.out.println("motor enc = "+ catapultMotor.getEncPosition());
 		
@@ -157,7 +152,7 @@ public class CatapultAssembly {
 				// fire catapult - manual fire
 				catapultMotor.setPosition(0);
 				catapultMotor.set(CATAPULT_FIRE_INCREMENT);
-				System.out.println("Fired!  new encoder pos = " + catapultMotor.getPosition());
+				//System.out.println("Fired!  new encoder pos = " + catapultMotor.getPosition());
 				
 				// set fired flag
 				catapultFired = true;
@@ -173,7 +168,7 @@ public class CatapultAssembly {
 				// reset catapult motor
 				catapultMotor.setPosition(0);
 				catapultMotor.set(CATAPULT_READY_POSITION);
-				System.out.println("Reset!  new encoder pos = " + catapultMotor.getPosition());
+				//System.out.println("Reset!  new encoder pos = " + catapultMotor.getPosition());
 				
 				// reset fired flag
 				catapultFired = false;

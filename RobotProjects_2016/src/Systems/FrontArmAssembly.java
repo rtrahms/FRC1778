@@ -12,9 +12,14 @@ public class FrontArmAssembly {
 	private static final double ROLLER_DEADZONE = 0.1;
 	
     private static final long CYCLE_USEC = 250000;
-            	
+    
+    // limits
+    private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*4.0);
+    private static final double REVERSE_SOFT_ENCODER_LIMIT = 0.0;
+    private static final double ARM_MOTION_MULTIPLIER = 1.0;
+    
 	// controller gamepad ID - assumes no other controllers connected
-	private static final int GAMEPAD_ID = 2;
+	private static final int GAMEPAD_ID = 0;
 	
     // control objects
     private static Joystick gamepad;
@@ -26,8 +31,6 @@ public class FrontArmAssembly {
     private static CANTalon frontArmMotor, frontArmRollerMotor;
     
     private static long initTime;
-    private static boolean pressed;
-    private static double armSpeed, rollerSpeed;
 
 	// static initializer
 	public static void initialize()
@@ -37,10 +40,8 @@ public class FrontArmAssembly {
 	        gamepad = new Joystick(GAMEPAD_ID);
 	        	                	        
 	        initialized = true;
-	        pressed = false;
-	        armSpeed = 0.0;
-	        rollerSpeed = 0.0;
 	        
+	        // create and initialize arm motor
 	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
 	        if (frontArmMotor != null) {
 	        	
@@ -60,8 +61,13 @@ public class FrontArmAssembly {
 	        	//frontArmMotor.setPID(0.1, 0, 0.5);    // good but weak
 	        		        	
 		        frontArmMotor.enableBrakeMode(true);
-	        	//frontArmMotor.enableForwardSoftLimit(false);
-	        	//frontArmMotor.enableReverseSoftLimit(false);
+		        
+		        // set soft limits on arm motion
+	        	frontArmMotor.setForwardSoftLimit(FORWARD_SOFT_ENCODER_LIMIT);    	
+	        	frontArmMotor.enableForwardSoftLimit(true);
+	        	frontArmMotor.setReverseSoftLimit(REVERSE_SOFT_ENCODER_LIMIT);
+	        	frontArmMotor.enableReverseSoftLimit(true);
+	        	
 		        frontArmMotor.set(frontArmMotor.getPosition());
 		        frontArmMotor.enableControl();
 	        	
@@ -71,14 +77,16 @@ public class FrontArmAssembly {
 	        else
 	        	System.out.println("ERROR: Front Arm motor not initialized!");
 		  
+	        // create and initialize roller motor
 	        frontArmRollerMotor = new CANTalon(FRONT_ARM_ROLLER_ID);
 	        if (frontArmRollerMotor != null) {
 	        	
 		        System.out.println("Initializing front arm roller motor (speed control, no encoder)...");
 	        	
-	        	// set up motor for percent Vbus control mode
+	        	// set up roller motor for percent Vbus control mode
 		        frontArmRollerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
-        		        		        	
+        		        	
+		        // no brake mode, no limits on rollers
 		        frontArmRollerMotor.enableBrakeMode(false);
 		        frontArmRollerMotor.enableForwardSoftLimit(false);
 		        frontArmRollerMotor.enableReverseSoftLimit(false);
@@ -124,17 +132,22 @@ public class FrontArmAssembly {
 		if ((currentTime - initTime) < CYCLE_USEC)
 			return;
 		
-		armSpeed = gamepad.getRawAxis(2);
-		if(Math.abs(armSpeed) <= ARM_DEADZONE) {
-			armSpeed = 0.0f;
+		// check for arm motion
+		double incrementalArmPos = gamepad.getRawAxis(2);
+		if(Math.abs(incrementalArmPos) <= ARM_DEADZONE) {
+			incrementalArmPos = 0.0;
 		}
 		
-		rollerSpeed = gamepad.getRawAxis(5);
+		double newArmTarget = frontArmMotor.getPosition() + (incrementalArmPos * ARM_MOTION_MULTIPLIER);
+		if ((newArmTarget >= REVERSE_SOFT_ENCODER_LIMIT) && (newArmTarget <= FORWARD_SOFT_ENCODER_LIMIT))
+			frontArmMotor.set(newArmTarget);
+		
+		// check for roller motion
+		double rollerSpeed = gamepad.getRawAxis(5);
 		if (Math.abs(rollerSpeed) < ROLLER_DEADZONE) {
 			rollerSpeed = 0.0f;
 		}
 					
-		frontArmMotor.set(armSpeed);
 		frontArmRollerMotor.set(rollerSpeed);
 
 		// reset input timer;

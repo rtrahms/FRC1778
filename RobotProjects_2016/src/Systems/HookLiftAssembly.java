@@ -22,19 +22,21 @@ public class HookLiftAssembly {
     
     // telescoping motor constants
     private static final int TELESCOPE_MOTOR_ID = 8;
-    private static final int TELESCOPE_RETRACT_POS = 0;
-    private static final int TELESCOPE_EXTEND_POS = (int) (4096.0*12.0);
+    private static final double TELESCOPE_RETRACT_POS = 0.0;
+    private static final double TELESCOPE_EXTEND_POS = (4096.0*12.0);
     
     // winch motor constants
     private static final int WINCH_MOTOR_ID = 9;  
     private static final double WINCH_DEAD_ZONE = 0.2;
+    private static final double WINCH_IN_POS = 0.0;
+    private static final double WINCH_MAX_OUT_POS = (4096.0*12.0);
+    private static final double WINCH_MOTION_MULTIPLIER = 1.0;
     
-    private static CANTalon deployMotor, telescopeMotor, winchMotor;
+    private static CANTalon telescopeMotor, winchMotor;
     
     private static long initTime;
-    private static boolean armDeployed;
-    private static boolean armExtended;
-    private static double winchSpeed;
+    private static boolean telescopePressed;    
+    private static boolean telescopeUp;
 
 	// static initializer
 	public static void initialize()
@@ -45,63 +47,70 @@ public class HookLiftAssembly {
 	        	                	        
 	        initialized = true;
 	        
-	        armDeployed = false;
-	        armExtended = false;
-	        winchSpeed = 0.0;
+	        telescopePressed = false;	        
+	        telescopeUp = false;
 	        
-	        //deployMotor = new CANTalon(DEPLOY_MOTOR_ID);
+	        // deployMotor not used
+	        // deployMotor = new CANTalon(DEPLOY_MOTOR_ID);
 	        
-	        // initialize telescope motor (position control with encoder feedback)
+	        // create and initialize telescope motor (position control with encoder feedback)
 	        telescopeMotor = new CANTalon(TELESCOPE_MOTOR_ID);
 	        if (telescopeMotor != null) {
 	        	
-		        System.out.println("Initializing telescoping motor...");
+		        System.out.println("Initializing telescoping motor (position control with encoder)...");
 	        	
 	        	// set up motor for position control mode
 		        telescopeMotor.disableControl();
 		        telescopeMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        telescopeMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 	        	
-	        	// P and D should be at a 1:4 ratio;  I should be ZERO
+	        	// P and D should be at a ~1:4 ratio;  I should be ZERO
 	        	// higher numbers equate to higher gain/current draw
-	        	//telescopeMotor.setPID(8.0, 0, 32.0);  // DO NOT USE - FUN STUFF HAPPENS
-	        	//telescopeMotor.setPID(3.0, 0, 12.0);
 		        telescopeMotor.setPID(2.0, 0, 18.0);     // works pretty well
-	        	//telescopeMotor.setPID(0.5, 0, 2.0);
 	        	//telescopeMotor.setPID(0.1, 0, 0.5);    // good but weak
-	        		        	
+	        		 
+		        // set brake mode on, and set soft limits on telescope arm motion
 		        telescopeMotor.enableBrakeMode(true);
-	        	//telescopeMotor.enableForwardSoftLimit(false);
-	        	//telescopeMotor.enableReverseSoftLimit(false);
+		        telescopeMotor.setForwardSoftLimit(TELESCOPE_EXTEND_POS);    	
+		        telescopeMotor.enableForwardSoftLimit(true);
+		        telescopeMotor.setReverseSoftLimit(TELESCOPE_RETRACT_POS);
+		        telescopeMotor.enableReverseSoftLimit(true);
+
 		        telescopeMotor.set(telescopeMotor.getPosition());
 		        telescopeMotor.enableControl();
 	        	
 	        	// initializes encoder to zero
 		        telescopeMotor.setPosition(0);
-	        	
-	        	// sets catapult into ready position!
-	            //telescopeMotor.set(CATAPULT_READY_POSITION);
-		        
-		        // motor speed test ONLY - do not set during position control
-	        	//telescopeMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 	        }
 	        else
 	        	System.out.println("ERROR: Telescope motor not initialized!");
 	        
+	        // create and initialize winch motor
 	        winchMotor = new CANTalon(WINCH_MOTOR_ID);
 	        if (winchMotor != null) {
 	        	
-		        System.out.println("Initializing winch motor (speed control, no encoder)...");
+		        System.out.println("Initializing winch motor (position control with encoder)...");
 	        	
 	        	// set up motor for percent Vbus control mode
-		        winchMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
-        		        		        	
-		        winchMotor.enableBrakeMode(false);
-		        winchMotor.enableForwardSoftLimit(false);
-		        winchMotor.enableReverseSoftLimit(false);
+		        winchMotor.disableControl();
+		        winchMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        winchMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+        		        	
+	        	// P and D should be at a ~1:4 ratio;  I should be ZERO
+	        	// higher numbers equate to higher gain/current draw
+		        winchMotor.setPID(2.0, 0, 18.0);     // works pretty well
+	        	//winchMotor.setPID(0.1, 0, 0.5);    // good but weak
+
+		        // enable brake mode and soft limits for winch motor
+		        winchMotor.enableBrakeMode(true);
+		        winchMotor.setForwardSoftLimit(WINCH_MAX_OUT_POS);    	
+		        winchMotor.enableForwardSoftLimit(true);
+		        winchMotor.setReverseSoftLimit(WINCH_IN_POS);
+		        winchMotor.enableReverseSoftLimit(true);
 	        	
-	        	// initializes speed of rollers to zero
-		        winchMotor.set(0);
+	        	// initializes speed of winch to zero
+		        winchMotor.set(winchMotor.getPosition());
+		        winchMotor.enableControl();
 	        	
 	        }
 	        else
@@ -141,46 +150,37 @@ public class HookLiftAssembly {
 		if ((currentTime - initTime) < CYCLE_USEC)
 			return;
 		
-					
-		// get right bumper button - deploy control
-		if (gamepad.getRawButton(7))
+		// check for telescope trigger
+		if (gamepad.getRawButton(3) && !telescopePressed)
+			telescopePressed = true;
+
+		
+		// if button to extend telescope is pressed
+		if (telescopePressed)
 		{
-			armDeployed = !armDeployed;
-			
-			if (!armDeployed) {
-				armExtended = false;
-				telescopeMotor.setPosition(TELESCOPE_RETRACT_POS);  // retract telescope before stowing
-				//deployMotor.setPosition(ARM_STOW_POS);
+			if (telescopeUp)
+			{
+				telescopeMotor.set(TELESCOPE_RETRACT_POS);
+				telescopeUp = false;
 			}
-			else {
-				//deployMotor.setPosition(ARM_DEPLOY_POS);
+			else
+			{
+				telescopeMotor.set(TELESCOPE_EXTEND_POS);
+				telescopeUp = true;				
 			}
-		}
-		
-		// if button to extend telescope is pressed (and arm is deployed)
-		if ((gamepad.getRawButton(8)) && (armDeployed))
-		{
-			armExtended = true;
-			telescopeMotor.setPosition(TELESCOPE_EXTEND_POS);
-		}
-		
-		// if button to retract telescope is pressed
-		if (gamepad.getRawButton(9))
-		{
-			armExtended = false;
-			telescopeMotor.setPosition(TELESCOPE_RETRACT_POS);
-		}
-		
-		// ONLY WHEN ARM IS DEPLOYED do we execute winch control
-		if (armDeployed)
-		{
-			// check thumbpad Y axis
-			winchSpeed = gamepad.getRawAxis(10);
-			if (winchSpeed < WINCH_DEAD_ZONE)
-				winchSpeed = 0.0;
 			
-			winchMotor.set(winchSpeed);
+			// reset pressed flag
+			telescopePressed = false;
 		}
+		
+		// check thumbpad Y axis for winch motion
+		double incrementalWinchPos = gamepad.getRawAxis(10);
+		if (Math.abs(incrementalWinchPos) <= WINCH_DEAD_ZONE)
+			incrementalWinchPos = 0.0;
+		
+		double newWinchTarget = winchMotor.getPosition() + (incrementalWinchPos * WINCH_MOTION_MULTIPLIER);
+		if ((newWinchTarget >= WINCH_IN_POS) && (newWinchTarget <= WINCH_MAX_OUT_POS))
+			winchMotor.set(newWinchTarget);
 		
 		// reset init timer
         initTime = Utility.getFPGATime();
