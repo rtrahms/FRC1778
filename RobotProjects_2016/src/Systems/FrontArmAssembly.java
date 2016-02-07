@@ -1,7 +1,7 @@
 package Systems;
 
+import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.TalonSRX;
 import edu.wpi.first.wpilibj.Utility;
 
 public class FrontArmAssembly {
@@ -23,7 +23,7 @@ public class FrontArmAssembly {
     private static final int FRONT_ARM_MOTOR_ID = 5;
     private static final int FRONT_ARM_ROLLER_ID = 6;
     
-    private static TalonSRX frontArmMotor, frontArmRollerMotor;
+    private static CANTalon frontArmMotor, frontArmRollerMotor;
     
     private static long initTime;
     private static boolean pressed;
@@ -41,9 +41,54 @@ public class FrontArmAssembly {
 	        armSpeed = 0.0;
 	        rollerSpeed = 0.0;
 	        
-	        frontArmMotor = new TalonSRX(FRONT_ARM_MOTOR_ID);
-	        frontArmRollerMotor = new TalonSRX(FRONT_ARM_ROLLER_ID);
-	        
+	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
+	        if (frontArmMotor != null) {
+	        	
+		        System.out.println("Initializing front arm motor (position control)...");
+	        	
+	        	// set up motor for position control mode
+		        frontArmMotor.disableControl();
+		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+	        	
+	        	// P and D should be at a 1:4 ratio;  I should be ZERO
+	        	// higher numbers equate to higher gain/current draw
+	        	//frontArmMotor.setPID(8.0, 0, 32.0);  // DO NOT USE - FUN STUFF HAPPENS
+	        	//frontArmMotor.setPID(3.0, 0, 12.0);
+		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well
+	        	//frontArmMotor.setPID(0.5, 0, 2.0);
+	        	//frontArmMotor.setPID(0.1, 0, 0.5);    // good but weak
+	        		        	
+		        frontArmMotor.enableBrakeMode(true);
+	        	//frontArmMotor.enableForwardSoftLimit(false);
+	        	//frontArmMotor.enableReverseSoftLimit(false);
+		        frontArmMotor.set(frontArmMotor.getPosition());
+		        frontArmMotor.enableControl();
+	        	
+	        	// initializes encoder to zero
+		        frontArmMotor.setPosition(0);        	
+	        }
+	        else
+	        	System.out.println("ERROR: Front Arm motor not initialized!");
+		  
+	        frontArmRollerMotor = new CANTalon(FRONT_ARM_ROLLER_ID);
+	        if (frontArmRollerMotor != null) {
+	        	
+		        System.out.println("Initializing front arm roller motor (speed control, no encoder)...");
+	        	
+	        	// set up motor for percent Vbus control mode
+		        frontArmRollerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+        		        		        	
+		        frontArmRollerMotor.enableBrakeMode(false);
+		        frontArmRollerMotor.enableForwardSoftLimit(false);
+		        frontArmRollerMotor.enableReverseSoftLimit(false);
+	        	
+	        	// initializes speed of rollers to zero
+		        frontArmRollerMotor.set(0);
+	        	
+	        }
+	        else
+	        	System.out.println("ERROR: Front Arm roller motor not initialized!");
 		}
 	}
 	
