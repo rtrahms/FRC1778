@@ -5,7 +5,6 @@ import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
 import Systems.HookLiftAssembly;
 import Systems.NetworkCommAssembly;
-import Systems.RioDuinoAssembly;
 import canStateMachine.AutoStateMachine;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -43,14 +42,13 @@ public class Robot extends IterativeRobot {
 		pdp.clearStickyFaults();
 
 		NetworkCommAssembly.initialize();
-		CANDriveAssembly.initialize();
+		//CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
 		HookLiftAssembly.initialize();
 		CatapultAssembly.initialize();
-		RioDuinoAssembly.initialize();
-		// AlignmentAssembly.initialize();
+		//RioDuinoAssembly.initialize();
 
-		RioDuinoAssembly.SendString("robotInit");
+		//RioDuinoAssembly.SendString("robotInit");
 
 	}
 
@@ -70,26 +68,25 @@ public class Robot extends IterativeRobot {
 		 */
 
 		// start the autonomous state machine
-		autoSM.start();
+		//autoSM.start();
 	}
 
 	/**
 	 * This function is called periodically during autonomous
 	 */
 	public void autonomousPeriodic() {
-		autoSM.process();
+		//autoSM.process();
 	}
 
 	// called one time on entry into teleop
 	public void teleopInit() {
 
-		CANDriveAssembly.teleopInit();
+		//CANDriveAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		HookLiftAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
-		RioDuinoAssembly.teleopInit();
-		// AlignmentAssembly.teleopInit();
-		RioDuinoAssembly.SendString("robotGreen");
+		//RioDuinoAssembly.teleopInit();
+		//RioDuinoAssembly.SendString("robotGreen");
 	}
 
 	/**
@@ -97,16 +94,17 @@ public class Robot extends IterativeRobot {
 	 */
 	public void teleopPeriodic() {
 
-		//System.out.println("Chill out teleopPeriodic call!");
+		//System.out.println("Chill out teleopPeriodic call!");		
+				
     	NetworkCommAssembly.updateValues(); 	
-    	CANDriveAssembly.teleopPeriodic();
+    	//CANDriveAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
     	HookLiftAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
-    	RioDuinoAssembly.teleopPeriodic();
-    	//AlignmentAssembly.teleopPeriodic();
+    	//RioDuinoAssembly.teleopPeriodic();
   	
  	}
+	
 	/**
 	 * This function is called periodically during test mode
 	 */

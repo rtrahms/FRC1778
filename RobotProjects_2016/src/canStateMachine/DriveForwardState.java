@@ -1,7 +1,6 @@
 package canStateMachine;
 
 import Systems.CANDriveAssembly;
-import Systems.PWMDriveAssembly;
 
 public class DriveForwardState extends AutoState {
 	
@@ -14,8 +13,8 @@ public class DriveForwardState extends AutoState {
 		this.isPWM = isPWM;
 		if (isPWM)
 		{
-			this.name = "<PWM Drive Forward State>";
-			PWMDriveAssembly.initialize();
+			this.name = "<PWM Drive Forward State - NOT SUPPORTED>";
+			//PWMDriveAssembly.initialize();
 		}
 		else
 		{
@@ -30,20 +29,18 @@ public class DriveForwardState extends AutoState {
 		this.speed = speed;
 		this.isPWM = isPWM;
 		
-		if (isPWM)
-			PWMDriveAssembly.initialize();
-		else
-			CANDriveAssembly.initialize();
+		// PWMDriveAssembly not supported
+		
+		CANDriveAssembly.initialize();
 	}
 	
 	// state entry
 	public void enter() {
 		// do some drivey initialization
 		
-		if (isPWM)
-			PWMDriveAssembly.autoInit();
-		else
-			CANDriveAssembly.autoInit();
+		// PWMDriveAssembly not supported
+		
+		CANDriveAssembly.autoInit();
 		
 		super.enter();
 	}
@@ -52,10 +49,10 @@ public class DriveForwardState extends AutoState {
 	public AutoState process()  {
 		
 		// do some drivey stuff
-		if (isPWM)
-			PWMDriveAssembly.autoPeriodicStraight(speed);
-		else
-			CANDriveAssembly.autoPeriodicStraight(speed);
+		
+		// PWMDriveAssembly not supported
+		
+		CANDriveAssembly.autoPeriodicStraight(speed);
 		
 		return super.process();
 	}
@@ -63,10 +60,10 @@ public class DriveForwardState extends AutoState {
 	// state cleanup and exit
 	public void exit() {
 		// do some drivey cleanup
-		if (isPWM)
-			PWMDriveAssembly.autoStop();
-		else
-			CANDriveAssembly.autoStop();
+		
+		// PWMDriveAssembly not supported
+			
+		CANDriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.exit();

@@ -18,11 +18,7 @@ public class CANDriveAssembly {
 	private static final int LEFT_REAR_TALON_ID = 4;
 	private static final int RIGHT_FRONT_TALON_ID = 8;
 	private static final int RIGHT_REAR_TALON_ID = 7;
-	
-	// no strafing motors in 2016 robot
-	//private static final int LATERAL_TALON_ID1 = 5;
-	//private static final int LATERAL_TALON_ID2 = 6;
-	
+		
 	// joystick axis ids
 	private static final int JOY_X_AXIS = 0;
 	private static final int JOY_Y_AXIS = 1;
@@ -65,19 +61,13 @@ public class CANDriveAssembly {
 	        mBackLeft = new CANTalon(LEFT_REAR_TALON_ID);
 	        mFrontRight = new CANTalon(RIGHT_FRONT_TALON_ID);
 	        mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
-	        
-	        // no strafing motors in 2016 robot
-	        //mLateral_1 = new CANTalon(LATERAL_TALON_ID1);
-	        //mLateral_1.enableBrakeMode(true);
-	        //mLateral_2 = new CANTalon(LATERAL_TALON_ID2);
-	        //mLateral_2.enableBrakeMode(true);
-	        
+	        	        
 	        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
-	        
+	        	        
 	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
 	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
 	        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);   
 	        
 	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
 	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);

@@ -1,7 +1,6 @@
 package canStateMachine;
 
 import Systems.CANDriveAssembly;
-import Systems.PWMDriveAssembly;
 
 public class TurnState extends AutoState {
 	
@@ -16,10 +15,9 @@ public class TurnState extends AutoState {
 		this.speedToTurn = speed;
 		this.isPwm = isPwm;
 		
-		if (isPwm)
-			PWMDriveAssembly.initialize();
-		else
-			CANDriveAssembly.initialize();
+		// PWMDriveAssembly not supported
+		
+		CANDriveAssembly.initialize();
 	}
 	
 	public TurnState(String name, double angleToTurn, double speed, boolean isPwm)
@@ -29,20 +27,18 @@ public class TurnState extends AutoState {
 		this.speedToTurn = speed;
 		this.isPwm = isPwm;
 		
-		if (isPwm)	
-			PWMDriveAssembly.initialize();
-		else
-			CANDriveAssembly.initialize();
+		// PWMDriveAssembly not supported
+
+		CANDriveAssembly.initialize();
 	}
 	
 	// state entry
 	public void enter() {
 		// do some drivey initialization
 		
-		if (isPwm)
-			PWMDriveAssembly.autoInit();
-		else
-			CANDriveAssembly.autoInit();
+		// PWMDriveAssembly not supported
+
+		CANDriveAssembly.autoInit();
 		
 		super.enter();
 	}
@@ -51,20 +47,13 @@ public class TurnState extends AutoState {
 	public AutoState process()  {
 		
 		// do some drivey stuff
-		if (isPwm)
-		{
-			if (angleToTurn < 0.0)
-				PWMDriveAssembly.rotateRight(speedToTurn);
-			else
-				PWMDriveAssembly.rotateLeft(speedToTurn);
-		}
+		
+		// PWMDriveAssembly not supported
+		
+		if (angleToTurn < 0.0)
+			CANDriveAssembly.rotateRight(speedToTurn);
 		else
-		{
-			if (angleToTurn < 0.0)
-				CANDriveAssembly.rotateRight(speedToTurn);
-			else
-				CANDriveAssembly.rotateLeft(speedToTurn);
-		}
+			CANDriveAssembly.rotateLeft(speedToTurn);
 		
 		return super.process();
 	}
@@ -72,10 +61,10 @@ public class TurnState extends AutoState {
 	// state cleanup and exit
 	public void exit() {
 		// do some drivey cleanup
-		if (isPwm)
-			PWMDriveAssembly.autoStop();
-		else
-			CANDriveAssembly.autoStop();
+			
+		// PWMDriveAssembly not supported
+		
+		CANDriveAssembly.autoStop();
 		
 		// cleanup base class
 		super.exit();

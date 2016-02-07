@@ -35,7 +35,7 @@ public class NetworkCommAssembly {
 		height = table.getNumberArray("height",defaultValue);
 		width = table.getNumberArray("width",defaultValue);
 		
-		System.out.println("X:"+centerx+", Y:"+centery+", area:"+area+", width:"+width+", height:"+height);
+		//System.out.println("X:"+centerx+", Y:"+centery+", area:"+area+", width:"+width+", height:"+height);
 
     }
 
