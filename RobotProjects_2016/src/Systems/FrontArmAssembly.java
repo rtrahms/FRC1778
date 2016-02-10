@@ -16,7 +16,7 @@ public class FrontArmAssembly {
     // limits
     private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*4.0);
     private static final double REVERSE_SOFT_ENCODER_LIMIT = 0.0;
-    private static final double ARM_MOTION_MULTIPLIER = 1.0;
+    private static final double ARM_MOTION_MULTIPLIER = 500.0;
     
 	// controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 0;
@@ -25,7 +25,7 @@ public class FrontArmAssembly {
     private static Joystick gamepad;
            
     // motor ids
-    private static final int FRONT_ARM_MOTOR_ID = 5;
+    private static final int FRONT_ARM_MOTOR_ID = 9;
     private static final int FRONT_ARM_ROLLER_ID = 6;
     
     private static CANTalon frontArmMotor, frontArmRollerMotor;
@@ -49,18 +49,13 @@ public class FrontArmAssembly {
 	        	
 	        	// set up motor for position control mode
 		        frontArmMotor.disableControl();
-		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);      
+		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 	        	
 	        	// P and D should be at a 1:4 ratio;  I should be ZERO
 	        	// higher numbers equate to higher gain/current draw
-	        	//frontArmMotor.setPID(8.0, 0, 32.0);  // DO NOT USE - FUN STUFF HAPPENS
-	        	//frontArmMotor.setPID(3.0, 0, 12.0);
-		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well
-	        	//frontArmMotor.setPID(0.5, 0, 2.0);
-	        	//frontArmMotor.setPID(0.1, 0, 0.5);    // good but weak
-	        		        	
-		        frontArmMotor.enableBrakeMode(true);
+		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well	        	
 		        
 		        // set soft limits on arm motion
 	        	frontArmMotor.setForwardSoftLimit(FORWARD_SOFT_ENCODER_LIMIT);    	
@@ -70,6 +65,8 @@ public class FrontArmAssembly {
 	        	
 		        frontArmMotor.set(frontArmMotor.getPosition());
 		        frontArmMotor.enableControl();
+		        
+		        frontArmMotor.enableBrakeMode(true);
 	        	
 	        	// initializes encoder to zero
 		        frontArmMotor.setPosition(0);        	
@@ -133,23 +130,28 @@ public class FrontArmAssembly {
 			return;
 		
 		// check for arm motion
-		double incrementalArmPos = gamepad.getRawAxis(2);
+		double incrementalArmPos = gamepad.getRawAxis(1);
 		if(Math.abs(incrementalArmPos) <= ARM_DEADZONE) {
 			incrementalArmPos = 0.0;
 		}
 		
+		/*
 		double newArmTarget = frontArmMotor.getPosition() + (incrementalArmPos * ARM_MOTION_MULTIPLIER);
-		if ((newArmTarget >= REVERSE_SOFT_ENCODER_LIMIT) && (newArmTarget <= FORWARD_SOFT_ENCODER_LIMIT))
+		//if ((newArmTarget >= REVERSE_SOFT_ENCODER_LIMIT) && (newArmTarget <= FORWARD_SOFT_ENCODER_LIMIT))
 			frontArmMotor.set(newArmTarget);
+		*/
+		frontArmMotor.set(gamepad.getRawAxis(1));
 		
 		// check for roller motion
-		double rollerSpeed = gamepad.getRawAxis(5);
+		/*
+		double rollerSpeed = gamepad.getRawAxis(3);
 		if (Math.abs(rollerSpeed) < ROLLER_DEADZONE) {
 			rollerSpeed = 0.0f;
 		}
 					
 		frontArmRollerMotor.set(rollerSpeed);
-
+		*/
+		
 		// reset input timer;
 		initTime = Utility.getFPGATime();
 	}

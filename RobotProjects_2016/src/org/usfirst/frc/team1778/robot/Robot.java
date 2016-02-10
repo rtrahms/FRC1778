@@ -3,6 +3,7 @@ package org.usfirst.frc.team1778.robot;
 import Systems.CANDriveAssembly;
 import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
+import Systems.GyroSensor;
 import Systems.HookLiftAssembly;
 import Systems.NetworkCommAssembly;
 import canStateMachine.AutoStateMachine;
@@ -41,11 +42,12 @@ public class Robot extends IterativeRobot {
 		pdp = new PowerDistributionPanel();
 		pdp.clearStickyFaults();
 
+		GyroSensor.initialize();
 		NetworkCommAssembly.initialize();
 		//CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
-		HookLiftAssembly.initialize();
-		CatapultAssembly.initialize();
+		//HookLiftAssembly.initialize();
+		//CatapultAssembly.initialize();
 		//RioDuinoAssembly.initialize();
 
 		//RioDuinoAssembly.SendString("robotInit");
@@ -81,10 +83,12 @@ public class Robot extends IterativeRobot {
 	// called one time on entry into teleop
 	public void teleopInit() {
 
+		GyroSensor.reset();
+		
 		//CANDriveAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
-		HookLiftAssembly.teleopInit();
-		CatapultAssembly.teleopInit();
+		//HookLiftAssembly.teleopInit();
+		//CatapultAssembly.teleopInit();
 		//RioDuinoAssembly.teleopInit();
 		//RioDuinoAssembly.SendString("robotGreen");
 	}
@@ -99,10 +103,11 @@ public class Robot extends IterativeRobot {
     	NetworkCommAssembly.updateValues(); 	
     	//CANDriveAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
-    	HookLiftAssembly.teleopPeriodic();
-    	CatapultAssembly.teleopPeriodic();
+    	//HookLiftAssembly.teleopPeriodic();
+    	//CatapultAssembly.teleopPeriodic();
     	//RioDuinoAssembly.teleopPeriodic();
   	
+    	//System.out.println("Gyro value = " + GyroSensor.getAngle());
  	}
 	
 	/**
