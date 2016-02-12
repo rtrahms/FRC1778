@@ -15,9 +15,10 @@ public class FrontArmAssembly {
     
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
-    private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*50.0);
+    //private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*50.0);
+    private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*5.0);
     private static final double REVERSE_SOFT_ENCODER_LIMIT = 0.0;
-    private static final double ARM_MOTION_MULTIPLIER = 500.0;
+    private static final double ARM_SPEED_MULTIPLIER = 2148.0;
     
 	// controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 0;
@@ -53,6 +54,8 @@ public class FrontArmAssembly {
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well	        	
+		        //frontArmMotor.setPID(2.0, 0, 9.0);     // 1:4 PID ratio        	
+		        //frontArmMotor.setPID(4.0, 0, 8.0);     // 1:2 PID ratio        	
 	        	frontArmMotor.setForwardSoftLimit(FORWARD_SOFT_ENCODER_LIMIT);    	
 	        	frontArmMotor.enableForwardSoftLimit(true);
 	        	frontArmMotor.setReverseSoftLimit(REVERSE_SOFT_ENCODER_LIMIT);
@@ -62,13 +65,16 @@ public class FrontArmAssembly {
 		        // set speed to zero and enable control
 		        frontArmMotor.set(0);
 		        frontArmMotor.enableControl();
-		          	
+		        
+		        // PercentVbus test ONLY!!!
+		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+		        
 	        	// initializes encoder to zero
 		        frontArmMotor.setPosition(0);        	
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm motor not initialized!");
-		  
+		  /*
 	        // create and initialize roller motor
 	        frontArmRollerMotor = new CANTalon(FRONT_ARM_ROLLER_ID);
 	        if (frontArmRollerMotor != null) {
@@ -89,6 +95,7 @@ public class FrontArmAssembly {
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm roller motor not initialized!");
+	        */
 		}
 	}
 	
@@ -113,6 +120,9 @@ public class FrontArmAssembly {
 		
 	public static void teleopInit() {
         initTime = Utility.getFPGATime();
+        
+    	// initializes encoder to zero
+        frontArmMotor.setPosition(0);        	
 		
 	}
 	
@@ -129,8 +139,14 @@ public class FrontArmAssembly {
 		if(Math.abs(armSpeed) <= ARM_DEADZONE) {
 			armSpeed = 0.0;
 		}
+		armSpeed *= ARM_SPEED_MULTIPLIER;
+		System.out.println("armspeed = " + armSpeed + " motor position = " + frontArmMotor.getPosition());
 		frontArmMotor.set(armSpeed);
 		
+		// PercentVbus test ONLY!!
+		//frontArmMotor.set(gamepad.getRawAxis(1));
+		
+		/*
 		// check for roller motion (right gamepad joystick)
 		double rollerSpeed = gamepad.getRawAxis(3);
 		if (Math.abs(rollerSpeed) < ROLLER_DEADZONE) {
@@ -140,6 +156,7 @@ public class FrontArmAssembly {
 		
 		// reset input timer;
 		initTime = Utility.getFPGATime();
+		*/
 	}
 
 }
