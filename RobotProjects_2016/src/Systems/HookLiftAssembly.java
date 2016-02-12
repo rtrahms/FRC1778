@@ -57,26 +57,21 @@ public class HookLiftAssembly {
 	        telescopeMotor = new CANTalon(TELESCOPE_MOTOR_ID);
 	        if (telescopeMotor != null) {
 	        	
-		        System.out.println("Initializing telescoping motor (position control with encoder)...");
+		        System.out.println("Initializing telescoping motor (speed control)...");
 	        	
 	        	// set up motor for position control mode
 		        telescopeMotor.disableControl();
-		        telescopeMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        telescopeMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
 		        telescopeMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-	        	
-	        	// P and D should be at a ~1:4 ratio;  I should be ZERO
-	        	// higher numbers equate to higher gain/current draw
 		        telescopeMotor.setPID(2.0, 0, 18.0);     // works pretty well
-	        	//telescopeMotor.setPID(0.1, 0, 0.5);    // good but weak
-	        		 
-		        // set brake mode on, and set soft limits on telescope arm motion
 		        telescopeMotor.enableBrakeMode(true);
 		        telescopeMotor.setForwardSoftLimit(TELESCOPE_EXTEND_POS);    	
 		        telescopeMotor.enableForwardSoftLimit(true);
 		        telescopeMotor.setReverseSoftLimit(TELESCOPE_RETRACT_POS);
 		        telescopeMotor.enableReverseSoftLimit(true);
-
-		        telescopeMotor.set(telescopeMotor.getPosition());
+		        
+		        //set speed to zero and enable control
+		        telescopeMotor.set(0);
 		        telescopeMotor.enableControl();
 	        	
 	        	// initializes encoder to zero
@@ -89,28 +84,25 @@ public class HookLiftAssembly {
 	        winchMotor = new CANTalon(WINCH_MOTOR_ID);
 	        if (winchMotor != null) {
 	        	
-		        System.out.println("Initializing winch motor (position control with encoder)...");
+		        System.out.println("Initializing winch motor (speed control)...");
 	        	
-	        	// set up motor for percent Vbus control mode
+	        	// set up motor for speed control mode
 		        winchMotor.disableControl();
-		        winchMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        winchMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
 		        winchMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-        		        	
-	        	// P and D should be at a ~1:4 ratio;  I should be ZERO
-	        	// higher numbers equate to higher gain/current draw
 		        winchMotor.setPID(2.0, 0, 18.0);     // works pretty well
-	        	//winchMotor.setPID(0.1, 0, 0.5);    // good but weak
-
-		        // enable brake mode and soft limits for winch motor
 		        winchMotor.enableBrakeMode(true);
 		        winchMotor.setForwardSoftLimit(WINCH_MAX_OUT_POS);    	
 		        winchMotor.enableForwardSoftLimit(true);
 		        winchMotor.setReverseSoftLimit(WINCH_IN_POS);
 		        winchMotor.enableReverseSoftLimit(true);
-	        	
-	        	// initializes speed of winch to zero
-		        winchMotor.set(winchMotor.getPosition());
+		        
+		        //set speed to zero and enable control
+		        winchMotor.set(0);
 		        winchMotor.enableControl();
+		        
+	        	// initializes encoder to zero
+		        winchMotor.setPosition(0);
 	        	
 	        }
 	        else

@@ -20,11 +20,13 @@ public class CatapultAssembly {
     private static Joystick gamepad;
            
     // catapult reset motor
-    private static final int CATAPULT_MOTOR_ID = 9;
+    private static final int MASTER_CATAPULT_MOTOR_ID = 9;
+    private static final int SLAVE_CATAPULT_MOTOR_ID = 10;
+    
     private static final int CATAPULT_FIRE_INCREMENT = 1024;
     private static final int CATAPULT_READY_POSITION = (int) (4096.0*5.25 - CATAPULT_FIRE_INCREMENT);
     
-    private static CANTalon catapultMotor;
+    private static CANTalon masterCatapultMotor, slaveCatapultMotor;
     
     private static long initCycleTime;
     private static boolean pressed;
@@ -43,46 +45,64 @@ public class CatapultAssembly {
 	        pressed = false;
 	        counter = 0;
 	        
-	        System.out.println("Creating motor object...");
+	        System.out.println("Creating motor objects...");
 	        
-	        // initialize catapult motor
-	        catapultMotor = new CANTalon(CATAPULT_MOTOR_ID);
+	        // initialize master catapult motor
+	        masterCatapultMotor = new CANTalon(MASTER_CATAPULT_MOTOR_ID);
 	        
-	        if (catapultMotor != null) {
+	        if (masterCatapultMotor != null) {
 	        	
-		        System.out.println("Initializing motor...");
+		        System.out.println("Initializing master catapult motor (position mode)...");
 	        	
 	        	// set up motor for position control mode
-	        	catapultMotor.disableControl();
-	        	catapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
-	        	catapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-	        	
-	        	// P and D should be at a 1:4 ratio;  I should be ZERO
-	        	// higher numbers equate to higher gain/current draw
-	        	//catapultMotor.setPID(8.0, 0, 32.0);  // DO NOT USE - FUN STUFF HAPPENS
-	        	//catapultMotor.setPID(3.0, 0, 12.0);
-	        	catapultMotor.setPID(2.0, 0, 18.0);     // works pretty well
-	        	//catapultMotor.setPID(0.5, 0, 2.0);
-	        	//catapultMotor.setPID(0.1, 0, 0.5);    // good but weak
-	        		        	
-	        	// enable brake mode, but no soft limits needed
-	        	catapultMotor.enableBrakeMode(true);
-	        	catapultMotor.enableForwardSoftLimit(false);
-	        	catapultMotor.enableReverseSoftLimit(false);
-	        	catapultMotor.set(catapultMotor.getPosition());
-	        	catapultMotor.enableControl();
-	        	
-	        	// initializes encoder to zero
-	        	catapultMotor.setPosition(0);
-	        	
-	        	// sets catapult into ready position!
-	            //catapultMotor.set(CATAPULT_READY_POSITION);
+		        masterCatapultMotor.disableControl();
+		        masterCatapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        masterCatapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		        masterCatapultMotor.setPID(2.0, 0, 18.0);     // works pretty well
+		        masterCatapultMotor.enableBrakeMode(true);
+		        masterCatapultMotor.enableForwardSoftLimit(false);
+		        masterCatapultMotor.enableReverseSoftLimit(false);
 		        
-		        // motor speed test ONLY - do not set during position control
-	        	//catapultMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+		        // initialize position and enable control
+		        masterCatapultMotor.set(masterCatapultMotor.getPosition());
+		        masterCatapultMotor.enableControl();
+	        	
+	        	// initializes master encoder to zero
+		        masterCatapultMotor.setPosition(0);
+	        	
 	        }
 	        else
-	        	System.out.println("ERROR: Catapult motor not initialized!");
+	        	System.out.println("ERROR: Master catapult motor not initialized!");
+
+	        // initialize slave catapult motor
+	        slaveCatapultMotor = new CANTalon(SLAVE_CATAPULT_MOTOR_ID);
+	        
+	        if (slaveCatapultMotor != null) {
+	        	
+		        System.out.println("Initializing slave catapult motor (follower mode)...");
+	        	
+	        	// set up slave motor for follower control mode (follows master above, but mirrored)
+		        slaveCatapultMotor.disableControl();
+		        slaveCatapultMotor.changeControlMode(CANTalon.TalonControlMode.Follower);
+		        slaveCatapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		        slaveCatapultMotor.setPID(2.0, 0, 18.0);     // works pretty well
+		        slaveCatapultMotor.enableBrakeMode(true);
+		        slaveCatapultMotor.enableForwardSoftLimit(false);
+		        slaveCatapultMotor.enableReverseSoftLimit(false);
+		        slaveCatapultMotor.reverseOutput(true);		       
+		        
+		        // initialize master id and enable control
+		        slaveCatapultMotor.set(MASTER_CATAPULT_MOTOR_ID);
+		        slaveCatapultMotor.enableControl();
+	        	
+	        	// initializes slave encoder to zero
+		        slaveCatapultMotor.setPosition(0);
+	        	
+	        }
+	        else
+	        	System.out.println("ERROR: Slave catapult motor not initialized!");
+		
+		
 		}
 	}
 	
@@ -109,15 +129,15 @@ public class CatapultAssembly {
         initCycleTime = Utility.getFPGATime();	
         
         // calibrate encoders to zero
-        catapultMotor.setPosition(0);
+        masterCatapultMotor.setPosition(0);
         
         // set motor to a position (test only)
-        catapultMotor.set(CATAPULT_READY_POSITION);    
+        masterCatapultMotor.set(CATAPULT_READY_POSITION);    
 
         // simple vbus test ONLY - NOT FOR POSITION MODE
-        //catapultMotor.set(0.5);
+        //masterCatapultMotor.set(0.5);
         
-		//System.out.println("teleop_init: motor enc = "+ catapultMotor.getEncPosition());
+		//System.out.println("teleop_init: motor enc = "+ masterCatapultMotor.getEncPosition());
 
         pressed = false;
 	}
@@ -130,13 +150,13 @@ public class CatapultAssembly {
 		if ((currentTime - initCycleTime) < CYCLE_USEC)
 			return;
 		
-		//System.out.println("Read enc position =" + catapultMotor.getEncPosition());
+		//System.out.println("Read enc position =" + masterCatapultMotor.getEncPosition());
 		
 		// check for catapult trigger
 		if (gamepad.getRawButton(1) && !pressed)
 			pressed = true;
 				
-		System.out.println("motor enc = "+ catapultMotor.getEncPosition());
+		System.out.println("motor enc = "+ masterCatapultMotor.getEncPosition());
 		
 		// if the catapult is not yet fired
 		if (!catapultFired) 
@@ -150,9 +170,9 @@ public class CatapultAssembly {
 				//RioDuinoAssembly.sendColor(RioDuinoAssembly.Color.Purple);
 				
 				// fire catapult - manual fire
-				catapultMotor.setPosition(0);
-				catapultMotor.set(CATAPULT_FIRE_INCREMENT);
-				//System.out.println("Fired!  new encoder pos = " + catapultMotor.getPosition());
+				masterCatapultMotor.setPosition(0);
+				masterCatapultMotor.set(CATAPULT_FIRE_INCREMENT);
+				//System.out.println("Fired!  new encoder pos = " + masterCatapultMotor.getPosition());
 				
 				// set fired flag
 				catapultFired = true;
@@ -166,8 +186,8 @@ public class CatapultAssembly {
 				System.out.println("catapult resetting");
 				
 				// reset catapult motor
-				catapultMotor.setPosition(0);
-				catapultMotor.set(CATAPULT_READY_POSITION);
+				masterCatapultMotor.setPosition(0);
+				masterCatapultMotor.set(CATAPULT_READY_POSITION);
 				//System.out.println("Reset!  new encoder pos = " + catapultMotor.getPosition());
 				
 				// reset fired flag

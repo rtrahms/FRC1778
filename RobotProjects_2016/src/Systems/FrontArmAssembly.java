@@ -14,7 +14,8 @@ public class FrontArmAssembly {
     private static final long CYCLE_USEC = 250000;
     
     // limits
-    private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*4.0);
+    // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
+    private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*50.0);
     private static final double REVERSE_SOFT_ENCODER_LIMIT = 0.0;
     private static final double ARM_MOTION_MULTIPLIER = 500.0;
     
@@ -45,29 +46,23 @@ public class FrontArmAssembly {
 	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
 	        if (frontArmMotor != null) {
 	        	
-		        System.out.println("Initializing front arm motor (position control)...");
+		        System.out.println("Initializing front arm motor (speed control)...");
 	        	
-	        	// set up motor for position control mode
+	        	// set up motor for speed control mode
 		        frontArmMotor.disableControl();
-		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);      
-		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-	        	
-	        	// P and D should be at a 1:4 ratio;  I should be ZERO
-	        	// higher numbers equate to higher gain/current draw
 		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well	        	
-		        
-		        // set soft limits on arm motion
 	        	frontArmMotor.setForwardSoftLimit(FORWARD_SOFT_ENCODER_LIMIT);    	
 	        	frontArmMotor.enableForwardSoftLimit(true);
 	        	frontArmMotor.setReverseSoftLimit(REVERSE_SOFT_ENCODER_LIMIT);
-	        	frontArmMotor.enableReverseSoftLimit(true);
-	        	
-		        frontArmMotor.set(frontArmMotor.getPosition());
-		        frontArmMotor.enableControl();
-		        
+	        	frontArmMotor.enableReverseSoftLimit(true);	        	
 		        frontArmMotor.enableBrakeMode(true);
-	        	
+		        
+		        // set speed to zero and enable control
+		        frontArmMotor.set(0);
+		        frontArmMotor.enableControl();
+		          	
 	        	// initializes encoder to zero
 		        frontArmMotor.setPosition(0);        	
 	        }
@@ -78,7 +73,7 @@ public class FrontArmAssembly {
 	        frontArmRollerMotor = new CANTalon(FRONT_ARM_ROLLER_ID);
 	        if (frontArmRollerMotor != null) {
 	        	
-		        System.out.println("Initializing front arm roller motor (speed control, no encoder)...");
+		        System.out.println("Initializing front arm roller motor (PercentVbus control)...");
 	        	
 	        	// set up roller motor for percent Vbus control mode
 		        frontArmRollerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
@@ -129,28 +124,19 @@ public class FrontArmAssembly {
 		if ((currentTime - initTime) < CYCLE_USEC)
 			return;
 		
-		// check for arm motion
-		double incrementalArmPos = gamepad.getRawAxis(1);
-		if(Math.abs(incrementalArmPos) <= ARM_DEADZONE) {
-			incrementalArmPos = 0.0;
+		// check for arm motion (left gamepad joystick)
+		double armSpeed = gamepad.getRawAxis(1);
+		if(Math.abs(armSpeed) <= ARM_DEADZONE) {
+			armSpeed = 0.0;
 		}
+		frontArmMotor.set(armSpeed);
 		
-		/*
-		double newArmTarget = frontArmMotor.getPosition() + (incrementalArmPos * ARM_MOTION_MULTIPLIER);
-		//if ((newArmTarget >= REVERSE_SOFT_ENCODER_LIMIT) && (newArmTarget <= FORWARD_SOFT_ENCODER_LIMIT))
-			frontArmMotor.set(newArmTarget);
-		*/
-		frontArmMotor.set(gamepad.getRawAxis(1));
-		
-		// check for roller motion
-		/*
+		// check for roller motion (right gamepad joystick)
 		double rollerSpeed = gamepad.getRawAxis(3);
 		if (Math.abs(rollerSpeed) < ROLLER_DEADZONE) {
 			rollerSpeed = 0.0f;
-		}
-					
+		}	
 		frontArmRollerMotor.set(rollerSpeed);
-		*/
 		
 		// reset input timer;
 		initTime = Utility.getFPGATime();
