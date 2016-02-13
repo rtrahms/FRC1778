@@ -72,6 +72,7 @@ void setup() {
   FastLED.addLeds<CHIPSET, PIN>(ledStrip, NUM_LEDS);
   FastLED.setBrightness( BRIGHTNESS );
 
+  teamColor = CRGB::Grey;
   stripColor = CRGB::Green;
   
   fadeValue = 0;
