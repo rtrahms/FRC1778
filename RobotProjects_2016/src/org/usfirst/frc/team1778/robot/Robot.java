@@ -1,5 +1,6 @@
 package org.usfirst.frc.team1778.robot;
 
+import Systems.AutoShooterAssembly;
 import Systems.CANDriveAssembly;
 import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
@@ -44,10 +45,11 @@ public class Robot extends IterativeRobot {
 
 		GyroSensor.initialize();
 		NetworkCommAssembly.initialize();
-		//CANDriveAssembly.initialize();
+		AutoShooterAssembly.initialize();
+		CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
+		CatapultAssembly.initialize();
 		//HookLiftAssembly.initialize();
-		//CatapultAssembly.initialize();
 		//RioDuinoAssembly.initialize();
 
 		//RioDuinoAssembly.SendString("robotInit");
@@ -85,10 +87,11 @@ public class Robot extends IterativeRobot {
 
 		GyroSensor.reset();
 		
-		//CANDriveAssembly.teleopInit();
+		CANDriveAssembly.teleopInit();
+		AutoShooterAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
+		CatapultAssembly.teleopInit();
 		//HookLiftAssembly.teleopInit();
-		//CatapultAssembly.teleopInit();
 		//RioDuinoAssembly.teleopInit();
 		//RioDuinoAssembly.SendString("robotGreen");
 	}
@@ -101,14 +104,20 @@ public class Robot extends IterativeRobot {
 		//System.out.println("Chill out teleopPeriodic call!");		
 				
     	NetworkCommAssembly.updateValues(); 	
-    	//CANDriveAssembly.teleopPeriodic();
+    	CANDriveAssembly.teleopPeriodic();
+    	AutoShooterAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
+    	CatapultAssembly.teleopPeriodic();
     	//HookLiftAssembly.teleopPeriodic();
-    	//CatapultAssembly.teleopPeriodic();
     	//RioDuinoAssembly.teleopPeriodic();
   	
     	//System.out.println("Gyro value = " + GyroSensor.getAngle());
  	}
+	
+	public void disabledInit() {
+    	CatapultAssembly.disabledInit();
+		
+	}
 	
 	/**
 	 * This function is called periodically during test mode

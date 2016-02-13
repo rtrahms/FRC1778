@@ -16,8 +16,8 @@ public class FrontArmAssembly {
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
     //private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*50.0);
-    private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*5.0);
-    private static final double REVERSE_SOFT_ENCODER_LIMIT = 0.0;
+    private static final double SOFT_ENCODER_LIMIT_1 = (4096.0*5.0);
+    private static final double SOFT_ENCODER_LIMIT_2 = 0.0;
     private static final double ARM_SPEED_MULTIPLIER = 2148.0;
     
 	// controller gamepad ID - assumes no other controllers connected
@@ -33,6 +33,7 @@ public class FrontArmAssembly {
     private static CANTalon frontArmMotor, frontArmRollerMotor;
     
     private static long initTime;
+    private static boolean teleopMode;
 
 	// static initializer
 	public static void initialize()
@@ -42,6 +43,7 @@ public class FrontArmAssembly {
 	        gamepad = new Joystick(GAMEPAD_ID);
 	        	                	        
 	        initialized = true;
+	        teleopMode = false;
 	        
 	        // create and initialize arm motor
 	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
@@ -50,21 +52,19 @@ public class FrontArmAssembly {
 		        System.out.println("Initializing front arm motor (speed control)...");
 	        	
 	        	// set up motor for speed control mode
-		        frontArmMotor.disableControl();
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well	        	
 		        //frontArmMotor.setPID(2.0, 0, 9.0);     // 1:4 PID ratio        	
 		        //frontArmMotor.setPID(4.0, 0, 8.0);     // 1:2 PID ratio        	
-	        	frontArmMotor.setForwardSoftLimit(FORWARD_SOFT_ENCODER_LIMIT);    	
+	        	frontArmMotor.setForwardSoftLimit(SOFT_ENCODER_LIMIT_2);    	
 	        	frontArmMotor.enableForwardSoftLimit(true);
-	        	frontArmMotor.setReverseSoftLimit(REVERSE_SOFT_ENCODER_LIMIT);
+	        	frontArmMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_1);
 	        	frontArmMotor.enableReverseSoftLimit(true);	        	
 		        frontArmMotor.enableBrakeMode(true);
 		        
-		        // set speed to zero and enable control
+		        // set speed to zero
 		        frontArmMotor.set(0);
-		        frontArmMotor.enableControl();
 		        
 		        // PercentVbus test ONLY!!!
 		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
@@ -101,6 +101,7 @@ public class FrontArmAssembly {
 	
 	public static void autoInit() {
         initTime = Utility.getFPGATime();
+        teleopMode = false;
 	}
 	
 	public static void autoPeriodic(boolean liftCommand)
@@ -120,6 +121,12 @@ public class FrontArmAssembly {
 		
 	public static void teleopInit() {
         initTime = Utility.getFPGATime();
+        
+        // enable motors
+        frontArmMotor.enable();
+        frontArmRollerMotor.enable();
+        
+        teleopMode = true;
         
     	// initializes encoder to zero
         frontArmMotor.setPosition(0);        	
@@ -157,6 +164,17 @@ public class FrontArmAssembly {
 		// reset input timer;
 		initTime = Utility.getFPGATime();
 		*/
+	}
+	
+	public static void disabledInit()
+	{
+		if (teleopMode) {
+	        frontArmMotor.enableBrakeMode(false);
+	        frontArmRollerMotor.enableBrakeMode(false);
+	        
+	        frontArmMotor.disable();
+	        frontArmRollerMotor.disable();
+		}
 	}
 
 }

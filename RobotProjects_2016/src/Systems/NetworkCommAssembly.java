@@ -38,5 +38,21 @@ public class NetworkCommAssembly {
 		//System.out.println("X:"+centerx+", Y:"+centery+", area:"+area+", width:"+width+", height:"+height);
 
     }
+    
+    public static double getTargetCenterX()
+    {
+    	if (centerx.length == 0)
+    		return -1.0;
+    	else
+    		return centerx[0];
+    }
+    
+    public static double getTargetCenterY()
+    {
+    	if (centery.length == 0)
+    		return -1.0;
+    	else
+    		return centery[0];
+    }
 
 }
