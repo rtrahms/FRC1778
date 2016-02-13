@@ -5,8 +5,8 @@ import Systems.CANDriveAssembly;
 import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
 import Systems.GyroSensor;
-import Systems.HookLiftAssembly;
 import Systems.NetworkCommAssembly;
+import Systems.RioDuinoAssembly;
 import canStateMachine.AutoStateMachine;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -49,14 +49,14 @@ public class Robot extends IterativeRobot {
 		CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
+		RioDuinoAssembly.initialize();
 		//HookLiftAssembly.initialize();
-		//RioDuinoAssembly.initialize();
 
-		//RioDuinoAssembly.SendString("robotInit");
+		RioDuinoAssembly.SendString("robotInit");
 
 	}
 
-	// called one tim on entry into autonomous
+	// called one time on entry into autonomous
 	public void autonomousInit() {
 
 		teamColor = DriverStation.getInstance().getAlliance();
@@ -65,12 +65,13 @@ public class Robot extends IterativeRobot {
 		System.out.println("in autonomousInit(), station #" + teamLocation);
 
 		// start up the robot team color
-		/*
-		 * if (teamColor == DriverStation.Alliance.Blue)
-		 * RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Blue); else
-		 * RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Red);
-		 */
+		 if (teamColor == DriverStation.Alliance.Blue)
+			 RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Blue); 
+		 else
+			 RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Red);
 
+		RioDuinoAssembly.autonomousInit();
+		
 		// start the autonomous state machine
 		//autoSM.start();
 	}
@@ -91,17 +92,14 @@ public class Robot extends IterativeRobot {
 		AutoShooterAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
+		RioDuinoAssembly.teleopInit();
 		//HookLiftAssembly.teleopInit();
-		//RioDuinoAssembly.teleopInit();
-		//RioDuinoAssembly.SendString("robotGreen");
 	}
 
 	/**
 	 * This function is called periodically during operator control
 	 */
 	public void teleopPeriodic() {
-
-		//System.out.println("Chill out teleopPeriodic call!");		
 				
     	NetworkCommAssembly.updateValues(); 	
     	CANDriveAssembly.teleopPeriodic();
@@ -109,14 +107,17 @@ public class Robot extends IterativeRobot {
     	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
     	//HookLiftAssembly.teleopPeriodic();
-    	//RioDuinoAssembly.teleopPeriodic();
   	
     	//System.out.println("Gyro value = " + GyroSensor.getAngle());
  	}
 	
 	public void disabledInit() {
-    	CatapultAssembly.disabledInit();
-		
+		RioDuinoAssembly.disabledInit();
+    	CatapultAssembly.disabledInit();		
+	}
+	
+	public void testInit() {
+		RioDuinoAssembly.testInit();
 	}
 	
 	/**

@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.I2C;
 
 public class RioDuinoAssembly {
 	
-	public static enum Color { Black, Red, Blue, Yellow, Green, Purple};
+	public static enum Color { Black, Red, Blue, Yellow, Orange, Green, Purple, Grey};
 	
 	private static boolean initialized = false;
 	private static Color teamColor;
@@ -12,15 +12,12 @@ public class RioDuinoAssembly {
 	private static I2C i2cBus;
 	
 	public static void initialize() {
-		i2cBus = new I2C(I2C.Port.kMXP, 4);		
-		
-		// turn on camera LED ring
-		SendString("Camera Ring On");
+		i2cBus = new I2C(I2C.Port.kMXP, 4);				
 	}
 	
 	public static void setTeamColor(Color col) {
 		teamColor = col;
-		sendColor(teamColor);
+		sendTeamColor(teamColor);
 	}
 	
 	public static void setTeamColor() {
@@ -28,35 +25,62 @@ public class RioDuinoAssembly {
 	}
 		
 	public static void autonomousInit() {
+		SendString("colorGreen");
+		SendString("autoInit");
 	}
 	
 	public static void teleopInit() {
+		SendString("colorGreen");
+		SendString("teleopInit");
 	}
 	
-	public static void teleopPeriodic() {		
+	public static void testInit() {
+		SendString("colorOrange");		
+		SendString("testInit");
 	}
 	
+	public static void disabledInit() {
+		sendTeamColor(teamColor);
+		SendString("disabledInit");
+	}
+		
 	public static void sendColor(Color col)
 	{
 		switch (col) {
 		case Red:
-			SendString("Robot Red");
+			SendString("colorRed");
 			break;
 		case Blue:
-			SendString("Robot Blue");
+			SendString("colorBlue");
 			break;
 		case Yellow:
-			SendString("Robot Yellow");
+			SendString("colorYellow");
 			break;
 		case Green:
-			SendString("Robot Green");
+			SendString("colorGreen");
 			break;
 		case Purple:
-			SendString("Robot Purple");
+			SendString("colorPurple");
+			break;
+		case Grey:
+			SendString("colorGrey");
 			break;
 		case Black:
 		default:
 			SendString("Robot Black");
+			break;
+		}
+	}
+	
+	private static void sendTeamColor(Color col)
+	{
+		switch (col) {
+		case Red:
+			SendString("teamRed");
+			break;
+		case Blue:
+		default:
+			SendString("teamBlue");
 			break;
 		}
 	}
