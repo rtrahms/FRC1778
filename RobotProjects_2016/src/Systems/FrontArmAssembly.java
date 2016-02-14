@@ -47,31 +47,29 @@ public class FrontArmAssembly {
 	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
 	        if (frontArmMotor != null) {
 	        	
-		        System.out.println("Initializing front arm motor (speed control)...");
+		        System.out.println("Initializing front arm motor (position control)...");
 	        	
-		        /*
 	        	// set up motor for control mode
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);
-		        frontArmMotor.setSafetyEnabled(false);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well	        	
 		        //frontArmMotor.setPID(2.0, 0, 9.0);     // 1:4 PID ratio        	
-		        //frontArmMotor.setPID(4.0, 0, 8.0);     // 1:2 PID ratio    
+		        //frontArmMotor.setPID(4.0, 0, 8.0);     // 1:2 PID ratio   
+		        frontArmMotor.enableControl();    // enable PID control
+		        frontArmMotor.setPosition(0);     // initializes encoder to zero 	
 		        
+		        // set limits and brake mode
 	        	frontArmMotor.setForwardSoftLimit(SOFT_ENCODER_LIMIT_1);    	
 	        	frontArmMotor.enableForwardSoftLimit(true);
 	        	frontArmMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_2);
 	        	frontArmMotor.enableReverseSoftLimit(true);	        	
 		        frontArmMotor.enableBrakeMode(true);
 		        
-		        // set speed to to current
+		        // set position to current
 		        //frontArmMotor.set(frontArmMotor.getPosition());
-		        */
-		        // PercentVbus test ONLY!!!
-		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
 		        
-	        	// initializes encoder to zero
-		        frontArmMotor.setPosition(0);        	
+		        // PercentVbus test ONLY!!!
+		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	        
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm motor not initialized!");
@@ -86,7 +84,6 @@ public class FrontArmAssembly {
 		        frontArmRollerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         		        	
 		        // no brake mode, no limits on rollers
-		        frontArmRollerMotor.setSafetyEnabled(false);
 		        frontArmRollerMotor.enableBrakeMode(false);
 		        frontArmRollerMotor.enableForwardSoftLimit(false);
 		        frontArmRollerMotor.enableReverseSoftLimit(false);
@@ -116,15 +113,8 @@ public class FrontArmAssembly {
 	}
 		
 	public static void teleopInit() {        
-        // enable motors
-        //frontArmMotor.enable();
-        //frontArmRollerMotor.enable();
         
-        teleopMode = true;
-        
-    	// initializes encoder to zero
-        frontArmMotor.setPosition(0);        	
-		
+        teleopMode = true;		
 	}
 	
 	public static void teleopPeriodic()
@@ -142,18 +132,16 @@ public class FrontArmAssembly {
 		frontArmMotor.set(armSpeed);
 		*/
 		
-		/*
 		double newArmPos = gamepad.getRawAxis(1);
 		if(Math.abs(newArmPos) <= ARM_DEADZONE) {
 			newArmPos = 0.0;
 		}
 		newArmPos = (newArmPos * ARM_SPEED_MULTIPLIER);
 		System.out.println(" input = " + newArmPos + "enc pos = " + frontArmMotor.getPosition());
-		//frontArmMotor.set(newArmPos);
-		*/
+		frontArmMotor.set(newArmPos);
 		
 		// PercentVbus test ONLY!!
-		frontArmMotor.set(gamepad.getRawAxis(1));
+		//frontArmMotor.set(gamepad.getRawAxis(1));
 		
 		// check for roller motion (right gamepad joystick)
 		double rollerSpeed = gamepad.getRawAxis(3);
@@ -166,12 +154,8 @@ public class FrontArmAssembly {
 	
 	public static void disabledInit()
 	{
-		/*
-		if (teleopMode) {
-	        frontArmMotor.enableBrakeMode(false);
-	        frontArmRollerMotor.enableBrakeMode(false);
-		}
-		*/
+		if (!initialized)
+			initialize();	
 	}
 
 }

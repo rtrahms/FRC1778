@@ -93,7 +93,8 @@ public class AutoShooterAssembly {
 	
 	public static void disabledInit()
 	{
-		// TODO
+		if (!initialized)
+			initialize();
 	}
 	
 	private static boolean calibratePosX()

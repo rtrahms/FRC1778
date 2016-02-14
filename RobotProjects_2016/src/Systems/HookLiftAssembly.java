@@ -159,7 +159,8 @@ public class HookLiftAssembly {
 
 	public static void disabledInit()
 	{
-		// TODO
+		if (!initialized)
+			initialize();
 	}
 
 }

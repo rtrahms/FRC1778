@@ -36,6 +36,8 @@ public class Robot extends IterativeRobot {
 	// particulars about the team number and color
 	DriverStation.Alliance teamColor;
 	int teamLocation;
+	
+	boolean teleopMode = false;
 
 	public void robotInit() {
 
@@ -51,16 +53,21 @@ public class Robot extends IterativeRobot {
 		AutoShooterAssembly.initialize();
 		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
-		RioDuinoAssembly.initialize();
-		HookLiftAssembly.initialize();
+		//HookLiftAssembly.initialize();
 
+		RioDuinoAssembly.initialize();
 		RioDuinoAssembly.SendString("robotInit");
+		
+		// reset the catapult (to load ball)
+		CatapultAssembly.reset();
 
 	}
 
 	// called one time on entry into autonomous
 	public void autonomousInit() {
 
+		teleopMode = false;
+		
 		teamColor = DriverStation.getInstance().getAlliance();
 		teamLocation = DriverStation.getInstance().getLocation();
 
@@ -71,7 +78,7 @@ public class Robot extends IterativeRobot {
 			 RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Blue); 
 		 else
 			 RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Red);
-
+		
 		RioDuinoAssembly.autonomousInit();
 		
 		// start the autonomous state machine
@@ -88,14 +95,17 @@ public class Robot extends IterativeRobot {
 	// called one time on entry into teleop
 	public void teleopInit() {
 
+		teleopMode = true;
+		
 		GyroSensor.reset();
 		
 		CANDriveAssembly.teleopInit();
 		AutoShooterAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
+		//HookLiftAssembly.teleopInit();
+
 		RioDuinoAssembly.teleopInit();
-		HookLiftAssembly.teleopInit();
 	}
 
 	/**
@@ -109,20 +119,23 @@ public class Robot extends IterativeRobot {
     	AutoShooterAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
-    	HookLiftAssembly.teleopPeriodic();
+    	//HookLiftAssembly.teleopPeriodic();
   	
     	//System.out.println("Gyro value = " + GyroSensor.getAngle());
  	}
 	
 	public void disabledInit() {
-		RioDuinoAssembly.disabledInit();
     	AutoShooterAssembly.disabledInit();
     	FrontArmAssembly.disabledInit();
     	CatapultAssembly.disabledInit();		
-    	HookLiftAssembly.disabledInit();
+    	//HookLiftAssembly.disabledInit();
+    	
+		RioDuinoAssembly.disabledInit();
 	}
 	
 	public void testInit() {
+		teleopMode = false;
+		
 		RioDuinoAssembly.testInit();
 	}
 	

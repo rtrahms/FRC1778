@@ -148,7 +148,8 @@ public class CANDriveAssembly {
 	
 	public static void disabledInit()
 	{
-		// TODO
+		if (!initialized)
+			initialize();
 	}
 
 	private static void drive(double left, double right, double strafe) {
