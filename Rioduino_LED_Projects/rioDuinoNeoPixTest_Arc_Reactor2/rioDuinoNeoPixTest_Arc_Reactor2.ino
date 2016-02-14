@@ -11,13 +11,10 @@
 #define NUM_LEDS 40
 #define PIN 6
 
-#define COLOR_ORDER GRB
 #define CHIPSET     NEOPIXEL
 
-#define BRIGHTNESS  200
+#define BRIGHTNESS  150
 #define FRAMES_PER_SECOND 60
-
-CRGB leds[NUM_LEDS];
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -27,7 +24,6 @@ CRGB leds[NUM_LEDS];
 //   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 
-//Adafruit_NeoPixel strip = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
 CRGB ledStrip[NUM_LEDS];
 
 // states defined for the arduino.  These equate to strings received by the Roborio.
@@ -39,9 +35,9 @@ enum ColorState { inactive, autonomous, teleop, test };
 
 // globals
 ColorState cs = inactive;
-uint32_t stripColor;
-uint32_t teamColor;
-float fadeValue;
+CRGB stripColor;
+CRGB teamColor;
+uint8_t fadeValue;
 uint8_t brightness;
 bool increasing;
 
@@ -53,11 +49,6 @@ bool increasing;
 /*********************** setup method **************************/
 // called once during arduino startup, or on a board reset
 void setup() {
-  // This is for Trinket 5V 16MHz, you can remove these three lines if you are not using a Trinket
-  #if defined (__AVR_ATtiny85__)
-    if (F_CPU == 16000000) clock_prescale_set(clock_div_1);
-  #endif
-  // End of trinket special code
 
   Serial.begin(57600);
   Serial.println("Starting up RioDuino!");
@@ -65,14 +56,11 @@ void setup() {
   Wire.begin(4);                // join i2c bus with address #4
   Wire.onReceive(receiveEvent); // register event
 
-  // add camera light wheel
-  //FastLED.addLeds<CHIPSET, WHEEL_PIN>(wheelLeds, NUM_LEDS);
-
   // add main strip
   FastLED.addLeds<CHIPSET, PIN>(ledStrip, NUM_LEDS);
   FastLED.setBrightness( BRIGHTNESS );
 
-  teamColor = CRGB::Grey;
+  teamColor = CRGB::Green;
   stripColor = CRGB::Green;
   
   fadeValue = 0;
@@ -88,14 +76,23 @@ void loop() {
     //colorWipe(stripColor, 50);
     //theaterChase(stripColor, 100);
     //fireMethod();
-    
+        
+    //colorWipe(teamColor,50);
+    //colorWipe(CRGB::Green,50);
+    //rainbow(100);
+
     switch (cs) {
       case inactive:
-        //rainbow(100);
         colorPulse(teamColor,50);
         break;
+      case autonomous:
+        colorWipe(stripColor,50);
+        break;
+      case teleop:
+        colorWipe(stripColor,50);
+        break;
       default:
-        colorWipe(stripColor,1);
+        rainbow(50);
         break;
     }
 }
@@ -146,6 +143,10 @@ void receiveEvent(int howMany)
   {
     stripColor = CRGB::Grey;
   }
+  else if (receiveStr = "colorBlack")
+  {
+    stripColor = CRGB::Black;
+  }
   else if (receiveStr = "teamRed")
   {
     teamColor = CRGB::Red;
@@ -172,7 +173,7 @@ void receiveEvent(int howMany)
   }
   else if (receiveStr == "disabledInit")
   {
-    stripColor= CRGB(31,31,31);  // grey
+    //stripColor= CRGB(31,31,31);  // grey
     cs = inactive;
   }
 }
@@ -180,41 +181,32 @@ void receiveEvent(int howMany)
 /*************** color pulse method ******************/
 // pulses a color between on and off
 // speed of the pulse is based on the wait parameter
-void colorPulse(uint32_t inputColor, uint8_t wait)
+void colorPulse(CRGB inputColor, uint8_t wait)
 {
-    const float upper_brightness = 0.5;
-    const float lower_brightness = 0.0;
-
     uint16_t i;
-    uint8_t red = (uint8_t)(((float)((inputColor & RED) >> 16)) * fadeValue);
-    uint8_t green = (uint8_t)(((float)((inputColor & GREEN)>> 8)) * fadeValue);
-    uint8_t blue = (uint8_t)((float)(inputColor & BLUE) * fadeValue);
-    uint32_t c = CRGB(red,green,blue);
 
     // update fadeValue
     if (increasing)
     {
-      fadeValue += 0.03;
+      fadeValue++;
     }
     else
     {
-      fadeValue -= 0.03;
+      fadeValue--;
     }
 
     // update direction based on limits
-    if (fadeValue > upper_brightness)
+    if (fadeValue == 255)
     {
-      fadeValue = upper_brightness;
       increasing = false;
     }
-    if (fadeValue < lower_brightness)
+    if (fadeValue == 0)
     {
-        fadeValue = lower_brightness;
         increasing = true;
     }
     
     for(i=0; i< NUM_LEDS; i++) {
-      ledStrip[i] = c;
+      ledStrip[i] = CHSV(inputColor,255,fadeValue);
     }
     FastLED.show();
     delay(wait);
@@ -224,7 +216,7 @@ void colorPulse(uint32_t inputColor, uint8_t wait)
 /*************** colorWipe method *********************/
 // Fill the dots one after the other with a color
 // speed of the fill is based on the wait parameter
-void colorWipe(uint32_t c, uint8_t wait) {
+void colorWipe(CRGB c, uint8_t wait) {
   for(uint16_t i=0; i<NUM_LEDS; i++) {
     ledStrip[i] = c;
     FastLED.show();
@@ -236,25 +228,12 @@ void colorWipe(uint32_t c, uint8_t wait) {
 // cycles through ALL colors for all neopixels 
 // speed of cycle based on wait parameter
 void rainbow(uint8_t wait) {
-  uint16_t i, j;
+  uint16_t i;
+  uint8_t hue;
 
-  for(j=0; j<256; j++) {
+  for(hue=0; hue<256; hue++) {
     for(i=0; i< NUM_LEDS; i++) {
-      ledStrip[i] = Wheel((i+j) & 255);
-    }
-    FastLED.show();
-    delay(wait);
-  }
-}
-
-/*************** rainbowCycle method *******************/
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
-
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
-    for(i=0; i< NUM_LEDS; i++) {
-      ledStrip[i] = Wheel(((i * 256 / NUM_LEDS) + j) & 255);
+      ledStrip[i] = CHSV(hue, 255, 255); 
     }
     FastLED.show();
     delay(wait);
@@ -263,58 +242,22 @@ void rainbowCycle(uint8_t wait) {
 
 /******************** theaterChase method ****************/
 //Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
+void theaterChase(CRGB c, uint8_t wait) {
   for (int j=0; j<10; j++) {  //do 10 cycles of chasing
     for (int q=0; q < 3; q++) {
       for (int i=0; i < NUM_LEDS; i=i+3) {
         ledStrip[i+q] = c;    //turn every third pixel on
       }
-      FastLED.show();
-
-      delay(wait);
 
       for (int i=0; i < NUM_LEDS; i=i+3) {
-        ledStrip[i+q] = 0;        //turn every third pixel off
+        ledStrip[i+q] = CRGB::Black;        //turn every third pixel off
       }
+      FastLED.show();
+      
+      delay(wait);
     }
   }
 }
-
-/****************** theaterChaseRainbow ********************/
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (int i=0; i < NUM_LEDS; i=i+3) {
-        ledStrip[i+q] = Wheel( (i+j) % 255);    //turn every third pixel on
-      }
-      FastLED.show();
-
-      delay(wait);
-
-      for (int i=0; i < NUM_LEDS; i=i+3) {
-        ledStrip[i+q] = 0;        //turn every third pixel off
-      }
-    }
-  }
-}
-
-/***************** Wheel utility method *******************/
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    return CRGB(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    return CRGB(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return CRGB(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-
 
 /****************************************************************************************/
 /*********************************** Fire2012 code **************************************/
@@ -400,7 +343,7 @@ void Fire2012()
 
     // Step 4.  Map from heat cells to LED colors
     for( int j = 0; j < NUM_LEDS; j++) {
-        leds[j] = HeatColorUtil( heat[j]);
+        ledStrip[j] = HeatColorUtil( heat[j]);
     }
 }
 
