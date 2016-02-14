@@ -146,6 +146,11 @@ public class CANDriveAssembly {
 		
 	}
 	
+	public static void disabledInit()
+	{
+		// TODO
+	}
+
 	private static void drive(double left, double right, double strafe) {
 		drive.tankDrive(left, right, USE_SQUARED_INPUTS);
 		//mLateral_1.set(strafe);

@@ -6,27 +6,24 @@ import edu.wpi.first.wpilibj.Utility;
 
 public class HookLiftAssembly {
 	private static boolean initialized = false;
-	
-    // minimum increment (for joystick dead zone)
-    private static final long CYCLE_USEC = 250000;
-            	
+	            	
 	//  controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 2;
 	
     private static Joystick gamepad;
     
     // deployment motor constants
-    //private static final int DEPLOY_MOTOR_ID = 7;
+    //private static final int DEPLOY_MOTOR_ID = 13;
     //private static final int ARM_STOW_POS = 0;
     //private static final int ARM_DEPLOY_POS = 90;
     
     // telescoping motor constants
-    private static final int TELESCOPE_MOTOR_ID = 8;
+    private static final int TELESCOPE_MOTOR_ID = 14;
     private static final double TELESCOPE_RETRACT_POS = 0.0;
     private static final double TELESCOPE_EXTEND_POS = (4096.0*12.0);
     
     // winch motor constants
-    private static final int WINCH_MOTOR_ID = 9;  
+    private static final int WINCH_MOTOR_ID = 15;  
     private static final double WINCH_DEAD_ZONE = 0.2;
     private static final double WINCH_IN_POS = 0.0;
     private static final double WINCH_MAX_OUT_POS = (4096.0*12.0);
@@ -34,7 +31,6 @@ public class HookLiftAssembly {
     
     private static CANTalon telescopeMotor, winchMotor;
     
-    private static long initTime;
     private static boolean telescopePressed;    
     private static boolean telescopeUp;
 
@@ -60,8 +56,8 @@ public class HookLiftAssembly {
 		        System.out.println("Initializing telescoping motor (speed control)...");
 	        	
 	        	// set up motor for position control mode
-		        telescopeMotor.disableControl();
 		        telescopeMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
+		        telescopeMotor.setSafetyEnabled(false);
 		        telescopeMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        telescopeMotor.setPID(2.0, 0, 18.0);     // works pretty well
 		        telescopeMotor.enableBrakeMode(true);
@@ -70,9 +66,8 @@ public class HookLiftAssembly {
 		        telescopeMotor.setReverseSoftLimit(TELESCOPE_RETRACT_POS);
 		        telescopeMotor.enableReverseSoftLimit(true);
 		        
-		        //set speed to zero and enable control
+		        //set speed to zero
 		        telescopeMotor.set(0);
-		        telescopeMotor.enableControl();
 	        	
 	        	// initializes encoder to zero
 		        telescopeMotor.setPosition(0);
@@ -87,8 +82,8 @@ public class HookLiftAssembly {
 		        System.out.println("Initializing winch motor (speed control)...");
 	        	
 	        	// set up motor for speed control mode
-		        winchMotor.disableControl();
 		        winchMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
+		        winchMotor.setSafetyEnabled(false);
 		        winchMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        winchMotor.setPID(2.0, 0, 18.0);     // works pretty well
 		        winchMotor.enableBrakeMode(true);
@@ -99,7 +94,6 @@ public class HookLiftAssembly {
 		        
 		        //set speed to zero and enable control
 		        winchMotor.set(0);
-		        winchMotor.enableControl();
 		        
 	        	// initializes encoder to zero
 		        winchMotor.setPosition(0);
@@ -110,18 +104,12 @@ public class HookLiftAssembly {
 		}
 	}
 	
-	public static void autoInit() {
-        initTime = Utility.getFPGATime();
+	public static void autoInit() 
+	{
 	}
 	
-	public static void autoPeriodic(boolean liftCommand)
+	public static void autoPeriodic()
 	{
-		long currentTime = Utility.getFPGATime();
-
-		// if not long enough, just return
-		if ((currentTime - initTime) < CYCLE_USEC)
-			return;
-
 	}
 	
 	public static void autoStop()
@@ -129,18 +117,12 @@ public class HookLiftAssembly {
 		// nothing to clean up here
 	}
 		
-	public static void teleopInit() {
-        initTime = Utility.getFPGATime();
-		
+	public static void teleopInit() 
+	{
 	}
 	
 	public static void teleopPeriodic()
 	{		
-		long currentTime = Utility.getFPGATime();
-		
-		// if not long enough, just return
-		if ((currentTime - initTime) < CYCLE_USEC)
-			return;
 		
 		// check for telescope trigger
 		if (gamepad.getRawButton(3) && !telescopePressed)
@@ -172,11 +154,12 @@ public class HookLiftAssembly {
 		
 		double newWinchTarget = winchMotor.getPosition() + (incrementalWinchPos * WINCH_MOTION_MULTIPLIER);
 		if ((newWinchTarget >= WINCH_IN_POS) && (newWinchTarget <= WINCH_MAX_OUT_POS))
-			winchMotor.set(newWinchTarget);
-		
-		// reset init timer
-        initTime = Utility.getFPGATime();
-	
+			winchMotor.set(newWinchTarget);	
+	}
+
+	public static void disabledInit()
+	{
+		// TODO
 	}
 
 }

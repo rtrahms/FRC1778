@@ -5,6 +5,7 @@ import Systems.CANDriveAssembly;
 import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
 import Systems.GyroSensor;
+import Systems.HookLiftAssembly;
 import Systems.NetworkCommAssembly;
 import Systems.RioDuinoAssembly;
 import canStateMachine.AutoStateMachine;
@@ -45,12 +46,13 @@ public class Robot extends IterativeRobot {
 
 		GyroSensor.initialize();
 		NetworkCommAssembly.initialize();
-		AutoShooterAssembly.initialize();
+		
 		CANDriveAssembly.initialize();
+		AutoShooterAssembly.initialize();
 		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
 		RioDuinoAssembly.initialize();
-		//HookLiftAssembly.initialize();
+		HookLiftAssembly.initialize();
 
 		RioDuinoAssembly.SendString("robotInit");
 
@@ -93,7 +95,7 @@ public class Robot extends IterativeRobot {
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
 		RioDuinoAssembly.teleopInit();
-		//HookLiftAssembly.teleopInit();
+		HookLiftAssembly.teleopInit();
 	}
 
 	/**
@@ -102,18 +104,22 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 				
     	NetworkCommAssembly.updateValues(); 	
+    	
     	CANDriveAssembly.teleopPeriodic();
     	AutoShooterAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
-    	//HookLiftAssembly.teleopPeriodic();
+    	HookLiftAssembly.teleopPeriodic();
   	
     	//System.out.println("Gyro value = " + GyroSensor.getAngle());
  	}
 	
 	public void disabledInit() {
 		RioDuinoAssembly.disabledInit();
+    	AutoShooterAssembly.disabledInit();
+    	FrontArmAssembly.disabledInit();
     	CatapultAssembly.disabledInit();		
+    	HookLiftAssembly.disabledInit();
 	}
 	
 	public void testInit() {
@@ -123,8 +129,8 @@ public class Robot extends IterativeRobot {
 	/**
 	 * This function is called periodically during test mode
 	 */
-	public void testPeriodic() {
-
+	public void testPeriodic() 
+	{
 	}
 
 }

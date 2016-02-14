@@ -12,7 +12,11 @@ public class RioDuinoAssembly {
 	private static I2C i2cBus;
 	
 	public static void initialize() {
-		i2cBus = new I2C(I2C.Port.kMXP, 4);				
+		if (!initialized)
+		{
+			i2cBus = new I2C(I2C.Port.kMXP, 4);	
+			initialized = true;
+		}
 	}
 	
 	public static void setTeamColor(Color col) {
@@ -40,7 +44,10 @@ public class RioDuinoAssembly {
 	}
 	
 	public static void disabledInit() {
-		sendTeamColor(teamColor);
+		if (!initialized)
+			initialize();
+		
+		//sendTeamColor(teamColor);
 		SendString("disabledInit");
 	}
 		
@@ -67,7 +74,7 @@ public class RioDuinoAssembly {
 			break;
 		case Black:
 		default:
-			SendString("Robot Black");
+			SendString("colorBlack");
 			break;
 		}
 	}
@@ -87,11 +94,18 @@ public class RioDuinoAssembly {
 	
 	public static void SendStateChange(char state)
 	{
+		if (!initialized)
+			return;
+		
 		i2cBus.write(0x02, state);
 	}
 	
 	public static void SendString(String writeStr)
 	{
+		
+		if (!initialized)
+			return;
+		
 		char[] CharArray = writeStr.toCharArray();
 		byte[] WriteData = new byte[CharArray.length];
 		for (int i = 0; i < CharArray.length; i++) {

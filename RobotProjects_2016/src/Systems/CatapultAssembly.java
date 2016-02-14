@@ -6,13 +6,7 @@ import edu.wpi.first.wpilibj.Utility;
 
 public class CatapultAssembly {
 	private static boolean initialized = false;
-	
-    // minimum increment (for joystick dead zone)
-    private static final long CYCLE_USEC = 250000;
-    
-    // catapult reset time (after firing) - 4 sec
-    private static final long CATAPULT_RESET_WAIT_USEC = 2000000;
-            	
+	                	
 	// joystick device ids
 	private static final int LEFT_JOYSTICK_ID = 0;
 	private static final int RIGHT_JOYSTICK_ID = 1;
@@ -22,18 +16,17 @@ public class CatapultAssembly {
            
     // catapult reset motor
     private static final int MASTER_CATAPULT_MOTOR_ID = 9;
-    private static final int SLAVE_CATAPULT_MOTOR_ID = 10;
+    //private static final int SLAVE_CATAPULT_MOTOR_ID = 10;
     
     private static final int CATAPULT_FIRE_INCREMENT = 1024;
     private static final int CATAPULT_READY_POSITION = (int) (4096.0*5.25 - CATAPULT_FIRE_INCREMENT);
     
-    private static CANTalon masterCatapultMotor, slaveCatapultMotor;
+    private static CANTalon masterCatapultMotor;
+    //private static CANTalong slaveCatapultMotor;
     
-    private static long initCycleTime;
     private static boolean pressed;
     private static boolean catapultFired;
     private static boolean teleopMode;
-    private static int counter;
 
 	// static initializer
 	public static void initialize()
@@ -47,7 +40,6 @@ public class CatapultAssembly {
 	        catapultFired = false;
 	        pressed = false;
 	        teleopMode = false;
-	        counter = 0;
 	        
 	        System.out.println("Creating motor objects...");
 	        
@@ -78,6 +70,7 @@ public class CatapultAssembly {
 	        	System.out.println("ERROR: Master catapult motor not initialized!");
 
 	        // initialize slave catapult motor
+	        /*
 	        slaveCatapultMotor = new CANTalon(SLAVE_CATAPULT_MOTOR_ID);
 	        
 	        if (slaveCatapultMotor != null) {
@@ -85,7 +78,7 @@ public class CatapultAssembly {
 		        System.out.println("Initializing slave catapult motor (follower mode)...");
 	        	
 	        	// set up slave motor for follower control mode (follows master above, but mirrored)
-		        masterCatapultMotor.setSafetyEnabled(false);
+		        slaveCatapultMotor.setSafetyEnabled(false);
 		        slaveCatapultMotor.changeControlMode(CANTalon.TalonControlMode.Follower);
 		        slaveCatapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        slaveCatapultMotor.setPID(2.0, 0, 18.0);     // works pretty well
@@ -98,30 +91,22 @@ public class CatapultAssembly {
 		        slaveCatapultMotor.set(MASTER_CATAPULT_MOTOR_ID);
 	        	
 	        	// initializes slave encoder to zero
-		        slaveCatapultMotor.setPosition(0);
-	        	
+		        slaveCatapultMotor.setPosition(0); 	
 	        }
 	        else
 	        	System.out.println("ERROR: Slave catapult motor not initialized!");
-		
+			*/
 		
 		}
 	}
 	
 	public static void autoInit() {
-        initCycleTime = Utility.getFPGATime();
         teleopMode = false;
         
 	}
 	
 	public static void autoPeriodic(boolean liftCommand)
 	{
-		long currentTime = Utility.getFPGATime();
-
-		// if not long enough, just return
-		if ((currentTime - initCycleTime) < CYCLE_USEC)
-			return;
-
 	}
 	
 	public static void autoStop()
@@ -130,11 +115,10 @@ public class CatapultAssembly {
 	}
 		
 	public static void teleopInit() {
-        initCycleTime = Utility.getFPGATime();	
-                
+		
         // enable motors
         masterCatapultMotor.enable();
-        slaveCatapultMotor.enable();
+        //slaveCatapultMotor.enable();
         
         // simple vbus test ONLY - NOT FOR POSITION MODE
         //masterCatapultMotor.set(0.5);
@@ -146,20 +130,14 @@ public class CatapultAssembly {
 	}
 	
 	public static void teleopPeriodic()
-	{		
-		long currentTime = Utility.getFPGATime();
-		
-		// if not long enough, just return
-		if ((currentTime - initCycleTime) < CYCLE_USEC)
-			return;
-		
+	{				
 		//System.out.println("Read enc position =" + masterCatapultMotor.getEncPosition());
 		
 		// check for catapult triggers
 		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
 			pressed = true;
 				
-		System.out.println("motor enc = "+ masterCatapultMotor.getEncPosition());
+		//System.out.println("motor enc = "+ masterCatapultMotor.getEncPosition());
 		
 		// check for catapult trigger
 		if (pressed) {
@@ -168,15 +146,14 @@ public class CatapultAssembly {
 				shoot();
 			else
 				reset();
-		}
-		
-		// reset cycle timer;
-		initCycleTime = Utility.getFPGATime();
-		
+		}		
 	}
 	
 	public static void disabledInit()
 	{
+		if (!initialized)
+			initialize();
+		
 		// if we are exiting teleop mode...
 		if (teleopMode)
 		{
@@ -186,11 +163,11 @@ public class CatapultAssembly {
 			
 			// set motors to coast mode
 			masterCatapultMotor.enableBrakeMode(false);
-			slaveCatapultMotor.enableBrakeMode(false);
+			//slaveCatapultMotor.enableBrakeMode(false);
 			
 			// disable motors
 			masterCatapultMotor.disable();
-			slaveCatapultMotor.disable();
+			//slaveCatapultMotor.disable();
 		}
 	}
 

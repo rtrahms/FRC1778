@@ -6,12 +6,10 @@ import edu.wpi.first.wpilibj.Utility;
 public class AutoShooterAssembly {
 	
 	private static boolean initialized = false;
-	
-    private static final long CYCLE_USEC = 250000;
-	
+		
 	private static final int LEFT_JOYSTICK_ID = 0;
 	private static final int RIGHT_JOYSTICK_ID = 1;
-	private static final int TARGETING_BUTTON_ID = 0;
+	private static final int TARGETING_BUTTON_ID = 9;
 	
 	private static Joystick leftJoy, rightJoy;
 	
@@ -23,9 +21,7 @@ public class AutoShooterAssembly {
 	private static boolean calibratedX, calibratedY;
 	
 	private static boolean targeting = false;
-	
-    private static long initTime;
-	
+		
 	public static void initialize()
 	{
 		if (!initialized)
@@ -46,7 +42,6 @@ public class AutoShooterAssembly {
 	
 	public static void teleopInit()
 	{
-        initTime = Utility.getFPGATime();
 		targeting = false;
 		actualPosX = -1;
 		actualPosY = -1;
@@ -56,14 +51,8 @@ public class AutoShooterAssembly {
 	
 	public static void teleopPeriodic()
 	{
-		long currentTime = Utility.getFPGATime();
-		
-		// if not long enough, just return
-		if ((currentTime - initTime) < CYCLE_USEC)
-			return;
-		
 		// one button to start auto trigger mode
-		if (leftJoy.getRawButton(TARGETING_BUTTON_ID))
+		if (leftJoy.getRawButton(TARGETING_BUTTON_ID) && !targeting)
 		{
 			System.out.println("AutoShooterAssembly:  autotargeting mode ON");
 			targeting = true;
@@ -74,7 +63,7 @@ public class AutoShooterAssembly {
 		}
 		
 		// either joystick trigger pressed to stop auto targeting mode
-		if (leftJoy.getTrigger() || rightJoy.getTrigger())
+		if ((leftJoy.getTrigger() || rightJoy.getTrigger()) && targeting)
 		{
 			System.out.println("AutoShooterAssembly:  autotargeting mode OFF");
 			targeting = false;
@@ -97,9 +86,14 @@ public class AutoShooterAssembly {
 			{
 				// both are calibrated - shoot the ball!
 				System.out.println("AutoTarget: SHOOTING!");
-				CatapultAssembly.shoot();
+				//CatapultAssembly.shoot();
 			}
 		}
+	}
+	
+	public static void disabledInit()
+	{
+		// TODO
 	}
 	
 	private static boolean calibratePosX()
