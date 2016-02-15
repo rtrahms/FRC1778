@@ -13,7 +13,8 @@
 
 #define CHIPSET     NEOPIXEL
 
-#define BRIGHTNESS  150
+#define BRIGHTNESS  10
+#define CAM_BRIGHTNESS 200
 #define FRAMES_PER_SECOND 120
 
 // Parameter 1 = number of pixels in strip
@@ -76,9 +77,10 @@ void setup() {
 // running as fast as processor will allow
 void loop() {
 
-    // test patterns
+    // test patterns area
     //colorWipe(teamColor,50);
     //colorWipe(CRGB::Green,50);
+    //colorChase(teamColor,CRGB::White, 40);
     //colorPulse(teamColor,1);
     //rainbow(30);
     //fireMethod();
@@ -86,16 +88,21 @@ void loop() {
     // change colors based on system state
     switch (cs) {
       case inactive:
-        colorPulse(teamHue,5);
+        FastLED.setBrightness( BRIGHTNESS );
+        //colorPulse(teamHue,5);
+        theaterChase(teamColor,CRGB::White, 1, 150);
         break;
       case autonomous:
+        FastLED.setBrightness( CAM_BRIGHTNESS );
         colorWipe(stripColor,50);
         break;
       case teleop:
+        FastLED.setBrightness( CAM_BRIGHTNESS );
         colorWipe(stripColor,50);
         break;
       case test:
       default:
+        FastLED.setBrightness( BRIGHTNESS );
         rainbow(20);
         break;
     }
@@ -218,7 +225,6 @@ void colorPulse(uint8_t teamHue, uint8_t wait)
     }
     FastLED.show();
     delay(wait);
-  
 }
 
 /*************** colorWipe method *********************/
@@ -248,25 +254,75 @@ void rainbow(uint8_t wait) {
   }
 }
 
+void colorChase(CRGB c1, CRGB c2, uint8_t wait)
+{
+  //clear() turns all LEDs off
+  FastLED.clear();
+  
+  // Move a single led
+  for(int led_number = 0; led_number < NUM_LEDS; led_number++)
+  {
+    // Turn our current led ON, then show the leds
+    ledStrip[led_number] = c1;
+    ledStrip[led_number+1] = c1;
+    ledStrip[led_number+2] = c2;
+    ledStrip[led_number+3] = c2;
+    ledStrip[led_number+4] = c1;
+    ledStrip[led_number+5] = c1;
+
+    // Show the leds (only one of which is has a color set, from above
+    // Show turns actually turns on the LEDs
+    FastLED.show();
+
+    // Wait a little bit
+    delay(wait);
+
+    // Turn our current led back to black for the next loop around
+    ledStrip[led_number] = CRGB::Black;
+    ledStrip[led_number+1] = CRGB::Black;
+    ledStrip[led_number+2] = CRGB::Black;
+    ledStrip[led_number+3] = CRGB::Black;
+    ledStrip[led_number+4] = CRGB::Black;
+    ledStrip[led_number+5] = CRGB::Black;
+  }
+  return;
+}
+
+// Display alternating stripes
+void stripes(CRGB c1, CRGB c2, int width){
+  for(int i=0; i<NUM_LEDS; i++){
+    if(i % (width * 2) < width){
+      ledStrip[i] = c1;
+    }
+    else{
+      ledStrip[i] = c2;
+    } 
+  }
+  FastLED.show();
+}
+
 /******************** theaterChase method ****************/
-//Theatre-style crawling lights.
-void theaterChase(CRGB c, uint8_t wait) {
-  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
+// Theater-style crawling lights
+void theaterChase(CRGB c1, CRGB c2, int cycles, int speed){ // TODO direction
+
+  for (int j=0; j<cycles; j++) {  
     for (int q=0; q < 3; q++) {
       for (int i=0; i < NUM_LEDS; i=i+3) {
-        ledStrip[i+q] = c;    //turn every third pixel on
+        int pos = i+q;
+        ledStrip[pos] = c1;    //turn every third pixel on
+        ledStrip[pos+1] = c2;    //turn every third pixel on
       }
+      FastLED.show();
+
+      delay(speed);
 
       for (int i=0; i < NUM_LEDS; i=i+3) {
         ledStrip[i+q] = CRGB::Black;        //turn every third pixel off
+        ledStrip[i+q+1] = CRGB::Black;        //turn every third pixel off
       }
-      FastLED.show();
-      
-      delay(wait);
     }
   }
 }
-
 /****************************************************************************************/
 /*********************************** Fire2012 code **************************************/
 // Fire2012: a basic fire simulation for a one-dimensional string of LEDs
