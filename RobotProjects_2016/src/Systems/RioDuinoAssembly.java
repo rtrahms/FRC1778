@@ -35,10 +35,10 @@ public class RioDuinoAssembly {
 		dsTeamColor = DriverStation.getInstance().getAlliance();
 		dsTeamLocation = DriverStation.getInstance().getLocation();
 
-		 if (dsTeamColor == DriverStation.Alliance.Blue)
-			 teamColor = RioDuinoAssembly.Color.Blue; 
+		 if (dsTeamColor == DriverStation.Alliance.Red)
+			 teamColor = RioDuinoAssembly.Color.Red; 
 		 else
-			 teamColor = RioDuinoAssembly.Color.Red;
+			 teamColor = RioDuinoAssembly.Color.Blue;
 
 		 sendTeamColor(teamColor);
 	}
