@@ -35,15 +35,23 @@ enum ColorState { inactive, autonomous, teleop, test };
 #define TELEOP 2
 #define TEST 3
 
+#define BLUE_HUE 160
+#define RED_HUE  0
+#define WHITE_HUE 128
+#define GREEN_HUE 85
+#define YELLOW_HUE 42
+
 // globals
 ColorState cs = inactive;
 CRGB stripColor;
 CRGB teamColor;
-uint8_t teamHue;
+uint8_t teamHue1, teamHue2;
+uint8_t idlePattern;
 
 uint8_t fadeValue;
 uint8_t brightness;
 bool increasing;
+bool primary;
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -65,9 +73,12 @@ void setup() {
   FastLED.setBrightness( BRIGHTNESS );
 
   teamColor = CRGB::Blue;
-  teamHue = 160;
+  teamHue1 = BLUE_HUE;
+  teamHue2 = YELLOW_HUE;
   stripColor = CRGB::Green;
+  idlePattern = 0;
 
+  primary = true;
   fadeValue = 255;
   brightness = 0;
   increasing = false;
@@ -81,7 +92,6 @@ void loop() {
     //colorWipe(teamColor,50);
     //colorWipe(CRGB::Green,50);
     //colorChase(teamColor,CRGB::White, 40);
-    //colorPulse(teamColor,1);
     //rainbow(30);
     //fireMethod();
 
@@ -89,8 +99,7 @@ void loop() {
     switch (cs) {
       case inactive:
         FastLED.setBrightness( BRIGHTNESS );
-        //colorPulse(teamHue,5);
-        theaterChase(teamColor,CRGB::White, 1, 150);
+        idleColor();
         break;
       case autonomous:
         FastLED.setBrightness( CAM_BRIGHTNESS );
@@ -164,15 +173,16 @@ void receiveEvent(int howMany)
   else if (receiveStr == "teamRed")
   {
     teamColor = CRGB::Red;
-    teamHue = 0;
+    teamHue1 = RED_HUE;
   }
   else if (receiveStr == "teamBlue")
   {
     teamColor = CRGB::Blue;
-    teamHue = 160;
+    teamHue1 = BLUE_HUE;
   }
   else if (receiveStr == "robotInit")
   {
+    idleSelect();   // select a new idle pattern index
     cs = inactive;    
   }
   else if (receiveStr == "autoInit")
@@ -189,8 +199,39 @@ void receiveEvent(int howMany)
   }
   else if (receiveStr == "disabledInit")
   {
+    idleSelect();   // select a new idle pattern index
     cs = inactive;
   }
+}
+
+/*************** idle color method ******************/
+// selects one from a set of patterns to display when idle
+void idleColor()
+{
+    switch (idlePattern) {
+      case 0:
+        //colorPulse(teamHue1,1);
+        dualColorPulse(teamHue1,teamHue2,1);
+        break;
+      case 1:
+        theaterChase(teamColor,CRGB::White, 1, 150);
+        break;
+      case 2:
+        colorChase(teamColor,CRGB::White,40);
+        break;
+      case 3:
+      default:
+        rainbow(10);
+        break;
+    }
+}
+
+/*************** idle select method *****************/
+// selects the index for the idle pattern to display
+void idleSelect()
+{
+    // select an index 0-3 (4 not inclusive)
+    idlePattern = random(0,4);
 }
 
 /*************** color pulse method ******************/
@@ -222,6 +263,48 @@ void colorPulse(uint8_t teamHue, uint8_t wait)
 
     for(i=0; i< NUM_LEDS; i++) {
       ledStrip[i] = CHSV(teamHue,255,fadeValue);
+    }
+    FastLED.show();
+    delay(wait);
+}
+
+/*************** dual color pulse method ******************/
+// pulses two colors between on and off, alternating colors
+// speed of the pulse is based on the wait parameter
+void dualColorPulse(uint8_t teamHue1, uint8_t teamHue2, uint8_t wait)
+{
+    uint16_t i;
+      
+    // update fadeValue
+    if (increasing)
+    {
+      fadeValue++;
+    }
+    else
+    {
+      fadeValue--;
+    }
+
+    // update direction based on limits
+    if (fadeValue == 255)
+    {
+      increasing = false;
+    }
+    if (fadeValue == 0)
+    { 
+        primary = !primary;  // toggle between primary and secondary hues
+        increasing = true;
+    }
+
+    if (primary) 
+    {
+      for(i=0; i< NUM_LEDS; i++)
+        ledStrip[i] = CHSV(teamHue1,255,fadeValue);
+    }
+    else
+    {
+      for(i=0; i< NUM_LEDS; i++)
+        ledStrip[i] = CHSV(teamHue2,255,fadeValue);      
     }
     FastLED.show();
     delay(wait);
@@ -264,11 +347,6 @@ void colorChase(CRGB c1, CRGB c2, uint8_t wait)
   {
     // Turn our current led ON, then show the leds
     ledStrip[led_number] = c1;
-    ledStrip[led_number+1] = c1;
-    ledStrip[led_number+2] = c2;
-    ledStrip[led_number+3] = c2;
-    ledStrip[led_number+4] = c1;
-    ledStrip[led_number+5] = c1;
 
     // Show the leds (only one of which is has a color set, from above
     // Show turns actually turns on the LEDs
@@ -279,11 +357,6 @@ void colorChase(CRGB c1, CRGB c2, uint8_t wait)
 
     // Turn our current led back to black for the next loop around
     ledStrip[led_number] = CRGB::Black;
-    ledStrip[led_number+1] = CRGB::Black;
-    ledStrip[led_number+2] = CRGB::Black;
-    ledStrip[led_number+3] = CRGB::Black;
-    ledStrip[led_number+4] = CRGB::Black;
-    ledStrip[led_number+5] = CRGB::Black;
   }
   return;
 }
