@@ -5,11 +5,9 @@ import Systems.CANDriveAssembly;
 import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
 import Systems.GyroSensor;
-import Systems.HookLiftAssembly;
 import Systems.NetworkCommAssembly;
 import Systems.RioDuinoAssembly;
 import canStateMachine.AutoStateMachine;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
@@ -33,9 +31,6 @@ public class Robot extends IterativeRobot {
 	// autonomous state machine object
 	AutoStateMachine autoSM;
 
-	// particulars about the team number and color
-	DriverStation.Alliance teamColor;
-	int teamLocation;
 	
 	boolean teleopMode = false;
 
@@ -67,17 +62,6 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 
 		teleopMode = false;
-		
-		teamColor = DriverStation.getInstance().getAlliance();
-		teamLocation = DriverStation.getInstance().getLocation();
-
-		System.out.println("in autonomousInit(), station #" + teamLocation);
-
-		// start up the robot team color
-		 if (teamColor == DriverStation.Alliance.Blue)
-			 RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Blue); 
-		 else
-			 RioDuinoAssembly.setTeamColor(RioDuinoAssembly.Color.Red);
 		
 		RioDuinoAssembly.autonomousInit();
 		

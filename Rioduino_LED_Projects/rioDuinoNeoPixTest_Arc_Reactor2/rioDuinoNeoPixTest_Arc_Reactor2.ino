@@ -14,7 +14,7 @@
 #define CHIPSET     NEOPIXEL
 
 #define BRIGHTNESS  150
-#define FRAMES_PER_SECOND 60
+#define FRAMES_PER_SECOND 120
 
 // Parameter 1 = number of pixels in strip
 // Parameter 2 = Arduino pin number (most are valid)
@@ -29,14 +29,17 @@ CRGB ledStrip[NUM_LEDS];
 // states defined for the arduino.  These equate to strings received by the Roborio.
 enum ColorState { inactive, autonomous, teleop, test };
 
-#define RED 0x00ff0000
-#define GREEN 0x0000ff00
-#define BLUE 0x000000ff
+#define INACTIVE 0
+#define AUTO 1
+#define TELEOP 2
+#define TEST 3
 
 // globals
 ColorState cs = inactive;
 CRGB stripColor;
 CRGB teamColor;
+uint8_t teamHue;
+
 uint8_t fadeValue;
 uint8_t brightness;
 bool increasing;
@@ -60,10 +63,11 @@ void setup() {
   FastLED.addLeds<CHIPSET, PIN>(ledStrip, NUM_LEDS);
   FastLED.setBrightness( BRIGHTNESS );
 
-  teamColor = CRGB::Green;
+  teamColor = CRGB::Blue;
+  teamHue = 160;
   stripColor = CRGB::Green;
-  
-  fadeValue = 0;
+
+  fadeValue = 255;
   brightness = 0;
   increasing = false;
 }
@@ -72,18 +76,17 @@ void setup() {
 // running as fast as processor will allow
 void loop() {
 
-    //colorPulse(stripColor, 50); // loop on the current strip color
-    //colorWipe(stripColor, 50);
-    //theaterChase(stripColor, 100);
-    //fireMethod();
-        
+    // test patterns
     //colorWipe(teamColor,50);
     //colorWipe(CRGB::Green,50);
-    //rainbow(100);
+    //colorPulse(teamColor,1);
+    //rainbow(30);
+    //fireMethod();
 
+    // change colors based on system state
     switch (cs) {
       case inactive:
-        colorPulse(teamColor,50);
+        colorPulse(teamHue,5);
         break;
       case autonomous:
         colorWipe(stripColor,50);
@@ -91,10 +94,14 @@ void loop() {
       case teleop:
         colorWipe(stripColor,50);
         break;
+      case test:
       default:
-        rainbow(50);
+        rainbow(20);
         break;
     }
+    
+    // make sure we have a resonable delay between frames
+    FastLED.delay(1000/FRAMES_PER_SECOND);
 }
 
 /***************** receiveEvent method ***********************/
@@ -139,21 +146,23 @@ void receiveEvent(int howMany)
   {
     stripColor = CRGB::Green;
   }
-  else if (receiveStr = "colorGrey")
+  else if (receiveStr == "colorGrey")
   {
     stripColor = CRGB::Grey;
   }
-  else if (receiveStr = "colorBlack")
+  else if (receiveStr == "colorBlack")
   {
     stripColor = CRGB::Black;
   }
-  else if (receiveStr = "teamRed")
+  else if (receiveStr == "teamRed")
   {
     teamColor = CRGB::Red;
+    teamHue = 0;
   }
-  else if (receiveStr = "teamBlue")
+  else if (receiveStr == "teamBlue")
   {
     teamColor = CRGB::Blue;
+    teamHue = 160;
   }
   else if (receiveStr == "robotInit")
   {
@@ -173,7 +182,6 @@ void receiveEvent(int howMany)
   }
   else if (receiveStr == "disabledInit")
   {
-    //stripColor= CRGB(31,31,31);  // grey
     cs = inactive;
   }
 }
@@ -181,10 +189,10 @@ void receiveEvent(int howMany)
 /*************** color pulse method ******************/
 // pulses a color between on and off
 // speed of the pulse is based on the wait parameter
-void colorPulse(CRGB inputColor, uint8_t wait)
+void colorPulse(uint8_t teamHue, uint8_t wait)
 {
     uint16_t i;
-
+      
     // update fadeValue
     if (increasing)
     {
@@ -200,13 +208,13 @@ void colorPulse(CRGB inputColor, uint8_t wait)
     {
       increasing = false;
     }
-    if (fadeValue == 0)
+    if (fadeValue == 40)
     {
         increasing = true;
     }
-    
+
     for(i=0; i< NUM_LEDS; i++) {
-      ledStrip[i] = CHSV(inputColor,255,fadeValue);
+      ledStrip[i] = CHSV(teamHue,255,fadeValue);
     }
     FastLED.show();
     delay(wait);
@@ -219,9 +227,9 @@ void colorPulse(CRGB inputColor, uint8_t wait)
 void colorWipe(CRGB c, uint8_t wait) {
   for(uint16_t i=0; i<NUM_LEDS; i++) {
     ledStrip[i] = c;
-    FastLED.show();
-    delay(wait);
   }
+  FastLED.show();
+  delay(wait);
 }
 
 /*************** rainbow method ********************/
@@ -229,7 +237,7 @@ void colorWipe(CRGB c, uint8_t wait) {
 // speed of cycle based on wait parameter
 void rainbow(uint8_t wait) {
   uint16_t i;
-  uint8_t hue;
+  uint16_t hue;
 
   for(hue=0; hue<256; hue++) {
     for(i=0; i< NUM_LEDS; i++) {

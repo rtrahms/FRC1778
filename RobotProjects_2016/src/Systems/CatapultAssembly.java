@@ -47,6 +47,9 @@ public class CatapultAssembly {
 	        if (catapultMotor != null) {
 	        	
 		        System.out.println("Initializing catapult motor (position mode)...");
+		        
+		        // VERY IMPORTANT - resets talon faults to render them usable again!!
+		        catapultMotor.clearStickyFaults();
 	        	
 	        	// set up motor for position control mode
 		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
@@ -58,10 +61,7 @@ public class CatapultAssembly {
 		        // set brake mode and limits to false
 		        catapultMotor.enableBrakeMode(true);
 		        catapultMotor.enableForwardSoftLimit(false);
-		        catapultMotor.enableReverseSoftLimit(false);
-		        
-		        // initialize position
-		        //catapultMotor.set(masterCatapultMotor.getPosition());
+		        catapultMotor.enableReverseSoftLimit(false);		        
 	        }
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		

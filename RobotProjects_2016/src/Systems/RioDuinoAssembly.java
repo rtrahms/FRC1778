@@ -1,11 +1,16 @@
 package Systems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
 
 public class RioDuinoAssembly {
 	
 	public static enum Color { Black, Red, Blue, Yellow, Orange, Green, Purple, Grey};
 	
+	// particulars about the team number and color
+	private static DriverStation.Alliance dsTeamColor;
+	private static int dsTeamLocation;
+
 	private static boolean initialized = false;
 	private static Color teamColor;
 
@@ -16,29 +21,45 @@ public class RioDuinoAssembly {
 		{
 			i2cBus = new I2C(I2C.Port.kMXP, 4);	
 			initialized = true;
+			
+			setTeamColor();
 		}
 	}
 	
 	public static void setTeamColor(Color col) {
 		teamColor = col;
-		sendTeamColor(teamColor);
+		sendColor(teamColor);
 	}
 	
 	public static void setTeamColor() {
-		sendColor(teamColor);
+		dsTeamColor = DriverStation.getInstance().getAlliance();
+		dsTeamLocation = DriverStation.getInstance().getLocation();
+
+		 if (dsTeamColor == DriverStation.Alliance.Blue)
+			 teamColor = RioDuinoAssembly.Color.Blue; 
+		 else
+			 teamColor = RioDuinoAssembly.Color.Red;
+
+		 sendTeamColor(teamColor);
 	}
 		
 	public static void autonomousInit() {
+	
+		setTeamColor();
 		SendString("colorGreen");
 		SendString("autoInit");
 	}
 	
 	public static void teleopInit() {
+		
+		setTeamColor();
 		SendString("colorGreen");
 		SendString("teleopInit");
 	}
 	
 	public static void testInit() {
+
+		setTeamColor();		
 		SendString("colorOrange");		
 		SendString("testInit");
 	}
@@ -47,7 +68,6 @@ public class RioDuinoAssembly {
 		if (!initialized)
 			initialize();
 		
-		//sendTeamColor(teamColor);
 		SendString("disabledInit");
 	}
 		

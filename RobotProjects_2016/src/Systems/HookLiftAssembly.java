@@ -11,12 +11,7 @@ public class HookLiftAssembly {
 	private static final int GAMEPAD_ID = 2;
 	
     private static Joystick gamepad;
-    
-    // deployment motor constants
-    //private static final int DEPLOY_MOTOR_ID = 13;
-    //private static final int ARM_STOW_POS = 0;
-    //private static final int ARM_DEPLOY_POS = 90;
-    
+        
     // telescoping motor constants
     private static final int TELESCOPE_MOTOR_ID = 14;
     private static final double TELESCOPE_RETRACT_POS = 0.0;
@@ -45,29 +40,26 @@ public class HookLiftAssembly {
 	        
 	        telescopePressed = false;	        
 	        telescopeUp = false;
-	        
-	        // deployMotor not used
-	        // deployMotor = new CANTalon(DEPLOY_MOTOR_ID);
-	        
+	        	        
 	        // create and initialize telescope motor (position control with encoder feedback)
 	        telescopeMotor = new CANTalon(TELESCOPE_MOTOR_ID);
 	        if (telescopeMotor != null) {
 	        	
-		        System.out.println("Initializing telescoping motor (speed control)...");
+		        System.out.println("Initializing telescoping motor (position control)...");
+		        
+		        // VERY IMPORTANT - resets talon faults to render them usable again!!
+		        telescopeMotor.clearStickyFaults();
 	        	
 	        	// set up motor for position control mode
-		        telescopeMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
-		        telescopeMotor.setSafetyEnabled(false);
+		        telescopeMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        telescopeMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        telescopeMotor.setPID(2.0, 0, 18.0);     // works pretty well
 		        telescopeMotor.enableBrakeMode(true);
+		        
 		        telescopeMotor.setForwardSoftLimit(TELESCOPE_EXTEND_POS);    	
 		        telescopeMotor.enableForwardSoftLimit(true);
 		        telescopeMotor.setReverseSoftLimit(TELESCOPE_RETRACT_POS);
 		        telescopeMotor.enableReverseSoftLimit(true);
-		        
-		        //set speed to zero
-		        telescopeMotor.set(0);
 	        	
 	        	// initializes encoder to zero
 		        telescopeMotor.setPosition(0);
@@ -80,9 +72,12 @@ public class HookLiftAssembly {
 	        if (winchMotor != null) {
 	        	
 		        System.out.println("Initializing winch motor (speed control)...");
+		        
+		        // VERY IMPORTANT - resets talon faults to render them usable again!!
+		        winchMotor.clearStickyFaults();
 	        	
 	        	// set up motor for speed control mode
-		        winchMotor.changeControlMode(CANTalon.TalonControlMode.Speed);
+		        winchMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        winchMotor.setSafetyEnabled(false);
 		        winchMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        winchMotor.setPID(2.0, 0, 18.0);     // works pretty well
@@ -91,10 +86,7 @@ public class HookLiftAssembly {
 		        winchMotor.enableForwardSoftLimit(true);
 		        winchMotor.setReverseSoftLimit(WINCH_IN_POS);
 		        winchMotor.enableReverseSoftLimit(true);
-		        
-		        //set speed to zero and enable control
-		        winchMotor.set(0);
-		        
+		        		        
 	        	// initializes encoder to zero
 		        winchMotor.setPosition(0);
 	        	

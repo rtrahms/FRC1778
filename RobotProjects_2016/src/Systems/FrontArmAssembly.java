@@ -8,15 +8,16 @@ public class FrontArmAssembly {
 	private static boolean initialized = false;
 	
     // minimum increment (for joystick dead zone)
-	private static final double ARM_DEADZONE = 0.2;
+	private static final double ARM_DEADZONE = 0.1;
 	private static final double ROLLER_DEADZONE = 0.1;
 	
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
-    //private static final double FORWARD_SOFT_ENCODER_LIMIT = (4096.0*50.0);
-    private static final double SOFT_ENCODER_LIMIT_1 = (4096.0*5.0);
+    //private static final double SOFT_ENCODER_LIMIT_1 = (4096.0*40.0);  // about a turn
+    private static final double SOFT_ENCODER_LIMIT_1 = (4096.0*20.0);  // about a quarter turn
     private static final double SOFT_ENCODER_LIMIT_2 = 0.0;
-    private static final double ARM_SPEED_MULTIPLIER = 512.0;
+    private static final double ARM_SPEED_MULTIPLIER = 4096.0;
+    private static final double ARM_ROLLER_MULTIPLIER = 0.1;
     
 	// controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 2;
@@ -25,8 +26,8 @@ public class FrontArmAssembly {
     private static Joystick gamepad;
            
     // motor ids
-    private static final int FRONT_ARM_MOTOR_ID = 11;
-    private static final int FRONT_ARM_ROLLER_ID = 12;
+    private static final int FRONT_ARM_MOTOR_ID = 12;
+    private static final int FRONT_ARM_ROLLER_ID = 11;
     
     private static CANTalon frontArmMotor, frontArmRollerMotor;
     
@@ -48,28 +49,28 @@ public class FrontArmAssembly {
 	        if (frontArmMotor != null) {
 	        	
 		        System.out.println("Initializing front arm motor (position control)...");
+
+		        // VERY IMPORTANT - resets talon faults to render them usable again!!
+		        frontArmMotor.clearStickyFaults();
 	        	
-	        	// set up motor for control mode
+	        	// set up motor for position control PID feedback mode only
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        frontArmMotor.setPID(2.0, 0, 18.0);     // works pretty well	        	
-		        //frontArmMotor.setPID(2.0, 0, 9.0);     // 1:4 PID ratio        	
-		        //frontArmMotor.setPID(4.0, 0, 8.0);     // 1:2 PID ratio   
 		        frontArmMotor.enableControl();    // enable PID control
-		        frontArmMotor.setPosition(0);     // initializes encoder to zero 	
+		        		        
+		        // PercentVbus test ONLY!!!
+		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	 
 		        
 		        // set limits and brake mode
 	        	frontArmMotor.setForwardSoftLimit(SOFT_ENCODER_LIMIT_1);    	
 	        	frontArmMotor.enableForwardSoftLimit(true);
 	        	frontArmMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_2);
 	        	frontArmMotor.enableReverseSoftLimit(true);	        	
-		        frontArmMotor.enableBrakeMode(true);
+	        	frontArmMotor.enableBrakeMode(true);
 		        
-		        // set position to current
-		        //frontArmMotor.set(frontArmMotor.getPosition());
-		        
-		        // PercentVbus test ONLY!!!
-		        //frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	        
+	        	// initializes encoder to zero 		        
+		        frontArmMotor.setPosition(0);    	
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm motor not initialized!");
@@ -80,6 +81,8 @@ public class FrontArmAssembly {
 	        	
 		        System.out.println("Initializing front arm roller motor (PercentVbus control)...");
 	        	
+		        frontArmRollerMotor.clearStickyFaults();
+		        
 	        	// set up roller motor for percent Vbus control mode
 		        frontArmRollerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
         		        	
@@ -120,34 +123,31 @@ public class FrontArmAssembly {
 	public static void teleopPeriodic()
 	{		
 				
-		// check for arm motion (left gamepad joystick)
-		/*
-		double armSpeed = gamepad.getRawAxis(1);
-		if(Math.abs(armSpeed) <= ARM_DEADZONE) {
-			armSpeed = 0.0;
-		}
-		
-		armSpeed *= ARM_SPEED_MULTIPLIER;
-		System.out.println("armspeed = " + armSpeed + " motor position = " + frontArmMotor.getPosition());
-		frontArmMotor.set(armSpeed);
-		*/
-		
 		double newArmPos = gamepad.getRawAxis(1);
 		if(Math.abs(newArmPos) <= ARM_DEADZONE) {
 			newArmPos = 0.0;
 		}
-		newArmPos = (newArmPos * ARM_SPEED_MULTIPLIER);
-		System.out.println(" input = " + newArmPos + "enc pos = " + frontArmMotor.getPosition());
+		newArmPos = (newArmPos * ARM_SPEED_MULTIPLIER) + frontArmMotor.getPosition();
 		frontArmMotor.set(newArmPos);
 		
 		// PercentVbus test ONLY!!
-		//frontArmMotor.set(gamepad.getRawAxis(1));
+		/*
+		double armSpeed = gamepad.getRawAxis(1);
+		if (Math.abs(armSpeed) < ARM_DEADZONE) {
+			armSpeed = 0.0f;
+		}	
+		frontArmMotor.set(armSpeed);
+		*/
+		
+		//System.out.println("enc pos = " + frontArmMotor.getPosition());
 		
 		// check for roller motion (right gamepad joystick)
-		double rollerSpeed = gamepad.getRawAxis(3);
+		//double rollerSpeed = gamepad.getRawAxis(3);
+		double rollerSpeed = gamepad.getRawAxis(5);
 		if (Math.abs(rollerSpeed) < ROLLER_DEADZONE) {
 			rollerSpeed = 0.0f;
 		}	
+		rollerSpeed *= ARM_ROLLER_MULTIPLIER;
 		frontArmRollerMotor.set(rollerSpeed);
 					
 	}
@@ -156,6 +156,14 @@ public class FrontArmAssembly {
 	{
 		if (!initialized)
 			initialize();	
+		
+		// if exiting from teleop mode (game is over)...
+		if (teleopMode)
+		{
+			System.out.println("FrontArmAssembly: exiting teleop, moving to coast mode");
+			// relax front arm motor (coast mode)
+			frontArmMotor.enableBrakeMode(false);
+		}
 	}
 
 }
