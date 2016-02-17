@@ -11,20 +11,25 @@ public class CatapultAssembly {
 	private static final int LEFT_JOYSTICK_ID = 0;
 	private static final int RIGHT_JOYSTICK_ID = 1;
 	
-    //  control object
+    //  control objects
     private static Joystick leftJoy, rightJoy;
            
     // catapult reset motor
-    private static final int CATAPULT_MOTOR_ID = 9;
+    //private static final int CATAPULT_MOTOR_ID = 9;
+    private static final int CATAPULT_MOTOR_ID = 11;
     
     private static final int CATAPULT_FIRE_INCREMENT = 1024;
-    private static final int CATAPULT_READY_POSITION = (int) (4096.0*5.25 - CATAPULT_FIRE_INCREMENT);
+    private static final int CATAPULT_READY_POSITION = (int) (4096.0*4.66667 - CATAPULT_FIRE_INCREMENT);
+    
+    private static final int TRIGGER_CYCLE_WAIT_US = 1000000;
     
     private static CANTalon catapultMotor;
     
     private static boolean pressed;
     private static boolean catapultFired;
     private static boolean teleopMode;
+    
+    private static double initTriggerTime;
 
 	// static initializer
 	public static void initialize()
@@ -39,7 +44,7 @@ public class CatapultAssembly {
 	        pressed = false;
 	        teleopMode = false;
 	        
-	        System.out.println("Creating motor objects...");
+	        System.out.println("Creating catapult motor object...");
 	        
 	        // initialize master catapult motor
 	        catapultMotor = new CANTalon(CATAPULT_MOTOR_ID);
@@ -52,16 +57,15 @@ public class CatapultAssembly {
 		        catapultMotor.clearStickyFaults();
 	        	
 	        	// set up motor for position control mode
+		        catapultMotor.enableControl();        // enables PID control
 		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        catapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-		        catapultMotor.setPID(2.0, 0, 18.0);     // works pretty well
-		        catapultMotor.enableControl();        // enables PID control
+		        catapultMotor.setPID(2.0, 0, 18.0);   // works pretty well
+		        catapultMotor.set(catapultMotor.getPosition());   // set motor to current position
 		        catapultMotor.setPosition(0);	      // initializes encoder to zero
 	        
-		        // set brake mode and limits to false
+		        // set brake mode
 		        catapultMotor.enableBrakeMode(true);
-		        catapultMotor.enableForwardSoftLimit(false);
-		        catapultMotor.enableReverseSoftLimit(false);		        
 	        }
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
@@ -86,26 +90,34 @@ public class CatapultAssembly {
 		                
         teleopMode = true;
         pressed = false;
+        
+        initTriggerTime = Utility.getFPGATime();
 	}
 	
 	public static void teleopPeriodic()
-	{				
+	{
+		double currentTime = Utility.getFPGATime();
+		
 		//System.out.println("Read enc position =" + masterCatapultMotor.getEncPosition());
 		
 		// check for catapult triggers
 		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
 			pressed = true;
-				
-		//System.out.println("motor enc = "+ masterCatapultMotor.getEncPosition());
 		
-		// check for catapult trigger
-		if (pressed) {
-			// if the catapult is not fired
-			if (!catapultFired) 
-				shoot();
-			else
-				reset();
-		}		
+		// only allow trigger press to proceed if more than the wait period
+		if (((currentTime - initTriggerTime) > TRIGGER_CYCLE_WAIT_US) && (pressed))
+		{	
+			// reset trigger init time
+			initTriggerTime = Utility.getFPGATime();
+					
+			// check for catapult trigger
+			if (pressed) {
+				if (!catapultFired) 
+					shoot();
+				else
+					reset();
+			}		
+		}
 	}
 	
 	public static void disabledInit()
@@ -124,15 +136,10 @@ public class CatapultAssembly {
 
 	public static void shoot()
 	{
-		System.out.println("TRIGGER!  Catapult firing");
-		
-		// Set "fire in the hole" color
-		//RioDuinoAssembly.sendColor(RioDuinoAssembly.Color.Purple);
-		
-		// fire catapult - manual fire
+		// fire catapult
 		catapultMotor.setPosition(0);
 		catapultMotor.set(CATAPULT_FIRE_INCREMENT);
-		//System.out.println("Fired!  new encoder pos = " + catapultMotor.getPosition());
+		System.out.println("Catapult Fired!  new pos = " + catapultMotor.getPosition());
 		
 		// set fired flag
 		catapultFired = true;
@@ -140,19 +147,14 @@ public class CatapultAssembly {
 	}
 	
 	public static void reset()
-	{
-		System.out.println("catapult resetting");
-		
+	{		
 		// reset catapult motor
 		catapultMotor.setPosition(0);
 		catapultMotor.set(CATAPULT_READY_POSITION);
-		//System.out.println("Reset!  new encoder pos = " + catapultMotor.getPosition());
+		System.out.println("Catapult Reset!  new pos = " + catapultMotor.getPosition());
 		
 		// reset fired flag
 		catapultFired = false;
 		pressed = false;
-						
-		// reset team color on robot
-		//RioDuinoAssembly.setTeamColor();				
 	}
 }
