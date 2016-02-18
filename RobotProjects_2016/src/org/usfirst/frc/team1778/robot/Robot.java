@@ -46,16 +46,12 @@ public class Robot extends IterativeRobot {
 		
 		CANDriveAssembly.initialize();
 		AutoShooterAssembly.initialize();
-		//FrontArmAssembly.initialize();
+		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
 		//HookLiftAssembly.initialize();
 
 		RioDuinoAssembly.initialize();
 		RioDuinoAssembly.SendString("robotInit");
-		
-		// reset the catapult (to load ball)
-		//CatapultAssembly.reset();
-
 	}
 
 	// called one time on entry into autonomous
@@ -85,7 +81,7 @@ public class Robot extends IterativeRobot {
 		
 		CANDriveAssembly.teleopInit();
 		AutoShooterAssembly.teleopInit();
-		//FrontArmAssembly.teleopInit();
+		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
 		//HookLiftAssembly.teleopInit();
 
@@ -101,7 +97,7 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.teleopPeriodic();
     	AutoShooterAssembly.teleopPeriodic();
-    	//FrontArmAssembly.teleopPeriodic();
+    	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
     	//HookLiftAssembly.teleopPeriodic();
   	
@@ -110,7 +106,7 @@ public class Robot extends IterativeRobot {
 	
 	public void disabledInit() {
     	AutoShooterAssembly.disabledInit();
-    	//FrontArmAssembly.disabledInit();
+    	FrontArmAssembly.disabledInit();
     	CatapultAssembly.disabledInit();		
     	//HookLiftAssembly.disabledInit();
     	

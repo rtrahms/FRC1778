@@ -15,11 +15,16 @@ public class CatapultAssembly {
     private static Joystick leftJoy, rightJoy;
            
     // catapult reset motor
-    //private static final int CATAPULT_MOTOR_ID = 9;
-    private static final int CATAPULT_MOTOR_ID = 11;
+    private static final int CATAPULT_MOTOR_ID = 9;
+    //private static final int CATAPULT_MOTOR_ID = 11;
     
-    private static final int CATAPULT_FIRE_INCREMENT = 1024;
-    private static final int CATAPULT_READY_POSITION = (int) (4096.0*4.66667 - CATAPULT_FIRE_INCREMENT);
+    private static final double NUM_TICKS_PER_REV = 4096;
+    private static final double VERSAPLANETARY_RATIO = 100;
+    private static final double CHOO_CHOO_GEAR_RATIO = 84.0/18.0;
+    private static final double FIRE_ROTATION_BACKOFF_REV = 0.25;
+    
+    private static final double CATAPULT_FIRE_INCREMENT = FIRE_ROTATION_BACKOFF_REV*NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO;
+    private static final double CATAPULT_READY_POSITION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO) - CATAPULT_FIRE_INCREMENT;
     
     private static final int TRIGGER_CYCLE_WAIT_US = 1000000;
     
@@ -40,7 +45,7 @@ public class CatapultAssembly {
 	        rightJoy = new Joystick(RIGHT_JOYSTICK_ID);
 	        	                	        
 	        initialized = true;
-	        catapultFired = false;
+	        catapultFired = true;
 	        pressed = false;
 	        teleopMode = false;
 	        
@@ -54,18 +59,19 @@ public class CatapultAssembly {
 		        System.out.println("Initializing catapult motor (position mode)...");
 		        
 		        // VERY IMPORTANT - resets talon faults to render them usable again!!
-		        catapultMotor.clearStickyFaults();
-	        	
+		        //catapultMotor.clearStickyFaults();
+		        
 	        	// set up motor for position control mode
 		        catapultMotor.enableControl();        // enables PID control
 		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        catapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-		        catapultMotor.setPID(2.0, 0, 18.0);   // works pretty well
-		        catapultMotor.set(catapultMotor.getPosition());   // set motor to current position
-		        catapultMotor.setPosition(0);	      // initializes encoder to zero
-	        
+		        catapultMotor.setPID(0.1, 0, 0.0);   
+		        //catapultMotor.set(catapultMotor.getPosition());   // set motor to current position
+		        catapultMotor.setPosition(0);	      // initializes encoder to zero	        	
+		      
 		        // set brake mode
-		        catapultMotor.enableBrakeMode(true);
+		        //catapultMotor.enableBrakeMode(true);
+		       
 	        }
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
@@ -98,15 +104,15 @@ public class CatapultAssembly {
 	{
 		double currentTime = Utility.getFPGATime();
 		
-		//System.out.println("Read enc position =" + masterCatapultMotor.getEncPosition());
+		if ((currentTime - initTriggerTime) < TRIGGER_CYCLE_WAIT_US)
+			return;
 		
 		// check for catapult triggers
 		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
+		{
 			pressed = true;
-		
-		// only allow trigger press to proceed if more than the wait period
-		if (((currentTime - initTriggerTime) > TRIGGER_CYCLE_WAIT_US) && (pressed))
-		{	
+			System.out.println("trigger pressed!");
+
 			// reset trigger init time
 			initTriggerTime = Utility.getFPGATime();
 					
@@ -116,8 +122,11 @@ public class CatapultAssembly {
 					shoot();
 				else
 					reset();
-			}		
+			}	
+
+			pressed = false;
 		}
+		
 	}
 	
 	public static void disabledInit()
