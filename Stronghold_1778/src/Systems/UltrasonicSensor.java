@@ -34,7 +34,7 @@ public class UltrasonicSensor {
 		}
 	}
 	
-	public static void teleopInit()  {
+	public static void reset()  {
 		initTimer= Utility.getFPGATime();
 	}
 	

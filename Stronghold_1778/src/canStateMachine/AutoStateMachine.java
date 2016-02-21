@@ -32,17 +32,33 @@ public class AutoStateMachine {
 	
 	private void createStateNetworks()
 	{	
+		// Eight possible state machine slots (three select switches)
+		// Default for each slot is... do nothing
 		
 		//--- STATE MACHINE 0: add a do nothing state machine (auto disabled anyway at 0 index)
 		createDoNothingSM(0);
 		
-		//*** STATE MACHINE 1: add a drive straight state machine (state & event list)
+		//*** STATE MACHINE 1: add a drive straight and stop state machine
 		createDriveForwardSM(1);
 				
-		//--- STATE MACHINE 2: add a drive forward, turn left, shoot state machine (from spybot location)
-		createDriveTurnShootSM(2);
+		//--- STATE MACHINE 2: add a drive straight and autotarget-SHOOT state machine
+		createDriveForwardAndShootSM(2);
+
+		//--- STATE MACHINE 3: add a do nothing state machine
+		createDoNothingSM(3);
 		
-						
+		//--- STATE MACHINE 4: add a drive forward, turn left, autotarget-shoot state machine (from spybot location)
+		createDriveTurnShootSM(4);
+		
+		//--- STATE MACHINE 5: add a do nothing state machine
+		createDoNothingSM(5);
+
+		//--- STATE MACHINE 6: add a do nothing state machine
+		createDoNothingSM(6);
+
+		//--- STATE MACHINE 7: add a do nothing state machine
+		createDoNothingSM(7);
+
 		System.out.println("autoStates list size = " + autoStates.size() + ", autoEvents list size = " + autoEvents.size());
 	}
 	
@@ -166,7 +182,7 @@ public class AutoStateMachine {
 		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.65);
 		IdleState deadEnd = new IdleState("<Dead End State>");
 		
-		// create events (betwen the states)
+		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
 		TimeEvent timer2 = new TimeEvent(3.25);  // 5s timer event
 		
@@ -195,13 +211,84 @@ public class AutoStateMachine {
 
 	}
 
+	// **** MOVE FORWARD & SHOOT STATE MACHINE ***** 
+	// 1) be idle for a number of sec
+	// 2) drive forward for a number of sec
+	// 3) calibrate auto-shooter with target
+	// 4) reset catapult
+	// 5) drop ball from conveyer into catapult
+	// 6) shoot catapult
+	// 7) go back to idle and stay there 
+	private void createDriveForwardAndShootSM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.65);
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
+		ResetCatapultState resetCatapult = new ResetCatapultState("<Reset Catapult State>");
+		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
+		ShootCatapultState shootBall = new ShootCatapultState("<Shoot Catapult State>");
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // timer event for idle
+		TimeEvent timer2 = new TimeEvent(3.25);  // timer event for drive forward
+		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
+		CatapultEvent catEvent1 = new CatapultEvent(false);  // tests for catapult being reset
+		TimeEvent timer3 = new TimeEvent(2.0);  // timer event for conveyer operation	
+		CatapultEvent catEvent2 = new CatapultEvent(true);  // tests for catapult being fired
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(driveForward);
+		timer2.associateNextState(calShooter);
+		calEvent1.associateNextState(resetCatapult);
+		catEvent1.associateNextState(conveyerIn);
+		timer3.associateNextState(shootBall);
+		catEvent2.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		driveForward.addEvent(timer2);
+		calShooter.addEvent(calEvent1);
+		resetCatapult.addEvent(catEvent1);
+		conveyerIn.addEvent(timer3);
+		shootBall.addEvent(catEvent2);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(driveForward);
+		myStates.add(calShooter);
+		myStates.add(resetCatapult);
+		myStates.add(conveyerIn);
+		myStates.add(shootBall);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(calEvent1);
+		myEvents.add(catEvent1);
+		myEvents.add(timer3);
+		myEvents.add(catEvent2);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
 	// **** DRIVE-TURN_SHOOT STATE MACHINE ***** 
 	// 1) be idle for a number of sec
 	// 2) drive forward for a number of sec
 	// 3) turn a number of degrees
-	// 4) shoot catapult
+	// 4) calibrate auto-shooter with target
 	// 5) reset catapult
-	// 6) go back to idle and stay there 
+	// 6) drop ball from conveyer into catapult
+	// 7) shoot catapult
+	// 8) go back to idle and stay there 
 	private void createDriveTurnShootSM(int index) {
 
 		// create states
@@ -209,30 +296,38 @@ public class AutoStateMachine {
 		IdleState startIdle = new IdleState("<Start Idle State>");
 		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.65);
 		TurnState turnLeft = new TurnState("<Turn Left State>",-120.0, 0.3, isPwm);
-		ShootCatapultState shootBall = new ShootCatapultState("<Shoot Catapult State>", false);
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
 		ResetCatapultState resetCatapult = new ResetCatapultState("<Reset Catapult State>");
+		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
+		ShootCatapultState shootBall = new ShootCatapultState("<Shoot Catapult State>");
 		IdleState deadEnd = new IdleState("<Dead End State>");
 		
-		// create events (betwen the states)
+		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
 		TimeEvent timer2 = new TimeEvent(0.5);  // 0.5s timer event
 		GyroAngleEvent gyro1 = new GyroAngleEvent(-120.0);  // -120 deg (left turn) event
-		CatapultEvent catEvent1 = new CatapultEvent(true);  // tests for catapult being fired
-		CatapultEvent catEvent2 = new CatapultEvent(false);  // tests for catapult reset
+		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
+		CatapultEvent catEvent1 = new CatapultEvent(false);  // tests for catapult being reset
+		TimeEvent timer3 = new TimeEvent(2.0);  // timer event for conveyer operation	
+		CatapultEvent catEvent2 = new CatapultEvent(true);  // tests for catapult being fired
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
 		timer2.associateNextState(turnLeft);
-		gyro1.associateNextState(shootBall);
-		catEvent1.associateNextState(resetCatapult);
+		gyro1.associateNextState(calShooter);
+		calEvent1.associateNextState(resetCatapult);
+		catEvent1.associateNextState(conveyerIn);
+		timer3.associateNextState(shootBall);
 		catEvent2.associateNextState(deadEnd);
 		
 		// add events to each state
 		startIdle.addEvent(timer1);
 		driveForward.addEvent(timer2);
 		turnLeft.addEvent(gyro1);
-		shootBall.addEvent(catEvent1);
-		resetCatapult.addEvent(catEvent2);
+		calShooter.addEvent(calEvent1);
+		resetCatapult.addEvent(catEvent1);
+		conveyerIn.addEvent(timer3);
+		shootBall.addEvent(catEvent2);
 		
 		// store everything
 		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
@@ -241,14 +336,18 @@ public class AutoStateMachine {
 		myStates.add(startIdle);
 		myStates.add(driveForward);
 		myStates.add(turnLeft);
-		myStates.add(shootBall);
+		myStates.add(calShooter);
 		myStates.add(resetCatapult);
+		myStates.add(conveyerIn);
+		myStates.add(shootBall);
 		myStates.add(deadEnd);
 		
 		myEvents.add(timer1);
 		myEvents.add(timer2);
 		myEvents.add(gyro1);
+		myEvents.add(calEvent1);
 		myEvents.add(catEvent1);
+		myEvents.add(timer3);
 		myEvents.add(catEvent2);
 		
 		// insert into the network arrays

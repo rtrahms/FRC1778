@@ -95,20 +95,7 @@ public class HookLiftAssembly {
 	        	System.out.println("ERROR: Winch motor not initialized!");
 		}
 	}
-	
-	public static void autoInit() 
-	{
-	}
-	
-	public static void autoPeriodic()
-	{
-	}
-	
-	public static void autoStop()
-	{
-		// nothing to clean up here
-	}
-		
+			
 	public static void teleopInit() 
 	{
 	}

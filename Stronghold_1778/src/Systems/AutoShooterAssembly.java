@@ -17,7 +17,7 @@ public class AutoShooterAssembly {
 	private static double angularVelocity, forwardVelocity;
 
 	private static boolean targeting = false;
-
+	private static boolean isCalibrated = false;
 	private static int consecCalibrate = 0;
 
 	public static void initialize() {
@@ -25,14 +25,14 @@ public class AutoShooterAssembly {
 			leftJoy = new Joystick(LEFT_JOYSTICK_ID);
 			rightJoy = new Joystick(RIGHT_JOYSTICK_ID);
 
-			targeting = false;
+			setCalibration(false);
 
 			initialized = true;
 		}
 	}
 
 	public static void teleopInit() {
-		targeting = false;
+		setCalibration(false);
 	}
 
 	public static void teleopPeriodic() {
@@ -40,18 +40,55 @@ public class AutoShooterAssembly {
 		if ((leftJoy.getRawButton(TARGETING_BUTTON_ID) || rightJoy
 				.getRawButton(TARGETING_BUTTON_ID)) && !targeting) {
 			System.out.println("AutoShooterAssembly:  autotargeting mode ON");
-			targeting = true;
-			consecCalibrate = 0;
+			setCalibration(true);
 		}
 
 		// either joystick trigger pressed to stop auto targeting mode
 		if ((Math.abs(leftJoy.getRawAxis(1)) > AUTO_RESET_THRESHOLD || Math.abs(rightJoy
 				.getRawAxis(1)) > AUTO_RESET_THRESHOLD) && targeting) {
 			System.out.println("AutoShooterAssembly:  autotargeting mode OFF");
-			targeting = false;
+			setCalibration(false);
 		}
 
-		if (NetworkCommAssembly.hasTarget() && targeting) {
+		// if we are in targeting mode, pass through calibration method
+		if (targeting)
+			calibrateShooter();
+		
+		// is it calibrated yet?
+		if (isCalibrated) {
+			
+			// shoot the catapult if ready to shoot!
+			if (CatapultAssembly.readyToShoot())
+			{
+				System.out.println("FIRING CATAPULT!");
+				//CatapultAssembly.shoot();
+			}
+			
+			// reset targeting flag and isCalibrated flags
+			targeting = false;
+			isCalibrated = false;
+		}
+	}
+
+	public static void setCalibration(boolean switchOn)
+	{
+		targeting = switchOn;
+		isCalibrated = false;
+		consecCalibrate = 0;
+	}
+	
+	
+	// calibrates the shooter in x and y prior to shooting catapult
+	public static void calibrateShooter()
+	{
+		// if no targets exist to calibrate against
+		if (!NetworkCommAssembly.hasTarget())  {
+			
+			// turn calibration mode off
+			System.out.println("AutoShooterAssembly: no targets, turning calibration off");
+			setCalibration(false);
+		}
+		else {
 			// first calibrate X position
 			if (calibratePosX()) {
 				// second calibrate Y position
@@ -60,9 +97,8 @@ public class AutoShooterAssembly {
 					System.out.println("AutoTarget: SHOOTING!");
 					consecCalibrate++;
 					if (consecCalibrate > 10) {
-						// CatapultAssembly.shoot();
-						// reset targeting flag
-						targeting = false;
+						// set calibrated flag (ready to shoot!)
+						isCalibrated = true;
 					}
 				} else {
 					consecCalibrate = 0;
@@ -72,7 +108,11 @@ public class AutoShooterAssembly {
 			}
 		}
 	}
-
+	
+	public static boolean isCalibrated() {
+		return isCalibrated;
+	}
+	
 	public static void disabledInit() {
 		if (!initialized)
 			initialize();

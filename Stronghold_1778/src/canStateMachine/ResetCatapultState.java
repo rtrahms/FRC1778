@@ -6,7 +6,7 @@ public class ResetCatapultState extends AutoState {
 	public ResetCatapultState() {
 		this.name = "<Reset Catapult State>";		
 		
-		// do some elevator initialization
+		// do some initialization
 		CatapultAssembly.initialize();
 	}
 	
@@ -14,29 +14,28 @@ public class ResetCatapultState extends AutoState {
 	{
 		this.name = name;
 		
-		// do some elevator initialization
+		// do some initialization
 		CatapultAssembly.initialize();
 	}
 
 	// state entry
 	public void enter() {
 				
+		// reset the catapult (just call once)
+		CatapultAssembly.reset();
+		
 		super.enter();
 	}
 	
 	// called periodically
 	public AutoState process()  {
 		
-		// reset the catapult
-		CatapultAssembly.reset();
-		
+		// no periodic needed
 		return super.process();
 	}
 	
 	// state cleanup and exit
 	public void exit() {
-		// do some elevator cleanup
-		CatapultAssembly.autoStop();
 		
 		// cleanup base class
 		super.exit();

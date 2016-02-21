@@ -3,7 +3,6 @@ package canStateMachine;
 import Systems.CatapultAssembly;
 
 public class ShootCatapultState extends AutoState {
-	private boolean autoTargeting = false;
 	
 	public ShootCatapultState() {
 		this.name = "<Shoot Catapult State>";		
@@ -11,19 +10,18 @@ public class ShootCatapultState extends AutoState {
 		CatapultAssembly.initialize();
 	}
 	
-	public ShootCatapultState(String name, boolean autoTargeting)
+	public ShootCatapultState(String name)
 	{
 		this.name = name;
-		this.autoTargeting = autoTargeting;
 		
 		CatapultAssembly.initialize();
 	}
 
 	// state entry
 	public void enter() {
-		// do some elevator initialization
-		
-		CatapultAssembly.autoInit();
+				
+		// do some shooty stuff (call once only)
+		CatapultAssembly.shoot();
 		
 		super.enter();
 	}
@@ -31,16 +29,12 @@ public class ShootCatapultState extends AutoState {
 	// called periodically
 	public AutoState process()  {
 		
-		// do some shooty stuff
-		CatapultAssembly.shoot();
-		
+		// no periodic call needed
 		return super.process();
 	}
 	
 	// state cleanup and exit
 	public void exit() {
-		// do some elevator cleanup
-		CatapultAssembly.autoStop();
 		
 		// cleanup base class
 		super.exit();

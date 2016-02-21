@@ -19,14 +19,17 @@ public class FrontArmAssembly {
     private static final double CONVEYER_SPEED = 0.5;
     private static final double ARM_MULTIPLIER = -0.5;
     
+    private static final double AUTO_CONVEYER_RUN_US = 2000000;  // auto conveyer run in microsec
+    private static boolean isAutoConveyerDone;
+    
 	// controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 2;
 	
-	private static final int ROLLER_UP_BUTTON = 5;
-	private static final int ROLLER_DOWN_BUTTON = 7;
+	private static final int ROLLER_IN_BUTTON = 5;
+	private static final int ROLLER_OUT_BUTTON = 7;
 	
-	private static final int CONVEYER_UP_BUTTON = 6;
-	private static final int CONVEYER_DOWN_BUTTON = 8;
+	private static final int CONVEYER_IN_BUTTON = 6;
+	private static final int CONVEYER_OUT_BUTTON = 8;
 	private static final int CONVEYER_DEPOSIT_BUTTON = 2;
 	
     // control objects
@@ -58,7 +61,6 @@ public class FrontArmAssembly {
 	        	
 		        System.out.println("Initializing front arm motor (position control)...");
 
-		        // VERY IMPORTANT - resets talon faults to render them usable again!!
 		        //frontArmMotor.clearStickyFaults();
 		        
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
@@ -106,28 +108,13 @@ public class FrontArmAssembly {
 	        	
 	        	// initializes speed of conveyers to zero
 		        conveyerMotor.set(0);
-	        	
 	        }
 	        else
 	        	System.out.println("ERROR: Conveyer motor not initialized!");
 	        
 		}
 	}
-	
-	public static void autoInit() 
-	{
-        teleopMode = false;
-	}
-	
-	public static void autoPeriodic(boolean liftCommand)
-	{
-	}
-	
-	public static void autoStop()
-	{
-		// nothing to clean up here
-	}
-		
+			
 	public static void teleopInit() {        
         
         teleopMode = true;		
@@ -150,9 +137,9 @@ public class FrontArmAssembly {
 		
 		// check for roller motion
 		double rollerSpeed = 0.0;
-		if (gamepad.getRawButton(ROLLER_UP_BUTTON))
+		if (gamepad.getRawButton(ROLLER_IN_BUTTON))
 			rollerSpeed = ARM_ROLLER_SPEED;
-		else if (gamepad.getRawButton(ROLLER_DOWN_BUTTON))
+		else if (gamepad.getRawButton(ROLLER_OUT_BUTTON))
 			rollerSpeed = -ARM_ROLLER_SPEED;	
 		frontArmRollerMotor.set(rollerSpeed);
 					
@@ -161,14 +148,27 @@ public class FrontArmAssembly {
 		// check for conveyer motion control
 		double conveyerSpeed = 0.0;
 		boolean ballDetected = UltrasonicSensor.isBallPresent();
-		if (((gamepad.getRawButton(CONVEYER_UP_BUTTON)) && !ballDetected) ||
+		if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
 			gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
 			conveyerSpeed = CONVEYER_SPEED;
-		else if (gamepad.getRawButton(CONVEYER_DOWN_BUTTON))
+		else if (gamepad.getRawButton(CONVEYER_OUT_BUTTON))
 			conveyerSpeed = -CONVEYER_SPEED;
 		conveyerMotor.set(conveyerSpeed);
 		
 		//System.out.println(" Conveyer = " + conveyerSpeed + " ballDetected = " + ballDetected);
+	}
+	
+	public static void startConveyer(boolean inDirection) 
+	{
+		if (inDirection)
+			conveyerMotor.set(CONVEYER_SPEED);		
+		else
+			conveyerMotor.set(-CONVEYER_SPEED);
+	}
+	
+	public static void stopConveyer()
+	{
+		conveyerMotor.set(0);		
 	}
 	
 	public static void disabledInit()

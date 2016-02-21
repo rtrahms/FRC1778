@@ -44,7 +44,7 @@ public class CatapultAssembly {
 	        rightJoy = new Joystick(RIGHT_JOYSTICK_ID);
 	        	                	        
 	        initialized = true;
-	        catapultFired = true;
+	        catapultFired = true;  // catapult starts in the low-energy (fired) state
 	        pressed = false;
 	        teleopMode = false;
 	        
@@ -75,20 +75,6 @@ public class CatapultAssembly {
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
 		}
-	}
-	
-	public static void autoInit() {
-        teleopMode = false;
-        
-	}
-	
-	public static void autoPeriodic(boolean liftCommand)
-	{
-	}
-	
-	public static void autoStop()
-	{
-		// nothing to clean up here
 	}
 		
 	public static void teleopInit() {
@@ -169,5 +155,10 @@ public class CatapultAssembly {
 	public static boolean isFired()
 	{
 		return catapultFired;
+	}
+	
+	public static boolean readyToShoot()
+	{
+		return !catapultFired;
 	}
 }

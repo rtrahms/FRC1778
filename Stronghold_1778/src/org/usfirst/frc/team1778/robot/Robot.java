@@ -72,6 +72,8 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during autonomous
 	 */
 	public void autonomousPeriodic() {
+		
+		// state machine runs things in autonomous
 		autoSM.process();
 	}
 
@@ -79,17 +81,17 @@ public class Robot extends IterativeRobot {
 	public void teleopInit() {
 
 		teleopMode = true;
+		RioDuinoAssembly.teleopInit();
 		
+		// reset sensors
 		GyroSensor.reset();
-		UltrasonicSensor.teleopInit();
+		UltrasonicSensor.reset();
 		
+		// teleop init for all systems
 		CANDriveAssembly.teleopInit();
 		AutoShooterAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
-		//HookLiftAssembly.teleopInit();
-
-		RioDuinoAssembly.teleopInit();
 	}
 
 	/**
@@ -104,19 +106,18 @@ public class Robot extends IterativeRobot {
     	CANDriveAssembly.teleopPeriodic();
     	AutoShooterAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
-    	CatapultAssembly.teleopPeriodic();
-    	//HookLiftAssembly.teleopPeriodic();
-  	
-    	//System.out.println("Gyro value = " + GyroSensor.getAngle());
+    	CatapultAssembly.teleopPeriodic(); 	
  	}
 	
 	public void disabledInit() {
+		
+		RioDuinoAssembly.disabledInit();
+
+		CANDriveAssembly.disabledInit();
     	AutoShooterAssembly.disabledInit();
     	FrontArmAssembly.disabledInit();
     	CatapultAssembly.disabledInit();		
-    	//HookLiftAssembly.disabledInit();
     	
-		RioDuinoAssembly.disabledInit();
 	}
 	
 	public void testInit() {
