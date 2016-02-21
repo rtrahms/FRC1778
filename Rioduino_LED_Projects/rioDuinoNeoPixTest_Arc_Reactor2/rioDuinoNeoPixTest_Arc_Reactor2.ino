@@ -11,6 +11,9 @@
 #define NUM_LEDS 40
 #define PIN 6
 
+#define NUM_LEDS2 10
+#define PIN2 5
+
 #define RING_INNER 16
 #define RING_OUTER 24
 
@@ -29,6 +32,7 @@
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 
 CRGB ledStrip[NUM_LEDS];
+CRGB miniStrip[NUM_LEDS2];
 
 // states defined for the arduino.  These equate to strings received by the Roborio.
 enum ColorState { inactive, autonomous, teleop, test };
@@ -47,6 +51,7 @@ enum ColorState { inactive, autonomous, teleop, test };
 // globals
 ColorState cs = inactive;
 CRGB stripColor;
+CRGB miniColor;
 CRGB teamColor;
 uint8_t teamHue1, teamHue2;
 uint8_t idlePattern;
@@ -55,6 +60,7 @@ uint8_t fadeValue;
 uint8_t brightness;
 bool increasing;
 bool primary;
+bool miniChanged;
 
 // IMPORTANT: To reduce NeoPixel burnout risk, add 1000 uF capacitor across
 // pixel power leads, add 300 - 500 Ohm resistor on first pixel's data input
@@ -73,18 +79,24 @@ void setup() {
 
   // add main strip
   FastLED.addLeds<CHIPSET, PIN>(ledStrip, NUM_LEDS);
+  // add a mini strip
+  FastLED.addLeds<CHIPSET, PIN2>(miniStrip, NUM_LEDS2);
   FastLED.setBrightness( BRIGHTNESS );
 
   teamColor = CRGB::Blue;
   teamHue1 = BLUE_HUE;
   teamHue2 = YELLOW_HUE;
   stripColor = CRGB::Green;
+  miniColor = CRGB::Black;
   idlePattern = 0;
 
   primary = true;
   fadeValue = 255;
   brightness = 0;
   increasing = false;
+  miniChanged = false;
+   
+  colorWipe2(miniColor,50);
 }
 
 /************ loop method *************/
@@ -117,6 +129,12 @@ void loop() {
         FastLED.setBrightness( BRIGHTNESS );
         rainbow(20);
         break;
+    }
+
+    if (miniChanged) 
+    {
+      colorWipe2(miniColor,50);
+      miniChanged = false;
     }
     
     // make sure we have a resonable delay between frames
@@ -183,6 +201,16 @@ void receiveEvent(int howMany)
     teamColor = CRGB::Blue;
     teamHue1 = BLUE_HUE;
   }
+  else if (receiveStr == "ballYes")
+  {
+    miniColor = CRGB::Green;
+    miniChanged = true;
+  }
+  else if (receiveStr == "ballNo")
+  {
+    miniColor = CRGB::Black;
+    miniChanged = true;
+  }  
   else if (receiveStr == "robotInit")
   {
     idleSelect();   // select a new idle pattern index
@@ -319,6 +347,17 @@ void dualColorPulse(uint8_t teamHue1, uint8_t teamHue2, uint8_t wait)
 void colorWipe(CRGB c, uint8_t wait) {
   for(uint16_t i=0; i<NUM_LEDS; i++) {
     ledStrip[i] = c;
+  }
+  FastLED.show();
+  delay(wait);
+}
+
+/*************** colorWipe2 method - only for miniStrip *********************/
+// Fill the dots one after the other with a color
+// speed of the fill is based on the wait parameter
+void colorWipe2(CRGB c, uint8_t wait) {
+  for(uint16_t i=0; i<NUM_LEDS2; i++) {
+    miniStrip[i] = c;
   }
   FastLED.show();
   delay(wait);

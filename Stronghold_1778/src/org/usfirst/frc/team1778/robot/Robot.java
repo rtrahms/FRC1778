@@ -103,7 +103,7 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.teleopPeriodic();
     	AutoShooterAssembly.teleopPeriodic();
-    	//FrontArmAssembly.teleopPeriodic();
+    	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
     	//HookLiftAssembly.teleopPeriodic();
   	

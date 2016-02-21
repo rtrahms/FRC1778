@@ -1,6 +1,7 @@
 package Systems;
 
 import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.Utility;
 
 public class UltrasonicSensor {
 
@@ -11,11 +12,14 @@ public class UltrasonicSensor {
 	private static final int ECHO_CHANNEL = 4;
 	
 	private static final double BALL_PRESENT_THRESHOLD_INCH = 4.0;
+	private static final double ULTRASONIC_MSG_CYCLE = 250000;
 	
 	private static final double MM_TO_SMOOT = 0.000588;
 		
 	private static double rangeInches;
 	private static boolean ballIsPresent;
+	
+	private static double initTimer;
 	
 	public static void initialize()
 	{
@@ -31,19 +35,36 @@ public class UltrasonicSensor {
 	}
 	
 	public static void teleopInit()  {
-		
+		initTimer= Utility.getFPGATime();
 	}
 	
 	public static void teleopPeriodic() {
+		
+		double currentTime = Utility.getFPGATime();
+
+		if ((currentTime - initTimer) < ULTRASONIC_MSG_CYCLE)
+			return;
+
 		rangeInches = ultra.getRangeInches();
 		//System.out.println("Ultrasonic value (in) = " + rangeInches);
 		
-		if (rangeInches < BALL_PRESENT_THRESHOLD_INCH) {
+		if (!ballIsPresent && (rangeInches < BALL_PRESENT_THRESHOLD_INCH)) {
 			//System.out.println("BALL PRESENT!");
 			ballIsPresent = true;
+			RioDuinoAssembly.SendString("ballYes");
+			
+			// reset msg timer
+			initTimer = Utility.getFPGATime();
 		}
-		else
+		else if (ballIsPresent && (rangeInches > BALL_PRESENT_THRESHOLD_INCH)) {
+			//System.out.println("BALL GONE!");
 			ballIsPresent = false;
+			RioDuinoAssembly.SendString("ballNo");
+			
+			// reset msg timer
+			initTimer = Utility.getFPGATime();
+		}
+		
 	}
 	
 	public static boolean isBallPresent() {

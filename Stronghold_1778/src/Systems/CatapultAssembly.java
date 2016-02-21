@@ -15,8 +15,7 @@ public class CatapultAssembly {
     private static Joystick leftJoy, rightJoy;
            
     // catapult reset motor
-    //private static final int CATAPULT_MOTOR_ID = 9;
-    private static final int CATAPULT_MOTOR_ID = 11;
+    private static final int CATAPULT_MOTOR_ID = 9;
     
     private static final double NUM_TICKS_PER_REV = 4096;
     private static final double VERSAPLANETARY_RATIO = 100;

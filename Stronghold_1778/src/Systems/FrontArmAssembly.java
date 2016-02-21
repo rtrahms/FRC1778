@@ -9,30 +9,35 @@ public class FrontArmAssembly {
 	
     // minimum increment (for joystick dead zone)
 	private static final double ARM_DEADZONE = 0.1;
-	private static final double ROLLER_DEADZONE = 0.1;
 	
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
     private static final double SOFT_ENCODER_LIMIT_1 = (4096.0*40.0);  // about a quarter turn
     private static final double SOFT_ENCODER_LIMIT_2 = 0.0;
-    private static final double ARM_SPEED_MULTIPLIER = 200.0;
-    //private static final double ARM_SPEED_MULTIPLIER = 1024.0;
 
-    private static final double ARM_ROLLER_MULTIPLIER = 0.5;
+    private static final double ARM_ROLLER_SPEED = 0.5;
+    private static final double CONVEYER_SPEED = 0.5;
     private static final double ARM_MULTIPLIER = -0.5;
     
 	// controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 2;
 	
+	private static final int ROLLER_UP_BUTTON = 5;
+	private static final int ROLLER_DOWN_BUTTON = 7;
+	
+	private static final int CONVEYER_UP_BUTTON = 6;
+	private static final int CONVEYER_DOWN_BUTTON = 8;
+	private static final int CONVEYER_DEPOSIT_BUTTON = 2;
+	
     // control objects
     private static Joystick gamepad;
            
     // motor ids
-    //private static final int FRONT_ARM_MOTOR_ID = 11;
-    private static final int FRONT_ARM_MOTOR_ID = 9;
+    private static final int FRONT_ARM_MOTOR_ID = 11;
     private static final int FRONT_ARM_ROLLER_ID = 12;
+    private static final int CONVEYER_MOTOR_ID = 13;
     
-    private static CANTalon frontArmMotor, frontArmRollerMotor;
+    private static CANTalon frontArmMotor, frontArmRollerMotor, conveyerMotor;
     
     private static long initTime;
     private static boolean teleopMode;
@@ -54,7 +59,8 @@ public class FrontArmAssembly {
 		        System.out.println("Initializing front arm motor (position control)...");
 
 		        // VERY IMPORTANT - resets talon faults to render them usable again!!
-		        frontArmMotor.clearStickyFaults();
+		        //frontArmMotor.clearStickyFaults();
+		        
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	 
 		        
@@ -73,7 +79,7 @@ public class FrontArmAssembly {
 	        	
 		        System.out.println("Initializing front arm roller motor (PercentVbus control)...");
 	        	
-		        frontArmRollerMotor.clearStickyFaults();
+		        //frontArmRollerMotor.clearStickyFaults();
 		        
 	        	// set up roller motor for percent Vbus control mode
 		        frontArmRollerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
@@ -85,6 +91,25 @@ public class FrontArmAssembly {
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm roller motor not initialized!");
+
+	        // create and initialize conveyer motor
+	        conveyerMotor = new CANTalon(CONVEYER_MOTOR_ID);
+	        if (conveyerMotor != null) {
+	        	
+		        System.out.println("Initializing conveyer motor (PercentVbus control)...");
+	        	
+		        //conveyerMotor.clearStickyFaults();
+		        
+	        	// set up conveyer motor for percent Vbus control mode
+		        conveyerMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+		        conveyerMotor.enableBrakeMode(false);
+	        	
+	        	// initializes speed of conveyers to zero
+		        conveyerMotor.set(0);
+	        	
+	        }
+	        else
+	        	System.out.println("ERROR: Conveyer motor not initialized!");
 	        
 		}
 	}
@@ -111,18 +136,7 @@ public class FrontArmAssembly {
 	public static void teleopPeriodic()
 	{		
 			
-		/*
-		double newArmPos = gamepad.getRawAxis(1);
-		if(Math.abs(newArmPos) <= ARM_DEADZONE) {
-			newArmPos = 0.0;
-		}
-		double newMotorPos = (newArmPos * ARM_SPEED_MULTIPLIER) + frontArmMotor.getPosition();
-		//double newMotorPos = (newArmPos * ARM_SPEED_MULTIPLIER);
-		frontArmMotor.set(newMotorPos);
-		System.out.println("input = " + newArmPos + " target pos = " + newMotorPos + " enc pos = " + frontArmMotor.getPosition());
-		*/
-		// PercentVbus test ONLY!!
-		
+		// check for front arm control motion
 		double armSpeed = gamepad.getRawAxis(1);
 		if (Math.abs(armSpeed) < ARM_DEADZONE) {
 			armSpeed = 0.0f;
@@ -134,14 +148,27 @@ public class FrontArmAssembly {
 		frontArmMotor.set(armSpeed);
 		//System.out.println("armSpeed = " + armSpeed + " enc pos = " + frontArmMotor.getPosition());	
 		
-		// check for roller motion (right gamepad joystick)
-		double rollerSpeed = gamepad.getRawAxis(3);
-		if (Math.abs(rollerSpeed) < ROLLER_DEADZONE) {
-			rollerSpeed = 0.0f;
-		}	
-		rollerSpeed *= ARM_ROLLER_MULTIPLIER;
+		// check for roller motion
+		double rollerSpeed = 0.0;
+		if (gamepad.getRawButton(ROLLER_UP_BUTTON))
+			rollerSpeed = ARM_ROLLER_SPEED;
+		else if (gamepad.getRawButton(ROLLER_DOWN_BUTTON))
+			rollerSpeed = -ARM_ROLLER_SPEED;	
 		frontArmRollerMotor.set(rollerSpeed);
 					
+		//System.out.println("Roller = " + rollerSpeed);
+		
+		// check for conveyer motion control
+		double conveyerSpeed = 0.0;
+		boolean ballDetected = UltrasonicSensor.isBallPresent();
+		if (((gamepad.getRawButton(CONVEYER_UP_BUTTON)) && !ballDetected) ||
+			gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
+			conveyerSpeed = CONVEYER_SPEED;
+		else if (gamepad.getRawButton(CONVEYER_DOWN_BUTTON))
+			conveyerSpeed = -CONVEYER_SPEED;
+		conveyerMotor.set(conveyerSpeed);
+		
+		//System.out.println(" Conveyer = " + conveyerSpeed + " ballDetected = " + ballDetected);
 	}
 	
 	public static void disabledInit()
