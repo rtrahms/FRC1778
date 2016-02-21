@@ -44,15 +44,11 @@ public class CANDriveAssembly {
 	
 	// speed controllers and drive class
 	private static CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
-	//private static CANTalon mLateral_1, mLateral_2;
     private static RobotDrive drive;
     
     // drive control
     private static Joystick leftStick, rightStick;
-	
-    // timers
-    private static long startTimeUs;
-        
+	        
 	// static initializer
 	public static void initialize()
 	{
@@ -112,8 +108,6 @@ public class CANDriveAssembly {
 		
 		double leftValue = throttleVal*leftStick.getY();
 		double rightValue = throttleVal*rightStick.getY();
-		//double strafeValue = throttleVal*leftStick.getX();
-		double strafeValue = 0; // no strafing in 2016 robot
 		
 		// Deadzones
 		if(Math.abs(leftValue) <= DRIVE_DEADZONE) {
@@ -121,9 +115,6 @@ public class CANDriveAssembly {
 		}
 		if(Math.abs(rightValue) <= DRIVE_DEADZONE) {
 			rightValue = 0;
-		}
-		if(Math.abs(strafeValue) <= LATERAL_DEADZONE) {
-			strafeValue = 0;
 		}
 		
 		// Throttle Equalization Compensation
@@ -138,11 +129,10 @@ public class CANDriveAssembly {
 		if(leftStick.getRawButton(1)) {
 			leftValue /= 1.5;
 			rightValue /= 1.5;
-			strafeValue /= 1.5;
 		}
 				
 		//Set the drive train 
-		drive(leftValue, rightValue, strafeValue);
+		drive(leftValue, rightValue, 0);
 		
 	}
 	
@@ -154,8 +144,6 @@ public class CANDriveAssembly {
 
 	private static void drive(double left, double right, double strafe) {
 		drive.tankDrive(left, right, USE_SQUARED_INPUTS);
-		//mLateral_1.set(strafe);
-		//mLateral_2.set(strafe);
 	}
 	
 	public static void driveDirection(double angle, double speed) {
