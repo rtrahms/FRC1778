@@ -170,6 +170,25 @@ public class CANDriveAssembly {
 		drive(driveAngle, -driveAngle, 0);
 	}
 	
+	public static void driveForward(double forwardVel) {
+		drive(forwardVel, forwardVel, 0);
+	}
+	
+	public static void rotate(double angularVel) {
+		drive(angularVel, -angularVel, 0);
+	}
+	
+	public static void driveVelocity(double forwardVel, double angularVel) {
+		drive((forwardVel+angularVel)/2.0,(forwardVel-angularVel)/2.0,0);
+	}
+	
+	private static double getAngle() {
+		double angle = GyroSensor.getAngle();
+		return angle;
+	}
+	
+	//Redundant Methods
+	//===================================================
 	public static void rotateLeft(double speed) {
 		drive(-speed, speed, 0);
 	}
@@ -177,11 +196,4 @@ public class CANDriveAssembly {
 	public static void rotateRight(double speed) {
 		drive(speed, -speed, 0);
 	}
-
-	private static double getAngle() {
-		
-		double angle = GyroSensor.getAngle();
-		return angle;
-	}
-	
 }

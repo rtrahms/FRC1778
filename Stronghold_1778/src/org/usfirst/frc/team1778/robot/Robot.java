@@ -7,6 +7,7 @@ import Systems.FrontArmAssembly;
 import Systems.GyroSensor;
 import Systems.NetworkCommAssembly;
 import Systems.RioDuinoAssembly;
+import Systems.UltrasonicSensor;
 import canStateMachine.AutoStateMachine;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -42,6 +43,8 @@ public class Robot extends IterativeRobot {
 		pdp.clearStickyFaults();
 
 		GyroSensor.initialize();
+		UltrasonicSensor.initialize();
+		
 		NetworkCommAssembly.initialize();
 		
 		CANDriveAssembly.initialize();
@@ -78,6 +81,7 @@ public class Robot extends IterativeRobot {
 		teleopMode = true;
 		
 		GyroSensor.reset();
+		UltrasonicSensor.teleopInit();
 		
 		CANDriveAssembly.teleopInit();
 		AutoShooterAssembly.teleopInit();
@@ -95,9 +99,11 @@ public class Robot extends IterativeRobot {
 				
     	NetworkCommAssembly.updateValues(); 	
     	
+		UltrasonicSensor.teleopPeriodic();
+    	
     	CANDriveAssembly.teleopPeriodic();
     	AutoShooterAssembly.teleopPeriodic();
-    	FrontArmAssembly.teleopPeriodic();
+    	//FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic();
     	//HookLiftAssembly.teleopPeriodic();
   	
