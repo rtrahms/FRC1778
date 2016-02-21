@@ -16,7 +16,7 @@ public class FrontArmAssembly {
     private static final double SOFT_ENCODER_LIMIT_2 = 0.0;
 
     private static final double ARM_ROLLER_SPEED = 0.5;
-    private static final double CONVEYER_SPEED = 0.5;
+    private static final double CONVEYER_SPEED = 0.2;
     private static final double ARM_MULTIPLIER = -0.5;
     
     private static final double AUTO_CONVEYER_RUN_US = 2000000;  // auto conveyer run in microsec

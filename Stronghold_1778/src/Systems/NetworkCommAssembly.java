@@ -131,6 +131,7 @@ public class NetworkCommAssembly {
     	return targetIndex;
     }
     
+    /*
     public static double getTargetCenterX(int index)
     {
     	if (centerx.length == 0)
@@ -146,5 +147,6 @@ public class NetworkCommAssembly {
     	else
     		return centery[index];
     }
+    */
 
 }

@@ -73,6 +73,9 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 		
+		// update values used for targeting
+    	NetworkCommAssembly.updateValues(); 	
+		
 		// state machine runs things in autonomous
 		autoSM.process();
 	}
@@ -99,8 +102,10 @@ public class Robot extends IterativeRobot {
 	 */
 	public void teleopPeriodic() {
 				
-    	NetworkCommAssembly.updateValues(); 	
+		// update values used for targeting
+    	NetworkCommAssembly.updateValues();
     	
+		// check status of the ball (if we have one)   	
 		UltrasonicSensor.teleopPeriodic();
     	
     	CANDriveAssembly.teleopPeriodic();
