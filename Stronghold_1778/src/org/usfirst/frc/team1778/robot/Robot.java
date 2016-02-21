@@ -21,8 +21,9 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
  */
 
 /*
- * Team 1778 robot has three major subclasses - Drivetrain, alignment and
- * elevator
+ * For Stronghold, Team 1778 robot has four major systems: CANDrive, AutoShooter, FrontArm & Catapult
+ * Supporting systems: Gyro Sensor, Ultrasonic Sensor, RioDuino (for LEDs) and Network Comm (for targeting)
+ * Autonomous modes run by AutoStateMachine object 
  */
 
 public class Robot extends IterativeRobot {
@@ -51,7 +52,6 @@ public class Robot extends IterativeRobot {
 		AutoShooterAssembly.initialize();
 		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
-		//HookLiftAssembly.initialize();
 
 		RioDuinoAssembly.initialize();
 		RioDuinoAssembly.SendString("robotInit");
