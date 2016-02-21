@@ -11,6 +11,9 @@
 #define NUM_LEDS 40
 #define PIN 6
 
+#define RING_INNER 16
+#define RING_OUTER 24
+
 #define CHIPSET     NEOPIXEL
 
 #define BRIGHTNESS  10
@@ -221,7 +224,7 @@ void idleColor()
         break;
       case 3:
       default:
-        rainbow(10);
+        rainbowSpiral(10);
         break;
     }
 }
@@ -534,4 +537,16 @@ CRGB HeatColorUtil( uint8_t temperature)
   return heatcolor;
 }
 
+
+void rainbowSpiral(uint8_t interval) {
+  uint8_t offset = (uint8_t)(millis()/interval%256);
+  float scale = 256/(float)RING_OUTER;
+  for(uint8_t led = 0; led < RING_OUTER; led++) {
+    ledStrip[led].setHSV(((uint8_t)((float)led*scale)+offset)%256,255,255);
+  }
+  scale = 256/(float)RING_INNER;
+  for(uint8_t led = 0; led < RING_INNER; led++) {
+    ledStrip[NUM_LEDS-led-1].setHSV(((uint8_t)((float)(led+2)*scale)+offset)%256,255,255);
+  }
+}
 
