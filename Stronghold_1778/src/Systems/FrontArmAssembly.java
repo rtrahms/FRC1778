@@ -16,7 +16,7 @@ public class FrontArmAssembly {
     private static final double SOFT_ENCODER_LIMIT_2 = 0.0;
 
     private static final double ARM_ROLLER_SPEED = 0.5;
-    private static final double CONVEYER_SPEED = 0.2;
+    private static final double CONVEYER_SPEED = 0.75;
     private static final double ARM_MULTIPLIER = -0.5;
     
     private static final double AUTO_CONVEYER_RUN_US = 2000000;  // auto conveyer run in microsec
@@ -148,8 +148,10 @@ public class FrontArmAssembly {
 		// check for conveyer motion control
 		double conveyerSpeed = 0.0;
 		boolean ballDetected = UltrasonicSensor.isBallPresent();
-		if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
+		if ((gamepad.getRawButton(CONVEYER_IN_BUTTON))||
 			gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
+		//if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
+		//	gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
 			conveyerSpeed = CONVEYER_SPEED;
 		else if (gamepad.getRawButton(CONVEYER_OUT_BUTTON))
 			conveyerSpeed = -CONVEYER_SPEED;

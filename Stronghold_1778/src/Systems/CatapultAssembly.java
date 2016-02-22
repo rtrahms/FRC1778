@@ -22,8 +22,12 @@ public class CatapultAssembly {
     private static final double CHOO_CHOO_GEAR_RATIO = 84.0/18.0;
     private static final double FIRE_ROTATION_BACKOFF_REV = 0.25;
     
-    private static final double CATAPULT_FIRE_INCREMENT = FIRE_ROTATION_BACKOFF_REV*NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO;
-    private static final double CATAPULT_READY_POSITION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO) - CATAPULT_FIRE_INCREMENT;
+    //private static final double CATAPULT_FIRE_INCREMENT = FIRE_ROTATION_BACKOFF_REV*NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO;
+    //private static final double CATAPULT_READY_POSITION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO) - CATAPULT_FIRE_INCREMENT;
+
+    // test values for choo-choo - not for normal operation
+    private static final double CATAPULT_FIRE_INCREMENT = 4096*50;
+    private static final double CATAPULT_READY_POSITION = 4096*50;
     
     private static final int TRIGGER_CYCLE_WAIT_US = 1000000;
     
@@ -54,23 +58,29 @@ public class CatapultAssembly {
 	        catapultMotor = new CANTalon(CATAPULT_MOTOR_ID);
 	        
 	        if (catapultMotor != null) {
-	        	
+	        
 		        System.out.println("Initializing catapult motor (position mode)...");
 		        
-		        // VERY IMPORTANT - resets talon faults to render them usable again!!
 		        //catapultMotor.clearStickyFaults();
+		        
+		        // VERY IMPORTANT - CATAPULT MOTOR CAN ONLY BE RUN IN ONE DIRECTION 
 		        
 	        	// set up motor for position control mode
 		        catapultMotor.enableControl();        // enables PID control
 		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        catapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		        catapultMotor.reverseOutput(true);  // NEED TO REVERSE OUTPUT - used for closed loops modes only
 		        catapultMotor.setPID(0.1, 0, 0.0);   
 		        //catapultMotor.set(catapultMotor.getPosition());   // set motor to current position
 		        catapultMotor.setPosition(0);	      // initializes encoder to zero	        	
-		      
-		        // set brake mode
-		        //catapultMotor.enableBrakeMode(true);
-		       
+		        catapultMotor.enableBrakeMode(true);
+		        
+		        /*
+		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+		        catapultMotor.enableBrakeMode(false);
+		        catapultMotor.setInverted(true);    // NEED TO REVERSE OUTPUT - used for Vbus mode ONLY
+		        */
+		               
 	        }
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
@@ -112,6 +122,20 @@ public class CatapultAssembly {
 			pressed = false;
 		}
 		
+		/*
+		// quick vbus test - only use when CANDrive not active
+		double multiplier = 0.5;
+		double speed = leftJoy.getRawAxis(1);
+		
+		// if speed is really low, or throttle is less than zero
+		if ((Math.abs(speed) < 0.1) || speed < 0)
+			speed = 0;
+		
+		speed *= multiplier;
+		
+		System.out.println("catapult motor speed = " + speed);
+		catapultMotor.set(speed);
+		*/
 	}
 	
 	public static void disabledInit()
