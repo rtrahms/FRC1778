@@ -63,6 +63,7 @@ public class Robot extends IterativeRobot {
 		teleopMode = false;
 		
 		RioDuinoAssembly.autonomousInit();
+		FrontArmAssembly.autoInit();
 		
 		// start the autonomous state machine
 		autoSM.start();
@@ -75,6 +76,7 @@ public class Robot extends IterativeRobot {
 		
 		// update values used for targeting
     	NetworkCommAssembly.updateValues(); 	
+		FrontArmAssembly.autoPeriodic();
 		
 		// state machine runs things in autonomous
 		autoSM.process();

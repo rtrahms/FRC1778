@@ -66,21 +66,22 @@ public class CatapultAssembly {
 		        // VERY IMPORTANT - CATAPULT MOTOR CAN ONLY BE RUN IN ONE DIRECTION 
 		        
 	        	// set up motor for position control mode
+		        /*
 		        catapultMotor.enableControl();        // enables PID control
 		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        catapultMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		        //catapultMotor.clearIAccum();   // clear error in PID control
 		        catapultMotor.reverseOutput(true);  // NEED TO REVERSE OUTPUT - used for closed loops modes only
 		        catapultMotor.setPID(0.1, 0, 0.0);   
 		        //catapultMotor.set(catapultMotor.getPosition());   // set motor to current position
 		        catapultMotor.setPosition(0);	      // initializes encoder to zero	        	
 		        catapultMotor.enableBrakeMode(true);
-		        
-		        /*
-		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
-		        catapultMotor.enableBrakeMode(false);
-		        catapultMotor.setInverted(true);    // NEED TO REVERSE OUTPUT - used for Vbus mode ONLY
 		        */
-		               
+		        catapultMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);
+		        catapultMotor.enableBrakeMode(true);
+		        catapultMotor.setInverted(true);    // NEED TO REVERSE OUTPUT - used for Vbus mode ONLY
+		        catapultMotor.setPosition(0);	      // initializes encoder to zero	        	
+		                
 	        }
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
@@ -102,6 +103,7 @@ public class CatapultAssembly {
 		if ((currentTime - initTriggerTime) < TRIGGER_CYCLE_WAIT_US)
 			return;
 		
+		/*
 		// check for catapult triggers
 		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
 		{
@@ -121,21 +123,16 @@ public class CatapultAssembly {
 
 			pressed = false;
 		}
-		
-		/*
-		// quick vbus test - only use when CANDrive not active
-		double multiplier = 0.5;
-		double speed = leftJoy.getRawAxis(1);
-		
-		// if speed is really low, or throttle is less than zero
-		if ((Math.abs(speed) < 0.1) || speed < 0)
-			speed = 0;
-		
-		speed *= multiplier;
-		
-		System.out.println("catapult motor speed = " + speed);
-		catapultMotor.set(speed);
 		*/
+		
+		// quick vbus test - only use when CANDrive not active
+		double speed = 0.0;
+		if (leftJoy.getTrigger() && rightJoy.getTrigger()) {
+			speed = 0.2;
+		}						
+		System.out.println("catapult motor speed = " + speed + "enc pos = " + catapultMotor.getPosition());
+		catapultMotor.set(speed);
+		
 	}
 	
 	public static void disabledInit()
