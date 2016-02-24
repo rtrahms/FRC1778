@@ -51,15 +51,15 @@ public class UltrasonicSensor {
 		if (!ballIsPresent && (rangeInches < BALL_PRESENT_THRESHOLD_INCH)) {
 			//System.out.println("BALL PRESENT!");
 			ballIsPresent = true;
-			RioDuinoAssembly.SendString("ballYes");
-			
+			//RioDuinoAssembly.SendString("ballYes");
+
 			// reset msg timer
 			initTimer = Utility.getFPGATime();
 		}
 		else if (ballIsPresent && (rangeInches > BALL_PRESENT_THRESHOLD_INCH)) {
 			//System.out.println("BALL GONE!");
 			ballIsPresent = false;
-			RioDuinoAssembly.SendString("ballNo");
+			//RioDuinoAssembly.SendString("ballNo");
 			
 			// reset msg timer
 			initTimer = Utility.getFPGATime();

@@ -3,6 +3,7 @@ package Systems;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Utility;
 
 public class FrontArmAssembly {
 	private static boolean initialized = false;
@@ -10,18 +11,22 @@ public class FrontArmAssembly {
     // minimum increment (for joystick dead zone)
 	private static final double ARM_DEADZONE = 0.1;
 	
+	private static final double CONTROL_CYCLE_US = 250000;
+	
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
-    private static final double SOFT_ENCODER_LIMIT_MAX = (4096.0*40.0);  // about a quarter turn up
-    private static final double SOFT_ENCODER_LIMIT_LOW_MOBILE = (4096*4.0);  // just above the floor
-    private static final double SOFT_ENCODER_LIMIT_FLOOR = 0.0;
+    private static final double SOFT_ENCODER_LIMIT_MAX = 0.0;  // about a quarter turn up
+    private static final double ENCODER_POS_HIGH = -(4096.0*5.0);
+    private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);
+    private static final double ENCODER_POS_LOW = -(4096.0*25.0); 
+    private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);
 
     private static final int ARM_HARD_LIMIT_CHANNEL = 5;  // hard limit switch on arm - normally closed (0), will open (1) on contact
     
     // speeds
     private static final double ARM_ROLLER_SPEED = 0.5;
     private static final double CONVEYER_SPEED = 0.75;
-    private static final double ARM_MULTIPLIER = -0.5;
+    private static final double ARM_POS_MULTIPLIER = -4096.0;
     
     private static final double AUTO_CONVEYER_RUN_US = 2000000;  // auto conveyer run in microsec
     private static boolean isAutoConveyerDone;
@@ -36,6 +41,9 @@ public class FrontArmAssembly {
 	private static final int CONVEYER_OUT_BUTTON = 8;
 	private static final int CONVEYER_DEPOSIT_BUTTON = 2;
 	
+	private static final int FRONT_ARM_GROUND_CAL_BUTTON1 = 1;
+	private static final int FRONT_ARM_GROUND_CAL_BUTTON2 = 3;
+	
     // control objects
     private static Joystick gamepad;
            
@@ -48,9 +56,7 @@ public class FrontArmAssembly {
     
     private static DigitalInput frontArmLimitSwitch;
     
-    private static long initTime;
     private static boolean teleopMode;
-    private static boolean firstTimeCalComplete;
 
 	// static initializer
 	public static void initialize()
@@ -61,11 +67,10 @@ public class FrontArmAssembly {
 	        	                	        
 	        initialized = true;
 	        teleopMode = false;
-	        firstTimeCalComplete = false;
 	        
 	        frontArmLimitSwitch = new DigitalInput(ARM_HARD_LIMIT_CHANNEL);
 	        
-	        // create and initialize arm motor
+	        //************ create and initialize arm motor
 	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
 	        if (frontArmMotor != null) {
 	        	
@@ -73,19 +78,31 @@ public class FrontArmAssembly {
 
 		        //frontArmMotor.clearStickyFaults();
 		        
+	        	// set up motor for position control (PID) mode
+		        frontArmMotor.enableControl();        // enables PID control
+		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
+		        //frontArmMotor.clearIAccum();   // clear error in PID control
+		        frontArmMotor.reverseOutput(true);  // May need to reverse output - used for closed loops modes only
+		        frontArmMotor.reverseSensor(false);  // encoder needs to be reversed
+		        frontArmMotor.setPID(0.1, 0, 0.0);   
+		        //frontArmMotor.set(catapultMotor.getPosition());   // set motor to current position
+		        frontArmMotor.setPosition(0);	      // initializes encoder to current position as zero	        	
+		        frontArmMotor.enableBrakeMode(true);  
+		        
+		        /*
+		        // VBUS MODE ONLY
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	 
-		        
-		        // set brake mode    
-	        	frontArmMotor.enableBrakeMode(true);
-		        
-	        	// initializes encoder to zero 		        
-		        frontArmMotor.setPosition(0);    	
+	        	frontArmMotor.enableBrakeMode(false);
+		        frontArmMotor.setPosition(0);    // initializes encoder to zero 		
+		        */
+	        		        
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm motor not initialized!");
 		  
-	        // create and initialize roller motor
+	        //*********** create and initialize roller motor
 	        frontArmRollerMotor = new CANTalon(FRONT_ARM_ROLLER_ID);
 	        if (frontArmRollerMotor != null) {
 	        	
@@ -104,7 +121,7 @@ public class FrontArmAssembly {
 	        else
 	        	System.out.println("ERROR: Front Arm roller motor not initialized!");
 
-	        // create and initialize conveyer motor
+	        //********** create and initialize conveyer motor
 	        conveyerMotor = new CANTalon(CONVEYER_MOTOR_ID);
 	        if (conveyerMotor != null) {
 	        	
@@ -124,32 +141,46 @@ public class FrontArmAssembly {
 	        
 		}
 	}
-			
+		
 	public static void autoInit() {		
-		if (!firstTimeCalComplete)		
-			startArmCal();
 	}
 	
 	public static void autoPeriodic() {
-		if (!firstTimeCalComplete)			
-			processArmCal();			
 	}
 		
 	public static void teleopInit() {        
         
-        teleopMode = true;	
-        
-		if (!firstTimeCalComplete)		
-			startArmCal();
-	}
+        teleopMode = true;
+   	}
 	
 	public static void teleopPeriodic()
-	{		
-
-		if (!firstTimeCalComplete)			
-			processArmCal();
+	{			
+		// both buttons pressed simultaneously, time to cal to ground
+		if (gamepad.getRawButton(FRONT_ARM_GROUND_CAL_BUTTON1) && gamepad.getRawButton(FRONT_ARM_GROUND_CAL_BUTTON2)) {
+			processGroundCal();
+		}
+			
+		// PID CONTROL ONLY --- check for front arm control motion
+		double armDeltaPos = gamepad.getRawAxis(1);
+		if (Math.abs(armDeltaPos) < ARM_DEADZONE) {
+			armDeltaPos = 0.0f;
+		}
+		else
+		{
+			armDeltaPos *= ARM_POS_MULTIPLIER;
+			double currPos = frontArmMotor.getPosition();
+			
+			if (((currPos > SOFT_ENCODER_LIMIT_MAX) && armDeltaPos > 0.0) || ((currPos < SOFT_ENCODER_LIMIT_FLOOR) && armDeltaPos < 0.0)) {
+				System.out.println("SOFT ARM LIMIT HIT! Setting armDeltaPos to zero");
+				armDeltaPos = 0.0;
+			}
+			
+			double newPos =  currPos + armDeltaPos;
+			frontArmMotor.set(newPos);
+		}		
 		
-		// check for front arm control motion
+		// VBUS CONTROL ONLY --- check for front arm control motion
+		/*
 		double armSpeed = gamepad.getRawAxis(1);
 		if (Math.abs(armSpeed) < ARM_DEADZONE) {
 			armSpeed = 0.0f;
@@ -158,21 +189,22 @@ public class FrontArmAssembly {
 		double pos= frontArmMotor.getPosition();
 		
 		// soft limit check (based on encoder value)
-		if (((pos > SOFT_ENCODER_LIMIT_MAX) && armSpeed < 0.0) || ((pos < SOFT_ENCODER_LIMIT_LOW_MOBILE) && armSpeed > 0.0))
+		if (((pos > SOFT_ENCODER_LIMIT_MAX) && armSpeed < 0.0) || ((pos < SOFT_ENCODER_LIMIT_FLOOR) && armSpeed > 0.0))
 		{
 			System.out.println("SOFT ARM LIMIT HIT! Setting speed to zero");
 			armSpeed = 0.0;
-		}
-		
-		// hard limit HIT when trying to go higher - STOP ARM
-		if (frontArmLimitSwitch.get() && armSpeed < 0.0)
-		{
-			System.out.println("HARD ARM LIMIT HIT! Setting speed to zero");
-			armSpeed = 0.0;
-		}
-		
+		}	
 		frontArmMotor.set(armSpeed);
-		//System.out.println("armSpeed = " + armSpeed + " enc pos = " + frontArmMotor.getPosition());	
+		*/
+		//System.out.println("Front arm enc pos = " + frontArmMotor.getPosition());	
+
+		// hard limit HIT when trying to go higher - DISABLE MOTOR
+		if (frontArmLimitSwitch.get())
+		{
+			System.out.println("HARD ARM LIMIT HIT! Disabling motor");
+			frontArmMotor.disable();
+		}
+		//System.out.println("Arm Limit Switch state = " + frontArmLimitSwitch.get());
 		
 		// check for roller motion
 		double rollerSpeed = 0.0;
@@ -198,7 +230,6 @@ public class FrontArmAssembly {
 		
 		//System.out.println(" Conveyer = " + conveyerSpeed + " ballDetected = " + ballDetected);
 		
-		//System.out.println("Arm Limit Switch state = " + frontArmLimitSwitch.get());
 	}
 	
 	public static void startConveyer(boolean inDirection) 
@@ -227,31 +258,16 @@ public class FrontArmAssembly {
 			frontArmMotor.enableBrakeMode(false);
 		}
 	}
-	
-	// start positioning the arm to correct position on power up
-	private static void startArmCal()
-	{
-		// if we haven't calibrated the arm yet (first time power-up)
-		/*
-		double calMotorSpeed = -0.1;
-		frontArmMotor.set(calMotorSpeed);		
-		*/				
-	}
-	
-	// status and/or stop calibration of the arm on first time power up
-	private static void processArmCal()
-	{
-		/*
-		// continue moving front arm just a bit (off floor)
-		double pos = frontArmMotor.getPosition();
 		
-		// if the arm is high enough off the floor
-		if (pos > SOFT_ENCODER_LIMIT_LOW_MOBILE) {
-			// stop motor and mark cal as complete
-			frontArmMotor.set(0.0);
-			firstTimeCalComplete = true;
+	// if we are on the ground, reinitialize encoder to this value
+	// this may be needed if arm position gets skewed
+	// NOTE:  ASSUMES ARM IS PHYSICALLY ON FLOOR
+	private static void processGroundCal()
+	{
+		if (frontArmMotor != null) {
+			System.out.println("Calibrating arm to floor position");
+			frontArmMotor.setPosition(SOFT_ENCODER_LIMIT_FLOOR);
 		}
-		*/
 	}		
 
 }

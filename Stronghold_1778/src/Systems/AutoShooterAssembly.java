@@ -36,6 +36,7 @@ public class AutoShooterAssembly {
 	}
 
 	public static void teleopPeriodic() {
+		
 		// one button to start auto trigger mode
 		if ((leftJoy.getRawButton(TARGETING_BUTTON_ID) || rightJoy
 				.getRawButton(TARGETING_BUTTON_ID)) && !targeting) {
@@ -68,6 +69,7 @@ public class AutoShooterAssembly {
 			targeting = false;
 			isCalibrated = false;
 		}
+		
 	}
 
 	public static void setCalibration(boolean switchOn)

@@ -94,7 +94,7 @@ public class Robot extends IterativeRobot {
 		
 		// teleop init for all systems
 		CANDriveAssembly.teleopInit();
-		AutoShooterAssembly.teleopInit();
+		//AutoShooterAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
 	}
@@ -111,7 +111,7 @@ public class Robot extends IterativeRobot {
 		UltrasonicSensor.teleopPeriodic();
     	
     	CANDriveAssembly.teleopPeriodic();
-    	AutoShooterAssembly.teleopPeriodic();
+    	//AutoShooterAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic(); 	
  	}
