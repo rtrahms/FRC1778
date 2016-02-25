@@ -93,8 +93,8 @@ public class CatapultAssembly {
         pressed = false;        
         initTriggerTime = Utility.getFPGATime();
         
-        // reset on mode entry
-        if (catapultFired)
+        // reset on mode entry, if not ready to shoot
+        if (!readyToShoot())
         	reset();
 	}
 
@@ -103,8 +103,8 @@ public class CatapultAssembly {
         pressed = false;        
         initTriggerTime = Utility.getFPGATime();
         
-        // reset on mode entry
-        if (catapultFired)
+        // reset on mode entry, if not ready to shoot
+        if (!readyToShoot())
         	reset();
 	}
 	
@@ -127,7 +127,7 @@ public class CatapultAssembly {
 					
 			// check for catapult trigger
 			if (pressed) {
-				if (!catapultFired) 
+				if (readyToShoot()) 
 					shoot();
 				else
 					reset();

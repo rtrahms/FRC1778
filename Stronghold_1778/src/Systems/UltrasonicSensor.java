@@ -41,30 +41,23 @@ public class UltrasonicSensor {
 	public static void teleopPeriodic() {
 		
 		double currentTime = Utility.getFPGATime();
-
+		
+		// just return if enough time hasn't passed
 		if ((currentTime - initTimer) < ULTRASONIC_MSG_CYCLE)
 			return;
-
+			
 		rangeInches = ultra.getRangeInches();
 		//System.out.println("Ultrasonic value (in) = " + rangeInches);
 		
-		if (!ballIsPresent && (rangeInches < BALL_PRESENT_THRESHOLD_INCH)) {
-			//System.out.println("BALL PRESENT!");
+		if (rangeInches < BALL_PRESENT_THRESHOLD_INCH) {
+			System.out.println("BALL PRESENT!");
 			ballIsPresent = true;
-			//RioDuinoAssembly.SendString("ballYes");
-
-			// reset msg timer
-			initTimer = Utility.getFPGATime();
 		}
-		else if (ballIsPresent && (rangeInches > BALL_PRESENT_THRESHOLD_INCH)) {
-			//System.out.println("BALL GONE!");
+		else
 			ballIsPresent = false;
-			//RioDuinoAssembly.SendString("ballNo");
-			
-			// reset msg timer
-			initTimer = Utility.getFPGATime();
-		}
 		
+		// reset timer
+		initTimer = Utility.getFPGATime();
 	}
 	
 	public static boolean isBallPresent() {

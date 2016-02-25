@@ -15,11 +15,11 @@ public class FrontArmAssembly {
 	
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
-    private static final double SOFT_ENCODER_LIMIT_MAX = 0.0;  // about a quarter turn up
-    private static final double ENCODER_POS_HIGH = -(4096.0*5.0);
-    private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);
-    private static final double ENCODER_POS_LOW = -(4096.0*25.0); 
-    private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);
+    private static final double SOFT_ENCODER_LIMIT_MAX = 0.0;  // high limit of arm -  vertical (matches need to start with arm in this position)
+    private static final double ENCODER_POS_HIGH = -(4096.0*5.0);     // arm high
+    private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);  // arm partially down
+    private static final double ENCODER_POS_LOW = -(4096.0*25.0);     // arm low
+    private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);  // low limit of arm (floor)
 
     private static final int ARM_HARD_LIMIT_CHANNEL = 5;  // hard limit switch on arm - normally closed (0), will open (1) on contact
     
@@ -80,8 +80,8 @@ public class FrontArmAssembly {
 		        frontArmMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 		        frontArmMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
 		        //frontArmMotor.clearIAccum();   // clear error in PID control
-		        frontArmMotor.reverseOutput(true);  // May need to reverse output - used for closed loops modes only
-		        frontArmMotor.reverseSensor(false);  // encoder needs to be reversed
+		        frontArmMotor.reverseOutput(true);  // reverse output needed - used for closed loops modes only
+		        frontArmMotor.reverseSensor(false);  // encoder does not need to be reversed
 		        //frontArmMotor.setPID(0.1, 0, 0.0);   // first test - works, but a little wobbly (low gain)
 		        frontArmMotor.setPID(0.5, 0, 0.0);		// 5x gain   
 		        //frontArmMotor.setPID(1.0, 0, 0.0);   // 10x gain
@@ -141,10 +141,7 @@ public class FrontArmAssembly {
 	        
 		}
 	}
-					
-	public static void teleopInit() {        
-   	}
-	
+						
 	public static void teleopPeriodic()
 	{			
 		// both buttons pressed simultaneously, time to cal to ground
@@ -211,10 +208,10 @@ public class FrontArmAssembly {
 		// check for conveyer motion control
 		double conveyerSpeed = 0.0;
 		boolean ballDetected = UltrasonicSensor.isBallPresent();
-		if ((gamepad.getRawButton(CONVEYER_IN_BUTTON))||
-			gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
-		//if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
+		//if ((gamepad.getRawButton(CONVEYER_IN_BUTTON))||
 		//	gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
+		if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
+			gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
 			conveyerSpeed = CONVEYER_SPEED;
 		else if (gamepad.getRawButton(CONVEYER_OUT_BUTTON))
 			conveyerSpeed = -CONVEYER_SPEED;
