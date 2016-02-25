@@ -166,6 +166,7 @@ public class FrontArmAssembly {
 			
 			double newPos =  currPos + armDeltaPos;
 			frontArmMotor.set(newPos);
+			System.out.println("Setting new front arm pos = " + newPos);	
 		}		
 		
 		// VBUS CONTROL ONLY --- check for front arm control motion
@@ -185,7 +186,6 @@ public class FrontArmAssembly {
 		}	
 		frontArmMotor.set(armSpeed);
 		*/
-		//System.out.println("Front arm enc pos = " + frontArmMotor.getPosition());	
 
 		// hard limit HIT when trying to go higher - DISABLE MOTOR
 		if (frontArmLimitSwitch.get())
