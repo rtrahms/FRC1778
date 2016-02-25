@@ -235,25 +235,25 @@ public class AutoStateMachine {
 		TimeEvent timer1 = new TimeEvent(0.5);  // timer event for idle
 		TimeEvent timer2 = new TimeEvent(3.25);  // timer event for drive forward
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
-		CatapultEvent catEvent1 = new CatapultEvent(false);  // tests for catapult being reset
-		TimeEvent timer3 = new TimeEvent(2.0);  // timer event for conveyer operation	
-		CatapultEvent catEvent2 = new CatapultEvent(true);  // tests for catapult being fired
+		TimeEvent timer3 = new TimeEvent(3.00);  // timer for catapult reset
+		TimeEvent timer4 = new TimeEvent(2.0);  // timer event for conveyer operation	
+		CatapultEvent catEvent1 = new CatapultEvent(true);  // tests for catapult being fired
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
 		timer2.associateNextState(calShooter);
 		calEvent1.associateNextState(resetCatapult);
-		catEvent1.associateNextState(conveyerIn);
-		timer3.associateNextState(shootBall);
-		catEvent2.associateNextState(deadEnd);
+		timer3.associateNextState(conveyerIn);
+		timer4.associateNextState(shootBall);
+		catEvent1.associateNextState(deadEnd);
 		
 		// add events to each state
 		startIdle.addEvent(timer1);
 		driveForward.addEvent(timer2);
 		calShooter.addEvent(calEvent1);
-		resetCatapult.addEvent(catEvent1);
-		conveyerIn.addEvent(timer3);
-		shootBall.addEvent(catEvent2);
+		resetCatapult.addEvent(timer3);
+		conveyerIn.addEvent(timer4);
+		shootBall.addEvent(catEvent1);
 	
 		// store everything
 		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
@@ -270,9 +270,9 @@ public class AutoStateMachine {
 		myEvents.add(timer1);
 		myEvents.add(timer2);
 		myEvents.add(calEvent1);
-		myEvents.add(catEvent1);
 		myEvents.add(timer3);
-		myEvents.add(catEvent2);
+		myEvents.add(timer4);
+		myEvents.add(catEvent1);
 		
 		// insert into the network arrays
 		autoStates.add(index, myStates);
@@ -307,27 +307,27 @@ public class AutoStateMachine {
 		TimeEvent timer2 = new TimeEvent(0.5);  // 0.5s timer event
 		GyroAngleEvent gyro1 = new GyroAngleEvent(-120.0);  // -120 deg (left turn) event
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
-		CatapultEvent catEvent1 = new CatapultEvent(false);  // tests for catapult being reset
-		TimeEvent timer3 = new TimeEvent(2.0);  // timer event for conveyer operation	
-		CatapultEvent catEvent2 = new CatapultEvent(true);  // tests for catapult being fired
+		TimeEvent timer3 = new TimeEvent(3.0);  // timer event for catapult reset operation	
+		TimeEvent timer4 = new TimeEvent(2.0);  // timer event for conveyer operation	
+		CatapultEvent catEvent1 = new CatapultEvent(true);  // tests for catapult being fired
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
 		timer2.associateNextState(turnLeft);
 		gyro1.associateNextState(calShooter);
 		calEvent1.associateNextState(resetCatapult);
-		catEvent1.associateNextState(conveyerIn);
-		timer3.associateNextState(shootBall);
-		catEvent2.associateNextState(deadEnd);
+		timer3.associateNextState(conveyerIn);
+		timer4.associateNextState(shootBall);
+		catEvent1.associateNextState(deadEnd);
 		
 		// add events to each state
 		startIdle.addEvent(timer1);
 		driveForward.addEvent(timer2);
 		turnLeft.addEvent(gyro1);
 		calShooter.addEvent(calEvent1);
-		resetCatapult.addEvent(catEvent1);
-		conveyerIn.addEvent(timer3);
-		shootBall.addEvent(catEvent2);
+		resetCatapult.addEvent(timer3);
+		conveyerIn.addEvent(timer4);
+		shootBall.addEvent(catEvent1);
 		
 		// store everything
 		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
@@ -346,9 +346,9 @@ public class AutoStateMachine {
 		myEvents.add(timer2);
 		myEvents.add(gyro1);
 		myEvents.add(calEvent1);
-		myEvents.add(catEvent1);
 		myEvents.add(timer3);
-		myEvents.add(catEvent2);
+		myEvents.add(timer4);
+		myEvents.add(catEvent1);
 		
 		// insert into the network arrays
 		autoStates.add(index, myStates);

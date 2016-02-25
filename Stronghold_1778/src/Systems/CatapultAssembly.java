@@ -34,9 +34,7 @@ public class CatapultAssembly {
     private static CANTalon catapultMotor;
     
     private static boolean pressed;
-    private static boolean catapultFired;
-    private static boolean teleopMode;
-    
+    private static boolean catapultFired;    
     private static double initTriggerTime;
 
 	// static initializer
@@ -50,7 +48,6 @@ public class CatapultAssembly {
 	        initialized = true;
 	        catapultFired = true;  // catapult starts in the low-energy (fired) state
 	        pressed = false;
-	        teleopMode = false;
 	        
 	        System.out.println("Creating catapult motor object...");
 	        
@@ -90,17 +87,25 @@ public class CatapultAssembly {
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
 		}
 	}
-		
-	public static void teleopInit() {
-		                
-        teleopMode = true;
-        pressed = false;
+
+	public static void autoInit() {
         
+        pressed = false;        
         initTriggerTime = Utility.getFPGATime();
         
         // reset on mode entry
-        //if (catapultFired)
-        //	reset();
+        if (catapultFired)
+        	reset();
+	}
+
+	public static void teleopInit() {
+		                
+        pressed = false;        
+        initTriggerTime = Utility.getFPGATime();
+        
+        // reset on mode entry
+        if (catapultFired)
+        	reset();
 	}
 	
 	public static void teleopPeriodic()
@@ -146,16 +151,6 @@ public class CatapultAssembly {
 	
 	public static void disabledInit()
 	{
-		if (!initialized)
-			initialize();
-		
-		// if we are exiting teleop mode...
-		if (teleopMode)
-		{
-			// fire catapult if ready to fire
-			if (!catapultFired)
-				shoot();			
-		}
 	}
 
 	public static void shoot()
@@ -176,6 +171,9 @@ public class CatapultAssembly {
 		catapultMotor.setPosition(0);
 		catapultMotor.set(CATAPULT_READY_POSITION);
 		System.out.println("Catapult Reset!  new pos = " + catapultMotor.getPosition());
+		
+		// TODO: resets are not instantaneous.  From the command to the final reset state takes a couple of seconds.
+		// Although this delay may introduce a race condition, we do NOT want to introduce wait/delay states.
 		
 		// reset fired flag
 		catapultFired = false;

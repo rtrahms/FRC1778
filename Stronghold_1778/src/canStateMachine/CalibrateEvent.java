@@ -21,12 +21,16 @@ public class CalibrateEvent extends Event {
 	// overloaded trigger method
 	public boolean isTriggered()
 	{		
+		// NOT YET TESTED FOR AUTO MODE - DISABLED
+		/*
 		boolean calState = AutoShooterAssembly.isCalibrated();
 		
 		if (calibratedCondition == calState)
 			return true;
 		
 		return false;
+		*/
+		return true;
 	}
 
 }

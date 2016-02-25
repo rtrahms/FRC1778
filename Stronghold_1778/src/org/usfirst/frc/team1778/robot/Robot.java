@@ -32,7 +32,6 @@ public class Robot extends IterativeRobot {
 
 	// autonomous state machine object
 	AutoStateMachine autoSM;
-
 	
 	boolean teleopMode = false;
 
@@ -63,7 +62,7 @@ public class Robot extends IterativeRobot {
 		teleopMode = false;
 		
 		RioDuinoAssembly.autonomousInit();
-		FrontArmAssembly.autoInit();
+		CatapultAssembly.autoInit();
 		
 		// start the autonomous state machine
 		autoSM.start();
@@ -76,7 +75,6 @@ public class Robot extends IterativeRobot {
 		
 		// update values used for targeting
     	NetworkCommAssembly.updateValues(); 	
-		FrontArmAssembly.autoPeriodic();
 		
 		// state machine runs things in autonomous
 		autoSM.process();
@@ -94,7 +92,7 @@ public class Robot extends IterativeRobot {
 		
 		// teleop init for all systems
 		CANDriveAssembly.teleopInit();
-		//AutoShooterAssembly.teleopInit();
+		AutoShooterAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
 	}
@@ -111,7 +109,7 @@ public class Robot extends IterativeRobot {
 		UltrasonicSensor.teleopPeriodic();
     	
     	CANDriveAssembly.teleopPeriodic();
-    	//AutoShooterAssembly.teleopPeriodic();
+    	AutoShooterAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
     	CatapultAssembly.teleopPeriodic(); 	
  	}
@@ -119,12 +117,6 @@ public class Robot extends IterativeRobot {
 	public void disabledInit() {
 		
 		RioDuinoAssembly.disabledInit();
-
-		CANDriveAssembly.disabledInit();
-    	AutoShooterAssembly.disabledInit();
-    	FrontArmAssembly.disabledInit();
-    	CatapultAssembly.disabledInit();		
-    	
 	}
 	
 	public void testInit() {

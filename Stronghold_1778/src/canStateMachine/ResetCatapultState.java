@@ -21,8 +21,9 @@ public class ResetCatapultState extends AutoState {
 	// state entry
 	public void enter() {
 				
-		// reset the catapult (just call once)
-		CatapultAssembly.reset();
+		// reset the catapult if necessary
+		if (CatapultAssembly.isFired())
+			CatapultAssembly.reset();
 		
 		super.enter();
 	}

@@ -22,17 +22,19 @@ public class CalibrateShooterState extends AutoState {
 	// state entry
 	public void enter() {
 		
+		// NOT YET TESTED FOR AUTO MODE - DISABLED
 		// set the calibration mode
-		AutoShooterAssembly.setCalibration(true);
-				
+		//AutoShooterAssembly.setCalibration(true);
+						
 		super.enter();
 	}
 	
 	// called periodically
 	public AutoState process()  {
 		
+		// NOT YET TESTED FOR AUTO MODE - DISABLED
 		// calibrate shooter
-		AutoShooterAssembly.calibrateShooter();
+		//AutoShooterAssembly.calibrateShooter();
 		
 		return super.process();
 	}
@@ -40,8 +42,9 @@ public class CalibrateShooterState extends AutoState {
 	// state cleanup and exit
 	public void exit() {
 	
+		// NOT YET TESTED FOR AUTO MODE - DISABLED
 		// reset calibration mode
-		AutoShooterAssembly.setCalibration(false);
+		//AutoShooterAssembly.setCalibration(false);
 
 		// cleanup base class
 		super.exit();

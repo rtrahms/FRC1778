@@ -56,8 +56,6 @@ public class FrontArmAssembly {
     
     private static DigitalInput frontArmLimitSwitch;
     
-    private static boolean teleopMode;
-
 	// static initializer
 	public static void initialize()
 	{
@@ -66,7 +64,6 @@ public class FrontArmAssembly {
 	        gamepad = new Joystick(GAMEPAD_ID);
 	        	                	        
 	        initialized = true;
-	        teleopMode = false;
 	        
 	        frontArmLimitSwitch = new DigitalInput(ARM_HARD_LIMIT_CHANNEL);
 	        
@@ -85,7 +82,10 @@ public class FrontArmAssembly {
 		        //frontArmMotor.clearIAccum();   // clear error in PID control
 		        frontArmMotor.reverseOutput(true);  // May need to reverse output - used for closed loops modes only
 		        frontArmMotor.reverseSensor(false);  // encoder needs to be reversed
-		        frontArmMotor.setPID(0.1, 0, 0.0);   
+		        //frontArmMotor.setPID(0.1, 0, 0.0);   // first test - works, but a little wobbly (low gain)
+		        frontArmMotor.setPID(0.5, 0, 0.0);		// 5x gain   
+		        //frontArmMotor.setPID(1.0, 0, 0.0);   // 10x gain
+
 		        //frontArmMotor.set(catapultMotor.getPosition());   // set motor to current position
 		        frontArmMotor.setPosition(0);	      // initializes encoder to current position as zero	        	
 		        frontArmMotor.enableBrakeMode(true);  
@@ -141,16 +141,8 @@ public class FrontArmAssembly {
 	        
 		}
 	}
-		
-	public static void autoInit() {		
-	}
-	
-	public static void autoPeriodic() {
-	}
-		
+					
 	public static void teleopInit() {        
-        
-        teleopMode = true;
    	}
 	
 	public static void teleopPeriodic()
@@ -244,21 +236,7 @@ public class FrontArmAssembly {
 	{
 		conveyerMotor.set(0);		
 	}
-	
-	public static void disabledInit()
-	{
-		if (!initialized)
-			initialize();	
-		
-		// if exiting from teleop mode (game is over)...
-		if (teleopMode)
-		{
-			System.out.println("FrontArmAssembly: exiting teleop, moving to coast mode");
-			// relax front arm motor (coast mode)
-			frontArmMotor.enableBrakeMode(false);
-		}
-	}
-		
+			
 	// if we are on the ground, reinitialize encoder to this value
 	// this may be needed if arm position gets skewed
 	// NOTE:  ASSUMES ARM IS PHYSICALLY ON FLOOR

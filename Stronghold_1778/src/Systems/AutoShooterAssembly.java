@@ -115,11 +115,6 @@ public class AutoShooterAssembly {
 		return isCalibrated;
 	}
 	
-	public static void disabledInit() {
-		if (!initialized)
-			initialize();
-	}
-
 	private static boolean calibratePosX() {
 		angularVelocity = NetworkCommAssembly.getAngularVelocity();
 
