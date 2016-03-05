@@ -26,13 +26,20 @@ public class Robot extends IterativeRobot {
 	
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
-    private final double SOFT_ENCODER_LIMIT_1 = (4096.0*40.0);
-    private final double SOFT_ENCODER_LIMIT_2 = 0.0;
+    private static final double SOFT_ENCODER_LIMIT_MAX = 0.0;  // high limit of arm -  vertical (matches need to start with arm in this position)
+    private static final double ENCODER_POS_HIGH = -(4096.0*5.0);     // arm high
+    private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);  // arm partially down
+    private static final double ENCODER_POS_LOW = -(4096.0*25.0);     // arm low
+    private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);  // low limit of arm (floor)
     private final double ARM_SPEED_MULTIPLIER = 400.0;
     //private static final double ARM_SPEED_MULTIPLIER = 1024.0;
 
     private final double ARM_MULTIPLIER = -0.5;
-    
+    private static final double ARM_POS_MULTIPLIER = -4096.0;
+
+	private static final int FRONT_ARM_GROUND_CAL_BUTTON1 = 1;
+	private static final int FRONT_ARM_GROUND_CAL_BUTTON2 = 3;
+
 	// controller gamepad ID - assumes no other controllers connected
 	private final int GAMEPAD_ID = 2;
 	
@@ -40,7 +47,7 @@ public class Robot extends IterativeRobot {
     private Joystick gamepad;
            
     // motor ids
-    private final int TEST_MOTOR_ID = 11;
+    private final int TEST_MOTOR_ID = 5;
     
     private static CANTalon testMotor;
     
@@ -59,15 +66,7 @@ public class Robot extends IterativeRobot {
     }
     
     private void initialize()
-    {
-    	double p;
-    	double i;
-    	double d;
-    	double f;
-    	int izone;
-    	double ramprate;  // this should leave the ramp rate uncapped.
-    	int profile;
-    	
+    {    	
         gamepad = new Joystick(GAMEPAD_ID);
                 
         // create and initialize arm motor
@@ -76,25 +75,33 @@ public class Robot extends IterativeRobot {
         	
 	        System.out.println("Initializing test motor (position control)...");
 
-	        // VERY IMPORTANT - resets talon faults to render them usable again!!
-	        testMotor.clearStickyFaults();
-	        //testMotor.setInverted(true);
-        		       
-	        /*
-	        testMotor.enableControl();
-			testMotor.changeControlMode(CANTalon.TalonControlMode.Position);
+	        System.out.println("Initializing front arm motor (position control)...");
+
+	        //frontArmMotor.clearStickyFaults();
+	        
+        	// set up motor for position control (PID) mode
+	        testMotor.enableControl();        // enables PID control
+	        testMotor.changeControlMode(CANTalon.TalonControlMode.Position);
 	        testMotor.setFeedbackDevice(CANTalon.FeedbackDevice.QuadEncoder);
-	        // set up motor for position control PID feedback mode only
-	        p = 3.0;  i = 0.0;  d = 0.0; f = 60.0;
-	        izone = 100;  ramprate = 120;  profile = 0;	        
-	        testMotor.setPID(p, i, d, f, izone, ramprate, profile);	 
-	        */
+	        //testMotor.clearIAccum();   // clear error in PID control
+	        testMotor.reverseOutput(true);  // reverse output needed - used for closed loops modes only
+	        testMotor.reverseSensor(false);  // encoder does not need to be reversed
+	        //testMotor.setPID(0.1, 0, 0.0);   // first test - works, but a little wobbly (low gain)
+	        testMotor.setPID(0.5, 0, 0.0);		// 5x gain   
+	        //testMotor.setPID(1.0, 0, 0.0);   // 10x gain
+	        
+	        //testMotor.setForwardSoftLimit(SOFT_ENCODER_LIMIT_MAX);
+	        //testMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_FLOOR);
+
+	        //testMotor.set(testMotor.getPosition());   // set motor to current position
+	        testMotor.setPosition(0);	      // initializes encoder to current position as zero	        	
+	        testMotor.enableBrakeMode(true);  
 	        
 	        // set up brake mode
 	        testMotor.enableBrakeMode(true);
 	        
 	        // PercentVbus test ONLY!!!
-	        testMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	 
+	        //testMotor.changeControlMode(CANTalon.TalonControlMode.PercentVbus);	 
 	        
 	        // set and enable soft motor limits  
 	        /*
@@ -102,13 +109,14 @@ public class Robot extends IterativeRobot {
         	testMotor.enableForwardSoftLimit(true);
         	testMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_2);
         	testMotor.enableReverseSoftLimit(true);	
-        	*/ 
+        	
         	
 	        // reset position
 	        //testMotor.set(testMotor.getPosition());
 	        
         	// initializes encoder to zero 		        
-	        testMotor.setPosition(0);    	
+	        //testMotor.setPosition(0);    	
+	         */
         }
         else
         	System.out.println("ERROR: Test motor not initialized!");
@@ -141,7 +149,32 @@ public class Robot extends IterativeRobot {
      * This function is called periodically during operator control
      */
     public void teleopPeriodic() {
-    	
+
+		// both buttons pressed simultaneously, time to cal to ground
+		if (gamepad.getRawButton(FRONT_ARM_GROUND_CAL_BUTTON1) && gamepad.getRawButton(FRONT_ARM_GROUND_CAL_BUTTON2)) {
+			processGroundCal();
+		}
+
+		// PID CONTROL ONLY
+		double armDeltaPos = gamepad.getRawAxis(1);
+		if (Math.abs(armDeltaPos) < ARM_DEADZONE) {
+			armDeltaPos = 0.0f;
+		}
+		else
+		{
+			armDeltaPos *= ARM_POS_MULTIPLIER;
+			double currPos = testMotor.getPosition();
+			
+			if (((currPos > SOFT_ENCODER_LIMIT_MAX) && armDeltaPos > 0.0) || ((currPos < SOFT_ENCODER_LIMIT_FLOOR) && armDeltaPos < 0.0)) {
+				System.out.println("SOFT ARM LIMIT HIT! Setting armDeltaPos to zero");
+				armDeltaPos = 0.0;
+			}
+			
+			double newPos =  currPos + armDeltaPos;
+			testMotor.set(newPos);
+			System.out.println("Setting new front arm pos = " + newPos);	
+		}		
+
     	/*
 		double newArmPos = gamepad.getRawAxis(1);
 		if(Math.abs(newArmPos) <= ARM_DEADZONE) {
@@ -153,6 +186,7 @@ public class Robot extends IterativeRobot {
     	*/
     	
 		// PercentVbus test ONLY!!
+    	/*
 		double armSpeed = gamepad.getRawAxis(1);
 		if (Math.abs(armSpeed) < ARM_DEADZONE) {
 			armSpeed = 0.0f;
@@ -165,9 +199,20 @@ public class Robot extends IterativeRobot {
 		testMotor.set(armSpeed);
 		
 		System.out.println("armSpeed = " + armSpeed + " enc pos = " + testMotor.getPosition());
-		       
+		 */      
     }
-    
+ 
+	// if we are on the ground, reinitialize encoder to this value
+	// this may be needed if arm position gets skewed
+	// NOTE:  ASSUMES ARM IS PHYSICALLY ON FLOOR
+	private static void processGroundCal()
+	{
+		if (testMotor != null) {
+			System.out.println("Calibrating arm to floor position");
+			testMotor.setPosition(SOFT_ENCODER_LIMIT_FLOOR);
+		}
+	}		
+
 	// Change to closed loop control mode and hold the current position
 	private void positionMode() {
 		testMotor.setProfile(0);
