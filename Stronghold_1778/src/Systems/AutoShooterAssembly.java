@@ -10,7 +10,8 @@ public class AutoShooterAssembly {
 	private static final int LEFT_JOYSTICK_ID = 0;
 	private static final int RIGHT_JOYSTICK_ID = 1;
 	private static final int TARGETING_BUTTON_ID = 2;
-	private static final double AUTO_RESET_THRESHOLD = 0.5;
+	private static final double AUTO_RESET_THRESHOLD = 0.25;
+	private static final int CONSECUTIVE_CAL_COUNT_THRESHOLD = 10;
 
 	private static Joystick leftJoy, rightJoy;
 
@@ -95,12 +96,13 @@ public class AutoShooterAssembly {
 			if (calibratePosX()) {
 				// second calibrate Y position
 				if (calibratePosY()) {
-					// both are calibrated - shoot the ball!
-					System.out.println("AutoTarget: SHOOTING!");
+					// both are calibrated - increment the cal counter
 					consecCalibrate++;
-					if (consecCalibrate > 10) {
+					
+					// if we are calibrated for enough consecutive times
+					if (consecCalibrate > CONSECUTIVE_CAL_COUNT_THRESHOLD) {
 						// set calibrated flag (ready to shoot!)
-						isCalibrated = true;
+						isCalibrated = true;						
 					}
 				} else {
 					consecCalibrate = 0;
@@ -116,6 +118,11 @@ public class AutoShooterAssembly {
 	}
 	
 	private static boolean calibratePosX() {
+		
+		// if no target data, return false
+		if (!NetworkCommAssembly.hasTarget())
+			return false;
+		
 		angularVelocity = NetworkCommAssembly.getAngularVelocity();
 
 		// if in the margin is small enough
@@ -136,11 +143,16 @@ public class AutoShooterAssembly {
 	}
 
 	private static boolean calibratePosY() {
+		
+		// if no target data, return false
+		if (!NetworkCommAssembly.hasTarget())
+			return false;
+		
 		forwardVelocity = NetworkCommAssembly.getForwardVelocity();
 
 		// if in the margin is small enough
 		if (forwardVelocity == 0) {
-			// no further x movement necessary - STOP
+			// no further y movement necessary - STOP
 			CANDriveAssembly.driveForward(0);
 
 			System.out.println("AXIAL Y CALIBRATED!");
@@ -154,27 +166,4 @@ public class AutoShooterAssembly {
 
 		return false;
 	}
-
-	private static boolean calibratePosXY() {
-		forwardVelocity = NetworkCommAssembly.getForwardVelocity();
-		angularVelocity = NetworkCommAssembly.getAngularVelocity();
-
-		// if in the margin is small enough
-		if (forwardVelocity == 0) {
-			// no further x movement necessary - STOP
-			CANDriveAssembly.driveVelocity(forwardVelocity, angularVelocity);
-
-			System.out.println("AXIAL X AND Y CALIBRATED!");
-			return true;
-		} else {
-			System.out.println("forwardVelocity = " + forwardVelocity
-					+ " angularVelocity = " + angularVelocity);
-
-			// rotate robot left or right to get better actual X position
-			CANDriveAssembly.driveForward(forwardVelocity);
-		}
-
-		return false;
-	}
-
 }

@@ -86,6 +86,9 @@ public class FrontArmAssembly {
 		        frontArmMotor.setPID(0.5, 0, 0.0);		// 5x gain   
 		        //frontArmMotor.setPID(1.0, 0, 0.0);   // 10x gain
 
+		        //frontArmMotor.setForwardSoftLimit(SOFT_ENCODER_LIMIT_MAX);
+		        //frontArmMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_FLOOR);
+
 		        //frontArmMotor.set(catapultMotor.getPosition());   // set motor to current position
 		        frontArmMotor.setPosition(0);	      // initializes encoder to current position as zero	        	
 		        frontArmMotor.enableBrakeMode(true);  

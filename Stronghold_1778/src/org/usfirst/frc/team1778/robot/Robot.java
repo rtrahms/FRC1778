@@ -33,8 +33,6 @@ public class Robot extends IterativeRobot {
 	// autonomous state machine object
 	AutoStateMachine autoSM;
 	
-	boolean teleopMode = false;
-
 	public void robotInit() {
 
 		autoSM = new AutoStateMachine();
@@ -58,8 +56,11 @@ public class Robot extends IterativeRobot {
 
 	// called one time on entry into autonomous
 	public void autonomousInit() {
-
-		teleopMode = false;
+		
+		// reset sensors and network table
+		GyroSensor.reset();
+		UltrasonicSensor.reset();
+		NetworkCommAssembly.reset();
 		
 		RioDuinoAssembly.autonomousInit();
 		CatapultAssembly.autoInit();
@@ -74,8 +75,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 		
 		// update values used for targeting
-		// CRASHES!  Taking out of circulation until bug found
-    	//NetworkCommAssembly.updateValues(); 	
+    	NetworkCommAssembly.updateValues(); 	
 		
 		// state machine runs things in autonomous
 		autoSM.process();
@@ -83,13 +83,13 @@ public class Robot extends IterativeRobot {
 
 	// called one time on entry into teleop
 	public void teleopInit() {
-
-		teleopMode = true;
+		
 		RioDuinoAssembly.teleopInit();
 		
-		// reset sensors
+		// reset sensors and network table
 		GyroSensor.reset();
 		UltrasonicSensor.reset();
+		NetworkCommAssembly.reset();
 		
 		// teleop init for all systems
 		CANDriveAssembly.teleopInit();
@@ -103,8 +103,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 				
 		// update values used for targeting
-		// CRASHES!  Taking out of circulation until bug found
-    	//NetworkCommAssembly.updateValues();
+    	NetworkCommAssembly.updateValues();
     	
 		// check status of the ball (if we have one)   	
 		UltrasonicSensor.teleopPeriodic();
@@ -121,8 +120,6 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void testInit() {
-		teleopMode = false;
-		
 		RioDuinoAssembly.testInit();
 	}
 	

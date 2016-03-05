@@ -184,7 +184,7 @@ public class AutoStateMachine {
 		
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(3.25);  // 5s timer event
+		TimeEvent timer2 = new TimeEvent(7.0);  // drive forward timer event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
@@ -233,7 +233,7 @@ public class AutoStateMachine {
 		
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // timer event for idle
-		TimeEvent timer2 = new TimeEvent(3.25);  // timer event for drive forward
+		TimeEvent timer2 = new TimeEvent(7.0);  // timer event for drive forward
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
 		TimeEvent timer3 = new TimeEvent(3.00);  // timer for catapult reset
 		TimeEvent timer4 = new TimeEvent(2.0);  // timer event for conveyer operation	
