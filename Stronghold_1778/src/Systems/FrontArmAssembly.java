@@ -19,6 +19,7 @@ public class FrontArmAssembly {
     private static final double ENCODER_POS_HIGH = -(4096.0*5.0);     // arm high
     private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);  // arm partially down
     private static final double ENCODER_POS_LOW = -(4096.0*20.0);     // arm low
+    private static final double ENCODER_POS_VERY_LOW = -(4096.0*30.0);     // arm very low (but above floor)
     private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);  // low limit of arm (floor)
 
     private static final int ARM_HARD_LIMIT_CHANNEL = 5;  // hard limit switch on arm - normally closed (0), will open (1) on contact
@@ -107,7 +108,10 @@ public class FrontArmAssembly {
 	        	frontArmMotor.enableBrakeMode(false);
 		        frontArmMotor.setPosition(0);    // initializes encoder to zero 		
 		        */
-	        		        
+
+				// make sure we're in fast accel mode
+				armFastAccel();
+
 	        }
 	        else
 	        	System.out.println("ERROR: Front Arm motor not initialized!");
@@ -151,7 +155,28 @@ public class FrontArmAssembly {
 	        
 		}
 	}
-						
+			
+	public static void autoInit() {
+		
+		// for auto control, arm motor ramp should be slow by default
+		armSlowAccel();
+
+		// check current arm position
+		double armPos = frontArmMotor.getPosition();
+				
+		// if the arm is up (above middle)
+		if (armPos > ENCODER_POS_MIDDLE) {
+			// move arm to low position
+			autoArmToLow();
+		}
+	}
+	
+	public static void teleopInit() {
+		
+		// for teleop control, arm motor ramp should be fast by default
+		armFastAccel();
+	}
+	
 	public static void teleopPeriodic()
 	{			
 		// both buttons pressed simultaneously, time to cal to ground
@@ -169,11 +194,11 @@ public class FrontArmAssembly {
 			armDeltaPos *= ARM_POS_MULTIPLIER;
 			double currPos = frontArmMotor.getPosition();
 			
-			if (((currPos > SOFT_ENCODER_LIMIT_MAX || hardLimit) && armDeltaPos > 0.0) || ((currPos < SOFT_ENCODER_LIMIT_FLOOR) && armDeltaPos < 0.0)) {
+			if (((currPos > SOFT_ENCODER_LIMIT_MAX || hardLimit) && armDeltaPos > 0.0) || ((currPos < ENCODER_POS_VERY_LOW) && armDeltaPos < 0.0)) {
 				System.out.println("SOFT or HARD ARM LIMIT HIT! Setting armDeltaPos to zero");
 				armDeltaPos = 0.0;
 			}
-			
+						
 			double newPos =  currPos + armDeltaPos;
 			frontArmMotor.set(newPos);
 			//System.out.println("Setting new front arm pos = " + newPos);	
@@ -261,11 +286,52 @@ public class FrontArmAssembly {
 		
 		// if arm position in encoder ticks is less than low position, return true
 		double armPos = frontArmMotor.getPosition();
-		if (armPos < ENCODER_POS_LOW)
+		if (armPos < ENCODER_POS_MIDDLE)
 			return true;
-		else
+		else {
+			System.out.println("WARNING: front arm is too high for catapult operation!!");
 			return false;
+		}
 	}
+	
+	/****************  automatic arm movement methods *******************/
+	public static void autoArmToVeryLow() {
+		armSlowAccel();
+		autoArmMove(ENCODER_POS_VERY_LOW);
+	}
+
+	public static void autoArmToLow() {
+		armSlowAccel();
+		autoArmMove(ENCODER_POS_LOW);
+	}
+
+	public static void autoArmToMiddle() {
+		armSlowAccel();
+		autoArmMove(ENCODER_POS_MIDDLE);
+	}
+
+	public static void autoArmToHigh() {
+		armSlowAccel();
+		autoArmMove(ENCODER_POS_HIGH);
+	}
+	
+	private static void autoArmMove(double encoderPos) {
+		// during auto movement, lower voltage ramp rate
+		frontArmMotor.setPosition(encoderPos);
+	}
+
+	private static void armFastAccel() {
+		frontArmMotor.setVoltageRampRate(96.0);   // 96 V/sec ramp - full ramp up to 12v in 0.125s	
+	}
+	
+	private static void armSlowAccel() {
+		frontArmMotor.setVoltageRampRate(12.0);   // 12 V/sec ramp - full ramp up to 12v in 1s
+	}
+
+	private static void armVerySlowAccel() {
+		frontArmMotor.setVoltageRampRate(6.0);   // 6 V/sec ramp - full ramp up to 12v in 2s
+	}
+
 	
 	// if we are on the ground, reinitialize encoder to this value
 	// this may be needed if arm position gets skewed

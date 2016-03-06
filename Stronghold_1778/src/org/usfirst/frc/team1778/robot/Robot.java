@@ -60,9 +60,11 @@ public class Robot extends IterativeRobot {
 		// reset sensors and network table
 		GyroSensor.reset();
 		UltrasonicSensor.reset();
-		NetworkCommAssembly.reset();
+		//NetworkCommAssembly.reset();
 		
 		RioDuinoAssembly.autonomousInit();
+		CANDriveAssembly.autoInit();
+		FrontArmAssembly.autoInit();
 		CatapultAssembly.autoInit();
 		
 		// start the autonomous state machine
@@ -75,7 +77,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 		
 		// update values used for targeting
-    	NetworkCommAssembly.updateValues(); 	
+    	//NetworkCommAssembly.updateValues(); 	
 		
 		// state machine runs things in autonomous
 		autoSM.process();
@@ -94,6 +96,7 @@ public class Robot extends IterativeRobot {
 		// teleop init for all systems
 		CANDriveAssembly.teleopInit();
 		AutoShooterAssembly.teleopInit();
+		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
 	}
 
