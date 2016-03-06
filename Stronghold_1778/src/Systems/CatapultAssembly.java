@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Utility;
 
+
 public class CatapultAssembly {
 	private static boolean initialized = false;
 	                	
@@ -117,11 +118,7 @@ public class CatapultAssembly {
 		// if not enough time has passed, no polling allowed!
 		if ((currentTime - initTriggerTime) < TRIGGER_CYCLE_WAIT_US)
 			return;
-		
-		// if front arm is too high, no shooting allowed!
-		if (!FrontArmAssembly.isArmLowEnoughForCatapult())
-			return;
-		
+				
 		// check for catapult triggers
 		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
 		{
@@ -158,43 +155,55 @@ public class CatapultAssembly {
 
 	public static void shoot()
 	{
-		// fire catapult
-		catapultMotor.setPosition(0);
-		catapultMotor.set(CATAPULT_FIRE_INCREMENT);
-		System.out.println("Catapult Fired!  new pos = " + catapultMotor.getPosition());
+		// if front arm is low enough and catapult ready to shoot...
+		if (FrontArmAssembly.isArmLowEnoughForCatapult() && readyToShoot()) {	
+			// fire catapult
+			catapultMotor.setPosition(0);
+			catapultMotor.set(CATAPULT_FIRE_INCREMENT);
+			System.out.println("Catapult Fired!  new pos = " + catapultMotor.getPosition());
+			
+			// set fired flag
+			catapultFired = true;
+		}
 		
-		// set fired flag
-		catapultFired = true;
 		pressed = false;		
 	}
 	
 	public static void reset()
 	{		
-		// reset catapult motor
-		catapultMotor.setPosition(0);
-		catapultMotor.set(CATAPULT_READY_POSITION);
-		System.out.println("Catapult Reset!  new pos = " + catapultMotor.getPosition());
+		// if in need of a reset...
+		if (isFired()) {
+			// reset catapult motor
+			catapultMotor.setPosition(0);
+			catapultMotor.set(CATAPULT_READY_POSITION);
+			System.out.println("Catapult Reset!  new pos = " + catapultMotor.getPosition());
+			
+			// TODO: resets are not instantaneous.  From the command to the final reset state takes a couple of seconds.
+			// Although this delay may introduce a race condition, we do NOT want to introduce wait/delay states.
+			
+			// reset fired flag
+			catapultFired = false;
+		}
 		
-		// TODO: resets are not instantaneous.  From the command to the final reset state takes a couple of seconds.
-		// Although this delay may introduce a race condition, we do NOT want to introduce wait/delay states.
-		
-		// reset fired flag
-		catapultFired = false;
 		pressed = false;
 	}
 
 	public static void shootAndReset()
 	{
-		// fire catapult
-		catapultMotor.setPosition(0);
-		catapultMotor.set(CATAPULT_FULL_REVOLUTION);
-		System.out.println("Catapult fired AND reset!  new pos = " + catapultMotor.getPosition());
+		// if front arm is low enough and catapult is ready to shoot...
+		if (FrontArmAssembly.isArmLowEnoughForCatapult() && readyToShoot()) {
+			// fire and reset catapult
+			catapultMotor.setPosition(0);
+			catapultMotor.set(CATAPULT_FULL_REVOLUTION);
+			System.out.println("Catapult fired AND reset!  new pos = " + catapultMotor.getPosition());
 		
-		// TODO: motor movements are not instantaneous.  From the command to the final reset state takes a couple of seconds.
-		// Although this delay may introduce a race condition, we do NOT want to introduce wait/delay states.
+			// TODO: motor movements are not instantaneous.  From the command to the final reset state takes a couple of seconds.
+			// Although this delay may introduce a race condition, we do NOT want to introduce wait/delay states.
 		
-		// reset fired flag
-		catapultFired = false;
+			// reset fired flag
+			catapultFired = false;
+		}
+		
 		pressed = false;
 	}
 
