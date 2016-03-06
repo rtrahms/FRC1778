@@ -50,7 +50,7 @@ public class UltrasonicSensor {
 		//System.out.println("Ultrasonic value (in) = " + rangeInches);
 		
 		if (rangeInches < BALL_PRESENT_THRESHOLD_INCH) {
-			System.out.println("BALL PRESENT!");
+			//System.out.println("BALL PRESENT!");
 			ballIsPresent = true;
 		}
 		else

@@ -64,11 +64,12 @@ public class AutoShooterAssembly {
 			{
 				System.out.println("FIRING CATAPULT!");
 				//CatapultAssembly.shoot();
+				
+				// reset targeting flag and isCalibrated flags
+				targeting = false;
+				isCalibrated = false;
 			}
 			
-			// reset targeting flag and isCalibrated flags
-			targeting = false;
-			isCalibrated = false;
 		}
 		
 	}

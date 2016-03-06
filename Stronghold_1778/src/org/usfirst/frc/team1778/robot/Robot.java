@@ -89,7 +89,7 @@ public class Robot extends IterativeRobot {
 		// reset sensors and network table
 		GyroSensor.reset();
 		UltrasonicSensor.reset();
-		NetworkCommAssembly.reset();
+		//NetworkCommAssembly.reset();
 		
 		// teleop init for all systems
 		CANDriveAssembly.teleopInit();
@@ -103,7 +103,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 				
 		// update values used for targeting
-    	NetworkCommAssembly.updateValues();
+    	//NetworkCommAssembly.updateValues();
     	
 		// check status of the ball (if we have one)   	
 		UltrasonicSensor.teleopPeriodic();

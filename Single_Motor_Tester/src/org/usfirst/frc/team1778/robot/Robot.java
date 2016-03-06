@@ -170,6 +170,7 @@ public class Robot extends IterativeRobot {
 				armDeltaPos = 0.0;
 			}
 			
+			
 			double newPos =  currPos + armDeltaPos;
 			testMotor.set(newPos);
 			System.out.println("Setting new front arm pos = " + newPos);	

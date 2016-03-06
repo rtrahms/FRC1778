@@ -11,13 +11,16 @@ public class NetworkCommAssembly {
     private static final double WIDTH = 7.5;//20.0;  // Width of target in inches
     private static final double HEIGHT = 5.5;//90.0; // Height of target in inches
     private static final int IMAGE_WIDTH = 640;
-    private static final double IMAGE_CENTER_X = IMAGE_WIDTH/2.0;
+    private static final double IMAGE_CENTER_X = 320;
     private static final int IMAGE_HEIGHT = 480;
     private static final double TARGET_DIST = 95.0; //Distance to get to in inches
     private static final double MIN_TARGET_AREA = 10.0;  // threshold target area to process
     
     private static final double FORWARD_THRESHOLD = 0.05;
     private static final double ANGULAR_THRESHOLD = 0.1;
+
+	private static final double ANGULAR_DAMPENER = 0.5;
+	private static final double FORWARD_DAMPENER = 0.5;
     
 	private static double[] area;
 	private static double[] centerx;
@@ -88,7 +91,13 @@ public class NetworkCommAssembly {
 				if(Math.abs(angularVelocity) < ANGULAR_THRESHOLD) 
 					angularVelocity = 0.0;
 			}
-								
+			angularVelocity *= ANGULAR_DAMPENER;
+			angularVelocity *= FORWARD_DAMPENER;
+			if(forwardVelocity > 1.0) forwardVelocity = 1.0;
+			if(forwardVelocity < -1.0) forwardVelocity = -1.0;
+			if(angularVelocity > 1.0) angularVelocity = 1.0;
+			if(angularVelocity < -1.0) angularVelocity = -1.0;
+			
 			/*
 			System.out.println("NetworkCommAssembly: X: " + targetX + " Y: " + targetY + " area: " + targetArea + 
 			   										" width: " + targetWidth + " height:" + targetHeight);

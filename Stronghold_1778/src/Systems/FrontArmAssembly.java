@@ -18,7 +18,7 @@ public class FrontArmAssembly {
     private static final double SOFT_ENCODER_LIMIT_MAX = 0.0;  // high limit of arm -  vertical (matches need to start with arm in this position)
     private static final double ENCODER_POS_HIGH = -(4096.0*5.0);     // arm high
     private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);  // arm partially down
-    private static final double ENCODER_POS_LOW = -(4096.0*25.0);     // arm low
+    private static final double ENCODER_POS_LOW = -(4096.0*20.0);     // arm low
     private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);  // low limit of arm (floor)
 
     private static final int ARM_HARD_LIMIT_CHANNEL = 5;  // hard limit switch on arm - normally closed (0), will open (1) on contact
@@ -34,11 +34,15 @@ public class FrontArmAssembly {
 	// controller gamepad ID - assumes no other controllers connected
 	private static final int GAMEPAD_ID = 2;
 	
+	private static final int ARM_AXIS = 1;
+	
 	private static final int ROLLER_IN_BUTTON = 5;
-	private static final int ROLLER_OUT_BUTTON = 7;
+	//private static final int ROLLER_OUT_BUTTON = 7;
+	private static final int ROLLER_OUT_AXIS = 2;
 	
 	private static final int CONVEYER_IN_BUTTON = 6;
-	private static final int CONVEYER_OUT_BUTTON = 8;
+	//private static final int CONVEYER_OUT_BUTTON = 8;
+	private static final int CONVEYER_OUT_AXIS = 3;
 	private static final int CONVEYER_DEPOSIT_BUTTON = 2;
 	
 	private static final int FRONT_ARM_GROUND_CAL_BUTTON1 = 1;
@@ -56,6 +60,8 @@ public class FrontArmAssembly {
     
     private static DigitalInput frontArmLimitSwitch;
     
+    private static boolean hardLimit;
+    
 	// static initializer
 	public static void initialize()
 	{
@@ -66,6 +72,7 @@ public class FrontArmAssembly {
 	        initialized = true;
 	        
 	        frontArmLimitSwitch = new DigitalInput(ARM_HARD_LIMIT_CHANNEL);
+	        hardLimit = false;
 	        
 	        //************ create and initialize arm motor
 	        frontArmMotor = new CANTalon(FRONT_ARM_MOTOR_ID);
@@ -83,8 +90,8 @@ public class FrontArmAssembly {
 		        frontArmMotor.reverseOutput(true);  // reverse output needed - used for closed loops modes only
 		        frontArmMotor.reverseSensor(false);  // encoder does not need to be reversed
 		        //frontArmMotor.setPID(0.1, 0, 0.0);   // first test - works, but a little wobbly (low gain)
-		        frontArmMotor.setPID(0.5, 0, 0.0);		// 5x gain   
-		        //frontArmMotor.setPID(1.0, 0, 0.0);   // 10x gain
+		        //frontArmMotor.setPID(0.5, 0, 0.0);		// 5x gain   
+		        frontArmMotor.setPID(0.75, 0, 0.0);   // 7.5x gain
 
 		        //frontArmMotor.setForwardSoftLimit(SOFT_ENCODER_LIMIT_MAX);
 		        //frontArmMotor.setReverseSoftLimit(SOFT_ENCODER_LIMIT_FLOOR);
@@ -153,7 +160,7 @@ public class FrontArmAssembly {
 		}
 			
 		// PID CONTROL ONLY --- check for front arm control motion
-		double armDeltaPos = gamepad.getRawAxis(1);
+		double armDeltaPos = gamepad.getRawAxis(ARM_AXIS);
 		if (Math.abs(armDeltaPos) < ARM_DEADZONE) {
 			armDeltaPos = 0.0f;
 		}
@@ -162,14 +169,14 @@ public class FrontArmAssembly {
 			armDeltaPos *= ARM_POS_MULTIPLIER;
 			double currPos = frontArmMotor.getPosition();
 			
-			if (((currPos > SOFT_ENCODER_LIMIT_MAX) && armDeltaPos > 0.0) || ((currPos < SOFT_ENCODER_LIMIT_FLOOR) && armDeltaPos < 0.0)) {
-				System.out.println("SOFT ARM LIMIT HIT! Setting armDeltaPos to zero");
+			if (((currPos > SOFT_ENCODER_LIMIT_MAX || hardLimit) && armDeltaPos > 0.0) || ((currPos < SOFT_ENCODER_LIMIT_FLOOR) && armDeltaPos < 0.0)) {
+				System.out.println("SOFT or HARD ARM LIMIT HIT! Setting armDeltaPos to zero");
 				armDeltaPos = 0.0;
 			}
 			
 			double newPos =  currPos + armDeltaPos;
 			frontArmMotor.set(newPos);
-			System.out.println("Setting new front arm pos = " + newPos);	
+			//System.out.println("Setting new front arm pos = " + newPos);	
 		}		
 		
 		// VBUS CONTROL ONLY --- check for front arm control motion
@@ -194,16 +201,21 @@ public class FrontArmAssembly {
 		if (frontArmLimitSwitch.get())
 		{
 			System.out.println("HARD ARM LIMIT HIT! Disabling motor");
-			frontArmMotor.disable();
+			//frontArmMotor.disable();
+			hardLimit = true;
 		}
+		else
+			hardLimit = false;
 		//System.out.println("Arm Limit Switch state = " + frontArmLimitSwitch.get());
 		
 		// check for roller motion
 		double rollerSpeed = 0.0;
 		if (gamepad.getRawButton(ROLLER_IN_BUTTON))
-			rollerSpeed = ARM_ROLLER_SPEED;
-		else if (gamepad.getRawButton(ROLLER_OUT_BUTTON))
-			rollerSpeed = -ARM_ROLLER_SPEED;	
+			rollerSpeed = -ARM_ROLLER_SPEED;
+		//else if (gamepad.getRawButton(ROLLER_OUT_BUTTON))
+		//	rollerSpeed = -ARM_ROLLER_SPEED;	
+		else if (gamepad.getRawAxis(ROLLER_OUT_AXIS) > 0.1)
+			rollerSpeed = ARM_ROLLER_SPEED;	
 		frontArmRollerMotor.set(rollerSpeed);
 					
 		//System.out.println("Roller = " + rollerSpeed);
@@ -213,10 +225,13 @@ public class FrontArmAssembly {
 		boolean ballDetected = UltrasonicSensor.isBallPresent();
 		//if ((gamepad.getRawButton(CONVEYER_IN_BUTTON))||
 		//	gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
-		if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
+		//if (((gamepad.getRawButton(CONVEYER_IN_BUTTON)) && !ballDetected) ||
+		if ((gamepad.getRawButton(CONVEYER_IN_BUTTON)) ||
 			gamepad.getRawButton(CONVEYER_DEPOSIT_BUTTON))
 			conveyerSpeed = CONVEYER_SPEED;
-		else if (gamepad.getRawButton(CONVEYER_OUT_BUTTON))
+		//else if (gamepad.getRawButton(CONVEYER_OUT_BUTTON))
+		//	conveyerSpeed = -CONVEYER_SPEED;
+		else if (gamepad.getRawAxis(CONVEYER_OUT_AXIS) > 0.1)
 			conveyerSpeed = -CONVEYER_SPEED;
 		conveyerMotor.set(conveyerSpeed);
 		
@@ -237,6 +252,21 @@ public class FrontArmAssembly {
 		conveyerMotor.set(0);		
 	}
 			
+	// query method to determine whether arm is low enough to shoot catapult
+	// purpose:  to avoid robot damaging itself when arm is too far up
+	public static boolean isArmLowEnoughForCatapult()  {
+		
+		if (frontArmMotor == null)
+			return false;
+		
+		// if arm position in encoder ticks is less than low position, return true
+		double armPos = frontArmMotor.getPosition();
+		if (armPos < ENCODER_POS_LOW)
+			return true;
+		else
+			return false;
+	}
+	
 	// if we are on the ground, reinitialize encoder to this value
 	// this may be needed if arm position gets skewed
 	// NOTE:  ASSUMES ARM IS PHYSICALLY ON FLOOR

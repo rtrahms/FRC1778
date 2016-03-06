@@ -21,9 +21,11 @@ public class CatapultAssembly {
     private static final double VERSAPLANETARY_RATIO = 100;
     private static final double CHOO_CHOO_GEAR_RATIO = 84.0/18.0;
     private static final double FIRE_ROTATION_BACKOFF_REV = 0.25;
+    private static final double AUTO_RESET_TIME_US = 1000000;
     
     private static final double CATAPULT_FIRE_INCREMENT = FIRE_ROTATION_BACKOFF_REV*NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO;
     private static final double CATAPULT_READY_POSITION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO) - CATAPULT_FIRE_INCREMENT;
+    private static final double CATAPULT_FULL_REVOLUTION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO);
 
     // test values for choo-choo - not for normal operation
     //private static final double CATAPULT_FIRE_INCREMENT = 4096*50;
@@ -46,7 +48,7 @@ public class CatapultAssembly {
 	        rightJoy = new Joystick(RIGHT_JOYSTICK_ID);
 	        	                	        
 	        initialized = true;
-	        catapultFired = true;  // catapult starts in the low-energy (fired) state
+	        catapultFired = false;  // Assumption!  catapult starts in the high-energy (ready to shoot) state
 	        pressed = false;
 	        
 	        System.out.println("Creating catapult motor object...");
@@ -81,7 +83,7 @@ public class CatapultAssembly {
 		        catapultMotor.setInverted(true);    // NEED TO REVERSE OUTPUT - used for Vbus mode ONLY
 		        catapultMotor.reverseSensor(true);
 		        catapultMotor.setPosition(0);	      // initializes encoder to zero	        	
-		        */       
+		        */     
 	        }
 	        else
 	        	System.out.println("ERROR: Catapult motor not initialized!");		
@@ -112,9 +114,13 @@ public class CatapultAssembly {
 	{
 		double currentTime = Utility.getFPGATime();
 		
+		// if not enough time has passed, no polling allowed!
 		if ((currentTime - initTriggerTime) < TRIGGER_CYCLE_WAIT_US)
 			return;
 		
+		// if front arm is too high, no shooting allowed!
+		if (!FrontArmAssembly.isArmLowEnoughForCatapult())
+			return;
 		
 		// check for catapult triggers
 		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
@@ -125,19 +131,16 @@ public class CatapultAssembly {
 			// reset trigger init time
 			initTriggerTime = Utility.getFPGATime();
 					
-			// check for catapult trigger
+			// shoot catapult and reset to ready state
 			if (pressed) {
-				if (readyToShoot()) 
-					shoot();
-				else
-					reset();
-			}	
+				shootAndReset();
+			}
 
-			pressed = false;
 		}
 		
-		/*
+		
 		// quick vbus test - only use when CANDrive not active
+		/*
 		double speed = 0.0;
 		if (leftJoy.getTrigger() && rightJoy.getTrigger()) {
 			speed = 0.2;
@@ -179,7 +182,22 @@ public class CatapultAssembly {
 		catapultFired = false;
 		pressed = false;
 	}
-	
+
+	public static void shootAndReset()
+	{
+		// fire catapult
+		catapultMotor.setPosition(0);
+		catapultMotor.set(CATAPULT_FULL_REVOLUTION);
+		System.out.println("Catapult fired AND reset!  new pos = " + catapultMotor.getPosition());
+		
+		// TODO: motor movements are not instantaneous.  From the command to the final reset state takes a couple of seconds.
+		// Although this delay may introduce a race condition, we do NOT want to introduce wait/delay states.
+		
+		// reset fired flag
+		catapultFired = false;
+		pressed = false;
+	}
+
 	public static boolean isFired()
 	{
 		return catapultFired;
