@@ -1,4 +1,4 @@
-package Systems;
+package org.usfirst.frc.team1778.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
@@ -76,7 +76,7 @@ public class NetworkCommAssembly {
 					
 					System.out.println("pollingThread updating tables! ctr = " + ctr++);
 					try {
-						Thread.sleep(250);
+						Thread.sleep(1000);
 					} catch (Exception e) {
 						System.out.println(e);
 					}
@@ -98,6 +98,13 @@ public class NetworkCommAssembly {
         
     	if (!initialized)
     		return;
+    	
+		//double[] defaultValue = new double[0];
+		//area = table.getNumberArray("area",defaultValue);
+		//centerx = table.getNumberArray("centerX",defaultValue);
+		//centery = table.getNumberArray("centerY",defaultValue);
+		//height = table.getNumberArray("height",defaultValue);
+		//width = table.getNumberArray("width",defaultValue);
 		
 		double targetArea = 0.0;
 		double targetX = 0.0;

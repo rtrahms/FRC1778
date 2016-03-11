@@ -273,21 +273,22 @@ public class AutoStateMachine {
 
 	}
 
-	// **** DRIVE-TURN_SHOOT STATE MACHINE ***** 
+	// **** DRIVE-TURN-DRIVE-SHOOT (Spybot) STATE MACHINE ***** 
 	// 1) be idle for a number of sec
 	// 2) drive forward for a number of sec
 	// 3) turn a number of degrees
-	// 4) drop ball from conveyer into catapult
-	// 5) calibrate auto-shooter with target
-	// 6) shoot and reset catapult
-	// 7) go back to idle and stay there 
+	// 4) drive forward for a number of sec
+	// 5) drop ball from conveyer into catapult
+	// 6) calibrate auto-shooter with target
+	// 7) shoot and reset catapult
+	// 8) go back to idle and stay there 
 	private void createDriveTurnShootSM(int index) {
 
 		// create states
 		boolean isPwm = false;
 		IdleState startIdle = new IdleState("<Start Idle State>");
 		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.65);
-		TurnState turnLeft = new TurnState("<Turn Left State>",-120.0, 0.3, isPwm);
+		TurnState turnLeft = new TurnState("<Turn Left State>",-135.0, 0.3, isPwm);
 		DriveForwardState driveForward2 = new DriveForwardState("<Drive Forward State 2>", isPwm, 0.65);
 		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
 		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
@@ -297,7 +298,7 @@ public class AutoStateMachine {
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
 		TimeEvent timer2 = new TimeEvent(3.0);  // 0.5s timer event
-		GyroAngleEvent gyro1 = new GyroAngleEvent(-120.0);  // -120 deg (left turn) event
+		GyroAngleEvent gyro1 = new GyroAngleEvent(-135.0);  // -135 deg (left turn) event
 		TimeEvent timer3 = new TimeEvent(3.0);  // timer event for second drive forward	
 		TimeEvent timer4 = new TimeEvent(2.0);  // timer event for conveyer operation	
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event

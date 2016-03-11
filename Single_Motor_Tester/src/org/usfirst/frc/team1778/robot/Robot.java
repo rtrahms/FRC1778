@@ -4,9 +4,9 @@ package org.usfirst.frc.team1778.robot;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -66,7 +66,10 @@ public class Robot extends IterativeRobot {
     }
     
     private void initialize()
-    {    	
+    { 
+    	
+    	NetworkCommAssembly.initialize();
+    	
         gamepad = new Joystick(GAMEPAD_ID);
                 
         // create and initialize arm motor
@@ -132,8 +135,9 @@ public class Robot extends IterativeRobot {
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
     public void autonomousInit() {
+    	NetworkCommAssembly.start();
     }
-
+    
     /**
      * This function is called periodically during autonomous
      */
@@ -141,6 +145,7 @@ public class Robot extends IterativeRobot {
     }
 
     public void teleopInit() {
+    	NetworkCommAssembly.start();
     	System.out.println("teleopInit: calling positionMode");
     	positionMode();
     }
@@ -150,6 +155,8 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
 
+    	//NetworkCommAssembly.updateValues();
+    	
 		// both buttons pressed simultaneously, time to cal to ground
 		if (gamepad.getRawButton(FRONT_ARM_GROUND_CAL_BUTTON1) && gamepad.getRawButton(FRONT_ARM_GROUND_CAL_BUTTON2)) {
 			processGroundCal();
@@ -202,6 +209,10 @@ public class Robot extends IterativeRobot {
 		System.out.println("armSpeed = " + armSpeed + " enc pos = " + testMotor.getPosition());
 		 */      
     }
+    
+    public void disabledInit() {
+    	NetworkCommAssembly.stop();
+    }
  
 	// if we are on the ground, reinitialize encoder to this value
 	// this may be needed if arm position gets skewed
@@ -230,6 +241,7 @@ public class Robot extends IterativeRobot {
 		testMotor.set((testMotor.getPosition()+count));
 		testMotor.ClearIaccum();
 	}
+	
 
     /**
      * This function is called periodically during test mode

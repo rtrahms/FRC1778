@@ -16,9 +16,9 @@ public class FrontArmAssembly {
     // limits
     // forward arm gear is 208:1 - for quarter turn of arm, about 50 motor revs
     private static final double SOFT_ENCODER_LIMIT_MAX = 0.0;  // high limit of arm -  vertical (matches need to start with arm in this position)
-    private static final double ENCODER_POS_HIGH = -(4096.0*5.0);     // arm high
-    private static final double ENCODER_POS_MIDDLE = -(4096.0*10.0);  // arm partially down
-    private static final double ENCODER_POS_LOW = -(4096.0*20.0);     // arm low
+    private static final double ENCODER_POS_HIGH = -(4096.0*10.0);     // arm high
+    private static final double ENCODER_POS_MIDDLE = -(4096.0*17.0);  // arm partially down
+    private static final double ENCODER_POS_LOW = -(4096.0*25.0);     // arm low
     private static final double ENCODER_POS_VERY_LOW = -(4096.0*30.0);     // arm very low (but above floor)
     private static final double SOFT_ENCODER_LIMIT_FLOOR = -(4096.0*35.0);  // low limit of arm (floor)
 
@@ -167,7 +167,7 @@ public class FrontArmAssembly {
 		// if the arm is up (above middle)
 		if (armPos > ENCODER_POS_MIDDLE) {
 			// move arm to low position
-			autoArmToLow();
+			autoArmToMiddle();
 		}
 	}
 	
