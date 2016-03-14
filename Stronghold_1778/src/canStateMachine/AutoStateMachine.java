@@ -38,17 +38,17 @@ public class AutoStateMachine {
 		//--- STATE MACHINE 0: add a do nothing state machine (auto disabled anyway at 0 index)
 		createDoNothingSM(0);
 		
-		//*** STATE MACHINE 1: add a drive straight and stop state machine
-		createDriveForwardSM(1);
+		//*** STATE MACHINE 1: add a drive straight and stop (slow & steady) state machine
+		createDriveForwardSM_Slow(1);
 				
-		//--- STATE MACHINE 2: add a drive straight and autotarget-SHOOT state machine
-		createDriveForwardAndShootSM(2);
-
+		//--- STATE MACHINE 2: add a drive straight (fast & short) state machine
+		createDriveForwardSM_Fast(2);
+		
 		//--- STATE MACHINE 3: add a do nothing state machine
 		createDoNothingSM(3);
 		
-		//--- STATE MACHINE 4: add a drive forward, turn left, autotarget-shoot state machine (from spybot location)
-		createDriveTurnShootSM(4);
+		//--- STATE MACHINE 4: add a drive straight (super fast & super short) state machine
+		createDriveForwardSM_SuperFast(4);
 		
 		//--- STATE MACHINE 5: add a do nothing state machine
 		createDoNothingSM(5);
@@ -170,21 +170,106 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 	}
 
-	// **** MOVE FORWARD STATE MACHINE ***** 
+	// **** MOVE FORWARD STATE MACHINE - slow and steady ***** 
+	// ** Good for moat, rough terrain, portcullis
 	// 1) be idle for a number of sec
 	// 2) drive forward for a number of sec
 	// 3) go back to idle and stay there 
-	private void createDriveForwardSM(int index) {
+	private void createDriveForwardSM_Slow(int index) {
 
 		// create states
 		boolean isPwm = false;
 		IdleState startIdle = new IdleState("<Start Idle State>");
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.65);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Slow>", isPwm, 0.65);
 		IdleState deadEnd = new IdleState("<Dead End State>");
 		
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(7.0);  // drive forward timer event
+		TimeEvent timer2 = new TimeEvent(8.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(driveForward);
+		timer2.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		driveForward.addEvent(timer2);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+	
+	// **** MOVE FORWARD STATE MACHINE - faster, shorter, more power ***** 
+	// ** Good for <UNKNOWN> ramparts?  stone wall?
+	// 1) be idle for a number of sec
+	// 2) drive forward for a number of sec
+	// 3) go back to idle and stay there 
+	private void createDriveForwardSM_Fast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(6.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(driveForward);
+		timer2.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		driveForward.addEvent(timer2);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+	
+	// **** MOVE FORWARD STATE MACHINE - superfast, super short, more power ***** 
+	// ** Good for <UNKNOWN>
+	// 1) be idle for a number of sec
+	// 2) drive forward for a number of sec
+	// 3) go back to idle and stay there 
+	private void createDriveForwardSM_SuperFast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - SuperFast>", isPwm, 0.95);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(3.0);  // drive forward timer event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
