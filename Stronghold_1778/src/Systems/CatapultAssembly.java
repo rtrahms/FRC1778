@@ -24,9 +24,10 @@ public class CatapultAssembly {
     private static final double FIRE_ROTATION_BACKOFF_REV = 0.25;
     private static final double AUTO_RESET_TIME_US = 1000000;
     
+    private static final double CATAPULT_ROTATION_MULTIPLIER = 1.005;
     private static final double CATAPULT_FIRE_INCREMENT = FIRE_ROTATION_BACKOFF_REV*NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO;
     private static final double CATAPULT_READY_POSITION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO) - CATAPULT_FIRE_INCREMENT;
-    private static final double CATAPULT_FULL_REVOLUTION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO);
+    private static final double CATAPULT_FULL_REVOLUTION = (NUM_TICKS_PER_REV*VERSAPLANETARY_RATIO*CHOO_CHOO_GEAR_RATIO)*CATAPULT_ROTATION_MULTIPLIER;
 
     // test values for choo-choo - not for normal operation
     //private static final double CATAPULT_FIRE_INCREMENT = 4096*50;
@@ -35,6 +36,7 @@ public class CatapultAssembly {
     private static final int TRIGGER_CYCLE_WAIT_US = 1000000;
     
     private static CANTalon catapultMotor;
+    private static boolean catapultKill;
     
     private static boolean pressed;
     private static boolean catapultFired;    
@@ -51,6 +53,7 @@ public class CatapultAssembly {
 	        initialized = true;
 	        catapultFired = false;  // Assumption!  catapult starts in the high-energy (ready to shoot) state
 	        pressed = false;
+	        catapultKill = false;    // disable catapult motor if goes wonky
 	        
 	        System.out.println("Creating catapult motor object...");
 	        
@@ -119,22 +122,27 @@ public class CatapultAssembly {
 		if ((currentTime - initTriggerTime) < TRIGGER_CYCLE_WAIT_US)
 			return;
 				
-		// check for catapult triggers
-		if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
-		{
-			pressed = true;
-			System.out.println("trigger pressed!");
-
-			// reset trigger init time
-			initTriggerTime = Utility.getFPGATime();
-					
-			// shoot catapult and reset to ready state
-			if (pressed) {
-				shootAndReset();
-			}
-
+		if ((leftJoy.getRawButton(8) || rightJoy.getRawButton(8)) && !catapultKill) {
+			catapultKill = true;
+			catapultMotor.disable();
 		}
-		
+			
+		if (!catapultKill) {
+			// check for catapult triggers
+			if (leftJoy.getTrigger() && rightJoy.getTrigger() && !pressed)
+			{
+				pressed = true;
+				System.out.println("trigger pressed!");
+	
+				// reset trigger init time
+				initTriggerTime = Utility.getFPGATime();
+						
+				// shoot catapult and reset to ready state
+				if (pressed) {
+					shootAndReset();
+				}
+			}
+		}
 		
 		// quick vbus test - only use when CANDrive not active
 		/*

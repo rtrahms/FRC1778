@@ -39,16 +39,23 @@ public class AutoStateMachine {
 		createDoNothingSM(0);
 		
 		//*** STATE MACHINE 1: add a drive straight and stop (slow & steady) state machine
-		createDriveForwardSM_Slow(1);
+		createLightArmMoveAndDriveForwardSM_Fast(1);
+		//createDriveForwardSM_Slow(1);
+		//createDoNothingSM(1);
 				
 		//--- STATE MACHINE 2: add a drive straight (fast & short) state machine
-		createDriveForwardSM_Fast(2);
+		createHalfArmMoveAndDriveForwardSM_Fast(2); 
+		//createDriveForwardSM_Slow(2);
+		//createDriveForwardSM_Fast(2);
+		//createDoNothingSM(2);
 		
 		//--- STATE MACHINE 3: add a do nothing state machine
 		createDoNothingSM(3);
 		
 		//--- STATE MACHINE 4: add a drive straight (super fast & super short) state machine
-		createDriveForwardSM_SuperFast(4);
+		createFullArmMoveAndDriveForwardSM_Fast(4);
+		//createDriveForwardSM_SuperFast(4);
+		//createDoNothingSM(4);
 		
 		//--- STATE MACHINE 5: add a do nothing state machine
 		createDoNothingSM(5);
@@ -170,6 +177,203 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 	}
 
+	// **** ARM MOVE DOWN THEN UP STATE MACHINE ***** 
+	// ** Test front arm movement in auto - no driving
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) raise arm for a number of sec
+	// 4) go back to idle and stay there 
+	private void createMoveArmDownThenUpSM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
+		ArmMoveState moveArmUp = new ArmMoveState("<Arm Move Up State>", -0.35);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(2.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(2.5);  // raise arm timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(moveArmUp);
+		timer3.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		moveArmUp.addEvent(timer3);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(moveArmUp);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+
+	// **** ARM MOVE FULL DOWN AND DRIVE FORWARD STATE MACHINE - fast ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) go back to idle and stay there 
+	private void createFullArmMoveAndDriveForwardSM_Fast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - Full move>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(2.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+	
+	// **** HALFWAY ARM MOVE AND DRIVE FORWARD STATE MACHINE - faster, shorter, more power ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) go back to idle and stay there 
+	private void createHalfArmMoveAndDriveForwardSM_Fast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - Halfway>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+	
+	// **** ARM SMALL MOVE AND DRIVE FORWARD STATE MACHINE - faster, shorter, more power ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) go back to idle and stay there 
+	private void createLightArmMoveAndDriveForwardSM_Fast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - light>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(0.75);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+	
 	// **** MOVE FORWARD STATE MACHINE - slow and steady ***** 
 	// ** Good for moat, rough terrain, portcullis
 	// 1) be idle for a number of sec
@@ -211,9 +415,9 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 
 	}
-	
+
 	// **** MOVE FORWARD STATE MACHINE - faster, shorter, more power ***** 
-	// ** Good for <UNKNOWN> ramparts?  stone wall?
+	// ** Good for ramparts, rough terrain, stone wall, portcullis
 	// 1) be idle for a number of sec
 	// 2) drive forward for a number of sec
 	// 3) go back to idle and stay there 
@@ -227,7 +431,7 @@ public class AutoStateMachine {
 		
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(6.0);  // drive forward timer event
+		TimeEvent timer2 = new TimeEvent(4.0);  // drive forward timer event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
@@ -253,7 +457,7 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 
 	}
-	
+
 	// **** MOVE FORWARD STATE MACHINE - superfast, super short, more power ***** 
 	// ** Good for <UNKNOWN>
 	// 1) be idle for a number of sec
@@ -295,6 +499,7 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 
 	}
+	
 
 	// **** MOVE FORWARD & SHOOT STATE MACHINE ***** 
 	// 1) be idle for a number of sec

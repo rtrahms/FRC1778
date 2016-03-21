@@ -14,7 +14,8 @@ public class NetworkCommAssembly {
     private static final int IMAGE_WIDTH = 640;
     private static final double IMAGE_CENTER_X = 320;
     private static final int IMAGE_HEIGHT = 480;
-    private static final double TARGET_DIST = 95.0; //Distance to get to in inches
+    private static final double TARGET_DIST = 36.370588235294115; //Distance to get to in inches
+    private static final double TARGET_OFFSET = 10;
     private static final double MIN_TARGET_AREA = 10.0;  // threshold target area to process
     
     private static final double FORWARD_THRESHOLD = 0.05;
@@ -22,7 +23,7 @@ public class NetworkCommAssembly {
 
 	private static final double ANGULAR_DAMPENER = 0.5;
 	private static final double FORWARD_DAMPENER = 0.5;
-    
+
 	private static double[] area;
 	private static double[] centerx;
 	private static double[] centery;
@@ -124,7 +125,7 @@ public class NetworkCommAssembly {
 			}
 
 			// calculate angular velocity
-			double lateralDelta = (targetX-IMAGE_CENTER_X)/IMAGE_CENTER_X;		
+			double lateralDelta = (targetX-IMAGE_CENTER_X-TARGET_OFFSET)/IMAGE_CENTER_X;		
 			if (lateralDelta != 0) {
 				angularVelocity = lateralDelta*lateralDampener;
 				if(Math.abs(angularVelocity) < ANGULAR_THRESHOLD) 

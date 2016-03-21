@@ -42,7 +42,7 @@ public class Robot extends IterativeRobot {
 
 		GyroSensor.initialize();
 		UltrasonicSensor.initialize();
-		
+				
 		CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
@@ -60,7 +60,6 @@ public class Robot extends IterativeRobot {
 		
 		RioDuinoAssembly.autonomousInit();
 		CANDriveAssembly.autoInit();
-		FrontArmAssembly.autoInit();
 		CatapultAssembly.autoInit();
 		
 		// start the autonomous state machine
@@ -71,10 +70,7 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during autonomous
 	 */
 	public void autonomousPeriodic() {
-		
-		// update values used for targeting
-		FrontArmAssembly.autoPeriodic();
-		
+				
 		// state machine runs things in autonomous
 		autoSM.process();
 	}
@@ -98,7 +94,7 @@ public class Robot extends IterativeRobot {
 	 * This function is called periodically during operator control
 	 */
 	public void teleopPeriodic() {
-				
+				    	
 		// check status of the ball (if we have one)   	
 		UltrasonicSensor.teleopPeriodic();
     	

@@ -84,13 +84,18 @@ public class CANDriveAssembly {
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
-		double gyroAngle = GyroSensor.getAngle();
-		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
+		//double gyroAngle = GyroSensor.getAngle();
+		double gyroAngle = 0.0;
+		double driveAngle = gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
 		//System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
-
-		speed *= -1.0;
-		drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF+speed, 
-						-driveAngle*AUTO_DRIVE_CORRECT_COEFF+speed);
+		
+		// first day mount vernon, gyro upside-down
+		//drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF-speed, 
+		//		-driveAngle*AUTO_DRIVE_CORRECT_COEFF-speed);
+		
+		// second day mount vernon, gyro rightside-up
+		drive.tankDrive(-driveAngle-speed, 
+						driveAngle-speed);
 	}
 
 	public static void autoStop() {
