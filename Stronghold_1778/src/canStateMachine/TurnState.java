@@ -50,7 +50,7 @@ public class TurnState extends AutoState {
 		
 		// PWMDriveAssembly not supported
 		
-		if (angleToTurn < 0.0)
+		if (angleToTurn > 0.0)
 			CANDriveAssembly.rotateRight(speedToTurn);
 		else
 			CANDriveAssembly.rotateLeft(speedToTurn);
