@@ -19,6 +19,8 @@ public class AutoStateMachine {
 	
 	public AutoStateMachine()
 	{
+		//  Switch arrangement: <0> <1> <2> - from the rear of the robot
+		// ON = toward bumper  --  OFF = toward robot center 
 		autoNetworkSwitch1 = new DigitalInput(0);
 		autoNetworkSwitch2 = new DigitalInput(1);
 		autoNetworkSwitch3 = new DigitalInput(2);
@@ -48,7 +50,7 @@ public class AutoStateMachine {
 		createHalfArmMoveAndDriveForwardSM_Fast(2); 
 		//createDoNothingSM(2);
 		
-		//--- STATE MACHINE 3: RIGHT POSITION SHOOTER == add a drive straight, turn left and shoot state machine
+		//--- STATE MACHINE 3: LEFT POSITION SHOOTER == add a drive straight, turn right and shoot state machine
 		create_ArmMove_Drive_TurnRight_Shoot_SM(3);
 		//createDoNothingSM(3);
 		
@@ -58,7 +60,7 @@ public class AutoStateMachine {
 		//--- STATE MACHINE 5: add a do nothing state machine
 		createDoNothingSM(5);
 
-		//--- STATE MACHINE 6: LEFT POSITION SHOOTER == add a drive straight, turn right and shoot state machine
+		//--- STATE MACHINE 6: RIGHT POSITION SHOOTER == add a drive straight, turn left and shoot state machine
 		create_ArmMove_Drive_TurnLeft_Shoot_SM(6);
 		//createDoNothingSM(6);
 
