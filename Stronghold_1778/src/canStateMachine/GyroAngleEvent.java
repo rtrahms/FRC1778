@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.Utility;
 public class GyroAngleEvent extends Event {
 	
 	private double angleToTurn = 0.0;
-	private double accuracyDeg = 2.0;
+	private double accuracyDeg = 5.0;
 	
 	public GyroAngleEvent(double angleToTurn)
 	{

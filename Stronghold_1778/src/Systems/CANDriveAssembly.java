@@ -36,7 +36,7 @@ public class CANDriveAssembly {
 	
 	private static final long AUTO_DRIVE_TIME_SEC = 4;
 	private static final double AUTO_DRIVE_SPEED = -0.5;
-	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.125;
+	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.01;
 	
 	//other constants
 	private static final boolean USE_SQUARED_INPUTS = true;
@@ -60,42 +60,37 @@ public class CANDriveAssembly {
 	        	        
 	        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
 	        	        
-	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, true);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, true);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, true);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, true);   
+	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, false);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, false);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, false);
+	        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, false);   
 	        
 	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
 	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	        
-	        GyroSensor.initialize();
-	        	        
 	        initialized = true;
 		}
 	}
 
 
-	public static void autoInit()
-	{
-		// initialize drive gyro
-		GyroSensor.reset();
+	public static void autoInit() {
    	}
 	
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
-		//double gyroAngle = GyroSensor.getAngle();
-		double gyroAngle = 0.0;
-		double driveAngle = gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
-		//System.out.println("Time (sec) = " + String.format("%.1f",currentPeriodSec) + " Angle =" + String.format("%.2f",driveAngle));
+		//double gyroAngle = 0.0;
+		double gyroAngle = GyroSensor.getAngle();
 		
-		// first day mount vernon, gyro upside-down
-		//drive.tankDrive(driveAngle*AUTO_DRIVE_CORRECT_COEFF-speed, 
-		//		-driveAngle*AUTO_DRIVE_CORRECT_COEFF-speed);
+		System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 		
-		// second day mount vernon, gyro rightside-up
-		drive.tankDrive(-driveAngle-speed, 
-						driveAngle-speed);
+		// calculate speed adjustment for left and right sides
+		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
+		if (driveAngle > 0.5) driveAngle = 0.5;
+		if (driveAngle < -0.5) driveAngle = -0.5;
+		
+		// adjust speed of left and right sides
+		drive.tankDrive(driveAngle+speed, -driveAngle+speed);
 	}
 
 	public static void autoStop() {
@@ -111,8 +106,9 @@ public class CANDriveAssembly {
 		// Left Stick Throttle Control
 		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
 		
-		double leftValue = throttleVal*leftStick.getY();
-		double rightValue = throttleVal*rightStick.getY();
+		// invert sign to compensate for joystick polarity (forward is neg Y, backward is pos Y)
+		double leftValue = -throttleVal*leftStick.getY();
+		double rightValue = -throttleVal*rightStick.getY();
 		
 		// Deadzones
 		if(Math.abs(leftValue) <= DRIVE_DEADZONE) {
@@ -141,7 +137,7 @@ public class CANDriveAssembly {
 		
 	}
 	
-	private static void drive(double left, double right, double strafe) {
+	public static void drive(double left, double right, double strafe) {
 		drive.tankDrive(left, right, USE_SQUARED_INPUTS);
 	}
 	

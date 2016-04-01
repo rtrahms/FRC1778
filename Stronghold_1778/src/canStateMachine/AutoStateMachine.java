@@ -38,33 +38,33 @@ public class AutoStateMachine {
 		//--- STATE MACHINE 0: add a do nothing state machine (auto disabled anyway at 0 index)
 		createDoNothingSM(0);
 		
-		//*** STATE MACHINE 1: add a drive straight and stop (slow & steady) state machine
-		createLightArmMoveAndDriveForwardSM_Fast(1);
+		//*** STATE MACHINE 1: add a lower arm and shoot state machine (mainly for testing)
+		//create_TargetFollower_SM(1);		
+		//create_ArmMove_Shoot_SM(1);
 		//createDriveForwardSM_Slow(1);
-		//createDoNothingSM(1);
+		createDoNothingSM(1);
 				
-		//--- STATE MACHINE 2: add a drive straight (fast & short) state machine
+		//--- STATE MACHINE 2:  mover only == add a drive straight (fast & short) state machine
 		createHalfArmMoveAndDriveForwardSM_Fast(2); 
-		//createDriveForwardSM_Slow(2);
-		//createDriveForwardSM_Fast(2);
 		//createDoNothingSM(2);
 		
-		//--- STATE MACHINE 3: add a do nothing state machine
-		createDoNothingSM(3);
+		//--- STATE MACHINE 3: RIGHT POSITION SHOOTER == add a drive straight, turn left and shoot state machine
+		create_ArmMove_Drive_TurnRight_Shoot_SM(3);
+		//createDoNothingSM(3);
 		
-		//--- STATE MACHINE 4: add a drive straight (super fast & super short) state machine
-		createFullArmMoveAndDriveForwardSM_Fast(4);
-		//createDriveForwardSM_SuperFast(4);
-		//createDoNothingSM(4);
+		//--- STATE MACHINE 4: add a drive straight, state machine
+		createDoNothingSM(4);
 		
 		//--- STATE MACHINE 5: add a do nothing state machine
 		createDoNothingSM(5);
 
-		//--- STATE MACHINE 6: add a do nothing state machine
-		createDoNothingSM(6);
+		//--- STATE MACHINE 6: LEFT POSITION SHOOTER == add a drive straight, turn right and shoot state machine
+		create_ArmMove_Drive_TurnLeft_Shoot_SM(6);
+		//createDoNothingSM(6);
 
-		//--- STATE MACHINE 7: add a do nothing state machine
-		createDoNothingSM(7);
+		//--- STATE MACHINE 7: CENTER POSITION SHOOTER == add a drive straight and shoot state machine
+		create_ArmMove_DriveStraight_Shoot_SM(7);
+		//createDoNothingSM(7);
 
 		System.out.println("autoStates list size = " + autoStates.size() + ", autoEvents list size = " + autoEvents.size());
 	}
@@ -90,7 +90,7 @@ public class AutoStateMachine {
 				// grab the first state in the selected network and enter it!
 				currentState = myNetwork.get(0);
 	
-				System.out.println("State machine starting with " + currentState.name);						
+				//System.out.println("State machine starting with " + currentState.name);						
 				currentState.enter();
 			}
 		}
@@ -106,7 +106,7 @@ public class AutoStateMachine {
 			// process the current state
 			if (currentState != null)
 			{
-				System.out.println("State = " + currentState.name);
+				//System.out.println("State = " + currentState.name);
 				nextState = currentState.process();
 			}
 			
@@ -142,7 +142,7 @@ public class AutoStateMachine {
 		// third switch is binary 4
 		if (autoNetworkSwitch3.get())
 			value += 4;
-		
+
 		if (value == 0)
 		{
 			// all switches off means no auto modes selected - auto state machine operation disabled
@@ -176,6 +176,415 @@ public class AutoStateMachine {
 		autoStates.add(index, myStates);
 		autoEvents.add(index, myEvents);
 	}
+
+	// **** [ARM MOVE - DRIVE]  STATE MACHINE ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) go back to idle and stay there 
+	private void createHalfArmMoveAndDriveForwardSM_Fast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - Halfway>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+	// ****  [ARM MOVE - DRIVE STRAIGHT - SHOOT] STATE MACHINE ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) lower arm FURTHER for a number of sec
+	// 5) run conveyer
+	// 6) calibrate shooter
+	// 7) shoot and reset catapult
+	// 8) go back to idle and stay there 
+	private void create_ArmMove_DriveStraight_Shoot_SM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		ArmMoveState moveArmDownAgain = new ArmMoveState("<Arm Move Down Again State>", 0.35);
+		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
+		ShootAndResetCatapultState shootBallAndReset = new ShootAndResetCatapultState("<Shoot and Reset Catapult State>");
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		TimeEvent timer4 = new TimeEvent(0.5);  // lower arm further timer event	
+		TimeEvent timer5 = new TimeEvent(3.0);  // timer event for conveyer operation	
+		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
+		//TimeEvent calTimer = new TimeEvent(3.0);  // time-out event for shooter calibration
+		TimeEvent timer6 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(moveArmDownAgain);
+		timer4.associateNextState(conveyerIn);
+		timer5.associateNextState(calShooter);
+		calEvent1.associateNextState(shootBallAndReset);
+		//calTimer.associateNextState(shootBallAndReset);
+		timer6.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+		moveArmDownAgain.addEvent(timer4);
+		conveyerIn.addEvent(timer5);
+		calShooter.addEvent(calEvent1);
+		//calShooter.addEvent(calTimer);
+		shootBallAndReset.addEvent(timer6);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(moveArmDownAgain);
+		myStates.add(conveyerIn);
+		myStates.add(calShooter);
+		myStates.add(shootBallAndReset);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		myEvents.add(timer4);
+		myEvents.add(timer5);
+		myEvents.add(calEvent1);
+		//myEvents.add(calTimer);
+		myEvents.add(timer6);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+	// ****  [ARM MOVE - DRIVE - TURN RIGHT - SHOOT] STATE MACHINE ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) lower arm FURTHER for a number of sec
+	// 5) turn right to a number of deg
+	// 6) run conveyer
+	// 7) calibrate shooter
+	// 8) shoot and reset catapult
+	// 9) go back to idle and stay there 
+	private void create_ArmMove_Drive_TurnRight_Shoot_SM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		ArmMoveState moveArmDownAgain = new ArmMoveState("<Arm Move Down FURTHER State>", 0.35);
+		TurnState turnRight = new TurnState("<Turn Right State>",45.0, 0.3, isPwm);
+		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
+		ShootAndResetCatapultState shootBallAndReset = new ShootAndResetCatapultState("<Shoot and Reset Catapult State>");
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		TimeEvent timer4 = new TimeEvent(0.5);  // lower arm again timer event	
+		GyroAngleEvent gyro1 = new GyroAngleEvent(45.0);  // 45 deg (right turn) event
+		TimeEvent timer5 = new TimeEvent(3.0);  // timer event for conveyer operation	
+		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
+		//TimeEvent calTimer = new TimeEvent(3.0);  // time-out event for shooter calibration
+		TimeEvent timer6 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(moveArmDownAgain);
+		timer4.associateNextState(turnRight);
+		gyro1.associateNextState(conveyerIn);
+		timer5.associateNextState(calShooter);
+		calEvent1.associateNextState(shootBallAndReset);
+		//calTimer.associateNextState(shootBallAndReset);
+		timer6.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+		moveArmDownAgain.addEvent(timer4);
+		turnRight.addEvent(gyro1);
+		conveyerIn.addEvent(timer5);
+		calShooter.addEvent(calEvent1);
+		//calShooter.addEvent(calTimer);
+		shootBallAndReset.addEvent(timer6);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(moveArmDownAgain);
+		myStates.add(turnRight);
+		myStates.add(conveyerIn);
+		myStates.add(calShooter);
+		myStates.add(shootBallAndReset);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		myEvents.add(timer4);
+		myEvents.add(gyro1);
+		myEvents.add(timer5);
+		myEvents.add(calEvent1);
+		//myEvents.add(calTimer);
+		myEvents.add(timer6);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+	// ****  [ARM MOVE - DRIVE - TURN LEFT - SHOOT] STATE MACHINE ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) lower arm FURTHER for a number of sec
+	// 5) turn right to a number of deg
+	// 6) run conveyer
+	// 7) calibrate shooter
+	// 8) shoot and reset catapult
+	// 9) go back to idle and stay there 
+	private void create_ArmMove_Drive_TurnLeft_Shoot_SM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		ArmMoveState moveArmDownAgain = new ArmMoveState("<Arm Move Down FURTHER State>", 0.35);
+		TurnState turnLeft = new TurnState("<Turn Left State>",-45.0, 0.3, isPwm);
+		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
+		ShootAndResetCatapultState shootBallAndReset = new ShootAndResetCatapultState("<Shoot and Reset Catapult State>");
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		TimeEvent timer4 = new TimeEvent(0.5);  // lower arm further timer event
+		GyroAngleEvent gyro1 = new GyroAngleEvent(-45.0);  // -45 deg (left turn) event
+		TimeEvent timer5 = new TimeEvent(3.0);  // timer event for conveyer operation	
+		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
+		//TimeEvent calTimer = new TimeEvent(3.0);  // time-out event for shooter calibration
+		TimeEvent timer6 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(moveArmDownAgain);
+		timer4.associateNextState(turnLeft);
+		gyro1.associateNextState(conveyerIn);
+		timer5.associateNextState(calShooter);
+		calEvent1.associateNextState(shootBallAndReset);
+		//calTimer.associateNextState(shootBallAndReset);
+		timer6.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
+		moveArmDownAgain.addEvent(timer4);
+		turnLeft.addEvent(gyro1);
+		conveyerIn.addEvent(timer5);
+		calShooter.addEvent(calEvent1);
+		//calShooter.addEvent(calTimer);
+		shootBallAndReset.addEvent(timer6);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(moveArmDownAgain);
+		myStates.add(turnLeft);
+		myStates.add(conveyerIn);
+		myStates.add(calShooter);
+		myStates.add(shootBallAndReset);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		myEvents.add(timer4);
+		myEvents.add(gyro1);
+		myEvents.add(timer5);
+		myEvents.add(calEvent1);
+		//myEvents.add(calTimer);
+		myEvents.add(timer6);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+	// ****  [ARM MOVE - SHOOT] STATE MACHINE - mainly for shooter testing ***** 
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) calibrate shooter
+	// 4) run conveyer
+	// 5) shoot and reset catapult
+	// 6) go back to idle and stay there 
+	private void create_ArmMove_Shoot_SM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
+		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
+		ShootAndResetCatapultState shootBallAndReset = new ShootAndResetCatapultState("<Shoot and Reset Catapult State>");
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(2.0);  // lower arm timer event
+		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
+		//TimeEvent calTimer = new TimeEvent(3.0);  // time-out event for shooter calibration
+		TimeEvent timer3 = new TimeEvent(3.0);  // timer event for conveyer operation	
+		TimeEvent timer4 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(calShooter);
+		calEvent1.associateNextState(conveyerIn);
+		//calTimer.associateNextState(conveyerIn);
+		timer3.associateNextState(shootBallAndReset);
+		timer4.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		calShooter.addEvent(calEvent1);
+		//calShooter.addEvent(calTimer);
+		conveyerIn.addEvent(timer3);
+		shootBallAndReset.addEvent(timer4);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(calShooter);
+		myStates.add(conveyerIn);
+		myStates.add(shootBallAndReset);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(calEvent1);
+		//myEvents.add(calTimer);
+		myEvents.add(timer3);
+		myEvents.add(timer4);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+	
+	// ****  [FOLLOW TARGET] STATE MACHINE - mainly for autotargeting testing - does not shoot ***** 
+	// 1) be idle for a number of sec
+	// 2) calibrate shooter continuously!  Never stop following target!  NEVER!
+	private void create_TargetFollower_SM(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter FOREVER State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(calShooter);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(calShooter);
+		
+		myEvents.add(timer1);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
+//******************************* UNUSED (OLD BUT USEFUL) STATE MACHINES **********************//
 
 	// **** ARM MOVE DOWN THEN UP STATE MACHINE ***** 
 	// ** Test front arm movement in auto - no driving
@@ -227,153 +636,6 @@ public class AutoStateMachine {
 	}
 
 
-	// **** ARM MOVE FULL DOWN AND DRIVE FORWARD STATE MACHINE - fast ***** 
-	// ** Good for ramparts, rough terrain, rock wall, portcullis
-	// 1) be idle for a number of sec
-	// 2) lower arm for a number of sec
-	// 3) drive forward for a number of sec
-	// 4) go back to idle and stay there 
-	private void createFullArmMoveAndDriveForwardSM_Fast(int index) {
-
-		// create states
-		boolean isPwm = false;
-		IdleState startIdle = new IdleState("<Start Idle State>");
-		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - Full move>", 0.35);
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
-		IdleState deadEnd = new IdleState("<Dead End State>");
-		
-		// create events (between the states)
-		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(2.5);  // lower arm timer event
-		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
-		
-		// connect each event with a state to move to
-		timer1.associateNextState(moveArmDown);
-		timer2.associateNextState(driveForward);
-		timer3.associateNextState(deadEnd);
-		
-		// add events to each state
-		startIdle.addEvent(timer1);
-		moveArmDown.addEvent(timer2);
-		driveForward.addEvent(timer3);
-	
-		// store everything
-		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
-		ArrayList<Event> myEvents = new ArrayList<Event>();
-				
-		myStates.add(startIdle);
-		myStates.add(moveArmDown);
-		myStates.add(driveForward);
-		myStates.add(deadEnd);
-		
-		myEvents.add(timer1);
-		myEvents.add(timer2);
-		myEvents.add(timer3);
-		
-		// insert into the network arrays
-		autoStates.add(index, myStates);
-		autoEvents.add(index, myEvents);
-
-	}
-	
-	// **** HALFWAY ARM MOVE AND DRIVE FORWARD STATE MACHINE - faster, shorter, more power ***** 
-	// ** Good for ramparts, rough terrain, rock wall, portcullis
-	// 1) be idle for a number of sec
-	// 2) lower arm for a number of sec
-	// 3) drive forward for a number of sec
-	// 4) go back to idle and stay there 
-	private void createHalfArmMoveAndDriveForwardSM_Fast(int index) {
-
-		// create states
-		boolean isPwm = false;
-		IdleState startIdle = new IdleState("<Start Idle State>");
-		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - Halfway>", 0.35);
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
-		IdleState deadEnd = new IdleState("<Dead End State>");
-		
-		// create events (between the states)
-		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
-		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
-		
-		// connect each event with a state to move to
-		timer1.associateNextState(moveArmDown);
-		timer2.associateNextState(driveForward);
-		timer3.associateNextState(deadEnd);
-		
-		// add events to each state
-		startIdle.addEvent(timer1);
-		moveArmDown.addEvent(timer2);
-		driveForward.addEvent(timer3);
-	
-		// store everything
-		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
-		ArrayList<Event> myEvents = new ArrayList<Event>();
-				
-		myStates.add(startIdle);
-		myStates.add(moveArmDown);
-		myStates.add(driveForward);
-		myStates.add(deadEnd);
-		
-		myEvents.add(timer1);
-		myEvents.add(timer2);
-		myEvents.add(timer3);
-		
-		// insert into the network arrays
-		autoStates.add(index, myStates);
-		autoEvents.add(index, myEvents);
-
-	}
-	
-	// **** ARM SMALL MOVE AND DRIVE FORWARD STATE MACHINE - faster, shorter, more power ***** 
-	// ** Good for ramparts, rough terrain, rock wall, portcullis
-	// 1) be idle for a number of sec
-	// 2) lower arm for a number of sec
-	// 3) drive forward for a number of sec
-	// 4) go back to idle and stay there 
-	private void createLightArmMoveAndDriveForwardSM_Fast(int index) {
-
-		// create states
-		boolean isPwm = false;
-		IdleState startIdle = new IdleState("<Start Idle State>");
-		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - light>", 0.35);
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
-		IdleState deadEnd = new IdleState("<Dead End State>");
-		
-		// create events (between the states)
-		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(0.75);  // lower arm timer event
-		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
-		
-		// connect each event with a state to move to
-		timer1.associateNextState(moveArmDown);
-		timer2.associateNextState(driveForward);
-		timer3.associateNextState(deadEnd);
-		
-		// add events to each state
-		startIdle.addEvent(timer1);
-		moveArmDown.addEvent(timer2);
-		driveForward.addEvent(timer3);
-	
-		// store everything
-		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
-		ArrayList<Event> myEvents = new ArrayList<Event>();
-				
-		myStates.add(startIdle);
-		myStates.add(moveArmDown);
-		myStates.add(driveForward);
-		myStates.add(deadEnd);
-		
-		myEvents.add(timer1);
-		myEvents.add(timer2);
-		myEvents.add(timer3);
-		
-		// insert into the network arrays
-		autoStates.add(index, myStates);
-		autoEvents.add(index, myEvents);
-
-	}
-	
 	// **** MOVE FORWARD STATE MACHINE - slow and steady ***** 
 	// ** Good for moat, rough terrain, portcullis
 	// 1) be idle for a number of sec
@@ -389,7 +651,7 @@ public class AutoStateMachine {
 		
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(8.0);  // drive forward timer event
+		TimeEvent timer2 = new TimeEvent(100.0);  // drive forward timer event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);
@@ -499,7 +761,56 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 
 	}
+
+	// **** ARM MOVE FULL DOWN AND DRIVE FORWARD STATE MACHINE - fast ***** 
+	// ** Good for ramparts, rough terrain, rock wall, portcullis
+	// 1) be idle for a number of sec
+	// 2) lower arm for a number of sec
+	// 3) drive forward for a number of sec
+	// 4) go back to idle and stay there 
+	private void createFullArmMoveAndDriveForwardSM_Fast(int index) {
+
+		// create states
+		boolean isPwm = false;
+		IdleState startIdle = new IdleState("<Start Idle State>");
+		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State - Full move>", 0.35);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		IdleState deadEnd = new IdleState("<Dead End State>");
+		
+		// create events (between the states)
+		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
+		TimeEvent timer2 = new TimeEvent(2.5);  // lower arm timer event
+		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
+		
+		// connect each event with a state to move to
+		timer1.associateNextState(moveArmDown);
+		timer2.associateNextState(driveForward);
+		timer3.associateNextState(deadEnd);
+		
+		// add events to each state
+		startIdle.addEvent(timer1);
+		moveArmDown.addEvent(timer2);
+		driveForward.addEvent(timer3);
 	
+		// store everything
+		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
+		ArrayList<Event> myEvents = new ArrayList<Event>();
+				
+		myStates.add(startIdle);
+		myStates.add(moveArmDown);
+		myStates.add(driveForward);
+		myStates.add(deadEnd);
+		
+		myEvents.add(timer1);
+		myEvents.add(timer2);
+		myEvents.add(timer3);
+		
+		// insert into the network arrays
+		autoStates.add(index, myStates);
+		autoEvents.add(index, myEvents);
+
+	}
+
 
 	// **** MOVE FORWARD & SHOOT STATE MACHINE ***** 
 	// 1) be idle for a number of sec

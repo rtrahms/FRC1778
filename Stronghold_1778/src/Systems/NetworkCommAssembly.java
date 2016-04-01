@@ -1,6 +1,7 @@
 package Systems;
 
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
 public class NetworkCommAssembly {
@@ -8,37 +9,68 @@ public class NetworkCommAssembly {
     private static NetworkTable table;
 	
     private static boolean initialized = false;
-    private static final double FOCAL = 824.4; // Focal length of lens
-    private static final double WIDTH = 7.5;//20.0;  // Width of target in inches
-    private static final double HEIGHT = 5.5;//90.0; // Height of target in inches
-    private static final int IMAGE_WIDTH = 640;
-    private static final double IMAGE_CENTER_X = 320;
-    private static final int IMAGE_HEIGHT = 480;
-    private static final double TARGET_DIST = 36.370588235294115; //Distance to get to in inches
-    private static final double TARGET_OFFSET = 10;
-    private static final double MIN_TARGET_AREA = 10.0;  // threshold target area to process
+        
+    private static final double GOAL_X_PX = 267.0;  // where target should be relative to left of image
+    private static final double GOAL_Y_PX = 250.0;  // where target should be relative to top of image
     
-    private static final double FORWARD_THRESHOLD = 0.05;
-    private static final double ANGULAR_THRESHOLD = 0.1;
-
-	private static final double ANGULAR_DAMPENER = 0.5;
-	private static final double FORWARD_DAMPENER = 0.5;
-
-	private static double[] area;
-	private static double[] centerx;
-	private static double[] centery;
-	private static double[] height;
-	private static double[] width;
-	    
-	private static double forwardVelocity, angularVelocity;
-	private static boolean hasTarget = false;
+    // camera parameters
+    private static final int IMAGE_WIDTH = 640;
+    private static final int IMAGE_HEIGHT = 480;
+   
+	// Target Objectives
+	private static final double TARGET_X = 320;
+	private static final double TARGET_Y = 240;
+	private static final double TARGET_AREA = 1000;
 	
-	private static PollingThread poller;
+	// Target accuracy thresholds
+	private static final double X_THRESHOLD = 20;
+	private static final int Y_THRESHOLD = 20;
+	private static final double AREA_THRESHOLD = 20;
+	
+	// Target Filter/Constraints
+	private static final double TARGET_AREA_MIN = 200.0;
+	private static final double TARGET_AREA_MAX = 3000.0;
+	private static final double TARGET_WIDTH_MIN = 50;
+	private static final double TARGET_WIDTH_MAX = 500;
+	private static final double TARGET_HEIGHT_MIN = 50;
+	private static final double TARGET_HEIGHT_MAX = 300;
+
+	// Arrays of data pulled from the network table published by grip
+	private static double[] grip_area;
+	private static double[] grip_centerx;
+	private static double[] grip_centery;
+	private static double[] grip_width;
+	private static double[] grip_height;
+	
+	// Actual target values filtered from grip data
+	private static double target_area;
+	private static double target_centerx;
+	private static double target_centery;
+	private static double target_width;
+	private static double target_height;
+
+	// Robot drive output
+	private static double driveLeft;
+	private static double driveRight;
+	
+	private static int readyTimer = 0;
+
+	// Robot targeting speed (% how fast it moves and turns)
+	private static final double DRIVE_SPEED = 0.35;
+	
+	// Number of loops to perform to guarantee the robot is lined up with the target
+	private static final int IS_CENTERED_DELAY = 15;
+
+	private static boolean hasTarget = false;
+	private static boolean targetCentered = false;
+
+	//private static PollingThread poller;
 	
 	public static boolean running = false;
-
-	private static double forwardDampener = 0.5;
-	private static double lateralDampener = 0.5;
+	
+	private static Joystick gamepad;   // gamepad used for testing ONLY
+	private static final double TARGETX_INIT = 320.0;   // testing only
+	private static final double TARGETY_INIT = 240.0;   // testing only
 	
     public static void initialize() {
     	if (!initialized) {
@@ -47,35 +79,56 @@ public class NetworkCommAssembly {
 	        
 	        reset();
 	        
-	        poller = new PollingThread();
-	        poller.start();
+	        //poller = new PollingThread();
+	        //poller.start();
+	        
+			// testing input only
+	        //gamepad = new Joystick(2);
 	        
        		initialized = true;
     	}
 	}
     
+    public static void autoInit() {
+		target_area = 0.0;
+		target_centerx = TARGETX_INIT;
+		target_centery = TARGETY_INIT;
+		target_width = 0.0;
+		target_height = 0.0;
+		
+		reset();
+    }
     public static void reset() {
-		forwardVelocity = 0;
-		angularVelocity = 0;
+    					
+		driveLeft = 0;
+		driveRight = 0;
+		
+		readyTimer = 0;
+
 		hasTarget = false;    	
+		targetCentered = false;
     }
     
     // Network polling thread class
+    /*
     static class PollingThread extends Thread {
     	public void run() {
     		int ctr = 0;
     		
 	    	while (true) {
 	    		if(running) {
-					//double[] defaultValue = {0.0};
-					double[] defaultValue = new double[0];
-					area = table.getNumberArray("area",defaultValue);
-					centerx = table.getNumberArray("centerX",defaultValue);
-					centery = table.getNumberArray("centerY",defaultValue);
-					height = table.getNumberArray("height",defaultValue);
-					width = table.getNumberArray("width",defaultValue);
+	    			
+	    			// Default data if network table data pull fails
+	    			double[] defaultValue = new double[0];
+	    			
+	    			// Pull data from grip
+	    			grip_area = table.getNumberArray("area", defaultValue);
+	    			grip_centerx = table.getNumberArray("centerX", defaultValue);
+	    			grip_centery = table.getNumberArray("centerY", defaultValue);
+	    			grip_width = table.getNumberArray("width", defaultValue);
+	    			grip_height = table.getNumberArray("height", defaultValue);
 					
-					System.out.println("pollingThread updating tables! ctr = " + ctr++);
+					//System.out.println("pollingThread updating tables! ctr = " + ctr++);
 					try {
 						Thread.sleep(250);
 					} catch (Exception e) {
@@ -86,6 +139,7 @@ public class NetworkCommAssembly {
     	}
 		
     }
+    */
     
 	public static void stop() {
     	running = false;
@@ -99,119 +153,153 @@ public class NetworkCommAssembly {
         
     	if (!initialized)
     		return;
+    	
+    	// Default data if network table data pull fails
+		double[] defaultValue = new double[0];
 		
-		double targetArea = 0.0;
-		double targetX = 0.0;
-		double targetY = 0.0;
-		double targetWidth = 0.0;
-		double targetHeight = 0.0;
-		double distance = 0.0;
+		// Pull data from grip
+		grip_area = table.getNumberArray("area", defaultValue);
+		grip_centerx = table.getNumberArray("centerX", defaultValue);
+		grip_centery = table.getNumberArray("centerY", defaultValue);
+		grip_width = table.getNumberArray("width", defaultValue);
+		grip_height = table.getNumberArray("height", defaultValue);
+
+    	// if a valid target exists (one that meets filter criteria)
+		if (findTarget()) {
+			
+			// First, focus on centering X!		
+			// neg delta X = actual left of goal, turn LEFT => angular velocity = NEG
+			// pos delta X = actual right of goal, turn RIGHT => angular velocity = POS
+			double deltaX = (target_centerx - GOAL_X_PX);
+			
+			if(Math.abs(deltaX) < X_THRESHOLD)  {
+				// X is now centered!  Next focus on Y!
+				// neg delta Y = actual above goal, move backward => forward velocity = NEG
+				// pos delta Y = actual below goal, move forward => forward velocity = POS
+				double deltaY = (target_centery - GOAL_Y_PX); 
 				
-		if(area.length != 0) {
-			targetArea = area[area.length-1];
-			targetX = centerx[centerx.length-1];
-			targetY = centery[centery.length-1];
-			targetHeight = height[height.length-1];
-			targetWidth = width[width.length-1];
-			distance = (WIDTH*FOCAL)/targetWidth;
-			hasTarget = true;
-
-			// calculate forward velocity
-			double distanceDelta = distance-TARGET_DIST;
-			if (distanceDelta != 0.0) {
-				forwardVelocity = (distanceDelta/(TARGET_DIST*4))*forwardDampener;
-				if(Math.abs(forwardVelocity) < FORWARD_THRESHOLD) 
-					forwardVelocity = 0.0;
+				if(Math.abs(deltaY) < Y_THRESHOLD)  {
+					// Both X and Y are centered!
+					driveLeft = 0;
+					driveRight = 0;
+					readyTimer++;
+									
+					// if we continued to be centered for a reasonable number of iterations
+					if(readyTimer >= IS_CENTERED_DELAY) {
+						//System.out.println("NetworkCommAssembly: TARGET CENTERED!.... X: " + target_centerx + " Y: " + target_centery + 
+						//		"driveLeft = " + driveLeft +
+						//		"driveRight = " + driveRight);
+						targetCentered = true;
+					}
+					return;
+				}
+				else {
+					// Set the left and right motors to help center Y
+					driveLeft = Math.copySign(DRIVE_SPEED, deltaY);
+					driveRight = Math.copySign(DRIVE_SPEED, deltaY);
+					targetCentered = false;
+					readyTimer = 0;
+					//System.out.println("NetworkCommAssembly: CENTERING Y.... X: " + target_centerx + " Y: " + target_centery + 
+					//		"driveLeft = " + driveLeft +
+					//		"driveRight = " + driveRight);
+					return;
+				}
 			}
-
-			// calculate angular velocity
-			double lateralDelta = (targetX-IMAGE_CENTER_X-TARGET_OFFSET)/IMAGE_CENTER_X;		
-			if (lateralDelta != 0) {
-				angularVelocity = lateralDelta*lateralDampener;
-				if(Math.abs(angularVelocity) < ANGULAR_THRESHOLD) 
-					angularVelocity = 0.0;
-			}
-			angularVelocity *= ANGULAR_DAMPENER;
-			angularVelocity *= FORWARD_DAMPENER;
-			if(forwardVelocity > 1.0) forwardVelocity = 1.0;
-			if(forwardVelocity < -1.0) forwardVelocity = -1.0;
-			if(angularVelocity > 1.0) angularVelocity = 1.0;
-			if(angularVelocity < -1.0) angularVelocity = -1.0;
-			
-			/*
-			System.out.println("NetworkCommAssembly: X: " + targetX + " Y: " + targetY + " area: " + targetArea + 
-			   										" width: " + targetWidth + " height:" + targetHeight);
-			*/
-			
-			//System.out.println("NetworkCommAssembly: hasTarget: " + hasTarget + " forwardVel: " + forwardVelocity + " angularVel: " + angularVelocity);
+			else {
+				// Set the left and right motors to help center X
+				driveLeft = Math.copySign(DRIVE_SPEED, deltaX);
+				driveRight = Math.copySign(DRIVE_SPEED, -deltaX);
+				targetCentered = false;
+				readyTimer = 0;
+				
+				//System.out.println("NetworkCommAssembly: CENTERING X.... X: " + target_centerx + " Y: " + target_centery + 
+				//		"driveLeft = " + driveLeft +
+				//		"driveRight = " + driveRight);
+				return;
+			}		
 		}
 		else {
 			// no target found!  Reset targeting params
 			reset();
 		}
 		
+		Timer.delay(0.02);
     }
-    
-    public static double getForwardVelocity()
-    {
-    	return forwardVelocity;
-    }
-    
-    public static double getAngularVelocity()
-    {
-    	return angularVelocity;
-    }
-    
-    public static boolean hasTarget()
-    {
-    	return hasTarget;
-    }
+        
+	// Returns the value for the left side drivetrain
+	public static double getLeftDriveValue() {
+		return driveLeft;
+	}
+	
+	// Returns the value for the right side drivetrain
+	public static double getRightDriveValue() {
+		return driveRight;
+	}
+	
+	// Returns true if the target is visible, returns false otherwise
+	public static boolean hasTarget() {
+		return hasTarget;
+	}
+	
+	// Returns true if the catapult is ready to shoot, returns false otherwise
+	public static boolean targetCentered() {
+		return targetCentered;
+	}
    
-    public static int findLargestTarget()
-    {
-    	int targetIndex = -1;
-    	double largestArea = -1.0;
-    	
-    	// if list is empty, return -1 (no target found)
-    	if (area.length == 0)
-    		return -1;
-    	
-    	// check each recognized target
-    	for (int i=0; i<area.length; i++)
-    	{	
-    		// if we've found an area larger than current
-    		if (area[i] > largestArea)
-    		{
-    			// mark it as largest
-    			targetIndex = i;
-    			largestArea = area[i];
-    		}
-    	}
-    	
-    	// if largest target is not big enough, return -1
-    	if (largestArea < MIN_TARGET_AREA)
-    		return -1;
-    	
-    	// return index of largest area found
-    	return targetIndex;
-    }
     
-    /*
-    public static double getTargetCenterX(int index)
-    {
-    	if (centerx.length == 0)
-    		return -1.0;
-    	else
-    		return centerx[index];
-    }
-    
-    public static double getTargetCenterY(int index)
-    {
-    	if (centery.length == 0)
-    		return -1.0;
-    	else
-    		return centery[index];
-    }
-    */
+	// Filters data from grip and determines if the target is visible
+	// Writes target data to target variables if the target is found.
+	private static boolean findTarget() {
+		
+		// TESTING INPUT ONLY - simulates actual target data normally provided by GRIP & camera //
+		/*
+		double incrX = gamepad.getRawAxis(4);
+		//if (Math.abs(incrX) < 0.1)
+		//	incrX = 0.0;
+		target_centerx = gamepad.getRawAxis(4)*IMAGE_WIDTH/2+IMAGE_WIDTH;
+		
+		double incrY = gamepad.getRawAxis(5);
+		if (Math.abs(incrY) < 0.1)
+			incrY = 0.0;
+		target_centery = gamepad.getRawAxis(5)*IMAGE_HEIGHT/2+IMAGE_HEIGHT;
+		
+		return true;
+		*/
+		// TESTING INPUT ONLY //
 
+		
+		// If none of the data received from grip is null
+		if (grip_area != null && grip_centerx != null && grip_centery != null && grip_width != null && grip_height != null) {
+			// If none of the arrays have an impossible or zero length
+			if (grip_area.length > 0 && grip_centerx.length > 0 && grip_centery.length > 0 && grip_width.length > 0 && grip_height.length > 0) {
+				// Loop through all the data received from grip
+				for (int n = 0; n < grip_area.length; n++) {
+					// If the data matches the targets area criteria
+					if (grip_area[n] >= TARGET_AREA_MIN && grip_area[n] <= TARGET_AREA_MAX) {
+						// If the data matches the targets width critera
+						if (grip_width[n] >= TARGET_WIDTH_MIN && grip_width[n] <= TARGET_WIDTH_MAX) {
+							// If the data matches the targets height criteria
+							if (grip_height[n] >= TARGET_HEIGHT_MIN && grip_height[n] <= TARGET_HEIGHT_MAX) {
+								// Set the target variables to the found targets values
+								target_area = grip_area[n];
+								target_centerx = grip_centerx[n];
+								target_centery = grip_centery[n];
+								target_width = grip_width[n];
+								target_height = grip_height[n];
+								
+								hasTarget = true;
+								
+								return true;
+							}
+						}
+
+					}
+				}
+			}
+		}
+		
+		// no target found that matches criteria, return false
+		return false;
+		
+	}
 }

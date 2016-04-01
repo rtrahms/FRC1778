@@ -42,6 +42,9 @@ public class Robot extends IterativeRobot {
 
 		GyroSensor.initialize();
 		UltrasonicSensor.initialize();
+		
+		NetworkCommAssembly.initialize();
+		AutoShooterAssembly.initialize();
 				
 		CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
@@ -58,6 +61,9 @@ public class Robot extends IterativeRobot {
 		GyroSensor.reset();
 		UltrasonicSensor.reset();
 		
+		NetworkCommAssembly.autoInit();
+		AutoShooterAssembly.autoInit();
+		
 		RioDuinoAssembly.autonomousInit();
 		CANDriveAssembly.autoInit();
 		CatapultAssembly.autoInit();
@@ -71,6 +77,9 @@ public class Robot extends IterativeRobot {
 	 */
 	public void autonomousPeriodic() {
 				
+		// update targeting data from network tables
+		NetworkCommAssembly.updateValues();
+		
 		// state machine runs things in autonomous
 		autoSM.process();
 	}
