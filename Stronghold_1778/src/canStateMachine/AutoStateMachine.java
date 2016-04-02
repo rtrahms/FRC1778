@@ -316,19 +316,21 @@ public class AutoStateMachine {
 	// 3) drive forward for a number of sec
 	// 4) lower arm FURTHER for a number of sec
 	// 5) turn right to a number of deg
-	// 6) run conveyer
-	// 7) calibrate shooter
-	// 8) shoot and reset catapult
-	// 9) go back to idle and stay there 
+	// 6) drive forward again for a number of sec
+	// 7) run conveyer
+	// 8) calibrate shooter
+	// 9) shoot and reset catapult
+	// 10) go back to idle and stay there 
 	private void create_ArmMove_Drive_TurnRight_Shoot_SM(int index) {
 
 		// create states
 		boolean isPwm = false;
 		IdleState startIdle = new IdleState("<Start Idle State>");
 		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.85);
 		ArmMoveState moveArmDownAgain = new ArmMoveState("<Arm Move Down FURTHER State>", 0.35);
 		TurnState turnRight = new TurnState("<Turn Right State>",45.0, 0.3, isPwm);
+		DriveForwardState driveForwardAgain = new DriveForwardState("<Drive Forward Again State>", isPwm, 0.85);
 		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
 		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
 		ShootAndResetCatapultState shootBallAndReset = new ShootAndResetCatapultState("<Shoot and Reset Catapult State>");
@@ -339,22 +341,24 @@ public class AutoStateMachine {
 		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
 		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
 		TimeEvent timer4 = new TimeEvent(0.5);  // lower arm again timer event	
-		GyroAngleEvent gyro1 = new GyroAngleEvent(45.0);  // 45 deg (right turn) event
-		TimeEvent timer5 = new TimeEvent(3.0);  // timer event for conveyer operation	
+		GyroAngleEvent gyro1 = new GyroAngleEvent(45.0,GyroAngleEvent.AnglePolarity.kGreaterThan);  // 45 deg (right turn) event
+		TimeEvent timer5 = new TimeEvent(1.5);  // drive forward again timer event
+		TimeEvent timer6 = new TimeEvent(3.0);  // timer event for conveyer operation	
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
 		//TimeEvent calTimer = new TimeEvent(3.0);  // time-out event for shooter calibration
-		TimeEvent timer6 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
+		TimeEvent timer7 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(moveArmDown);
 		timer2.associateNextState(driveForward);
 		timer3.associateNextState(moveArmDownAgain);
 		timer4.associateNextState(turnRight);
-		gyro1.associateNextState(conveyerIn);
-		timer5.associateNextState(calShooter);
+		gyro1.associateNextState(driveForwardAgain);
+		timer5.associateNextState(conveyerIn);
+		timer6.associateNextState(calShooter);
 		calEvent1.associateNextState(shootBallAndReset);
 		//calTimer.associateNextState(shootBallAndReset);
-		timer6.associateNextState(deadEnd);
+		timer7.associateNextState(deadEnd);
 		
 		// add events to each state
 		startIdle.addEvent(timer1);
@@ -362,10 +366,11 @@ public class AutoStateMachine {
 		driveForward.addEvent(timer3);
 		moveArmDownAgain.addEvent(timer4);
 		turnRight.addEvent(gyro1);
-		conveyerIn.addEvent(timer5);
+		driveForwardAgain.addEvent(timer5);
+		conveyerIn.addEvent(timer6);
 		calShooter.addEvent(calEvent1);
 		//calShooter.addEvent(calTimer);
-		shootBallAndReset.addEvent(timer6);
+		shootBallAndReset.addEvent(timer7);
 	
 		// store everything
 		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
@@ -376,6 +381,7 @@ public class AutoStateMachine {
 		myStates.add(driveForward);
 		myStates.add(moveArmDownAgain);
 		myStates.add(turnRight);
+		myStates.add(driveForwardAgain);
 		myStates.add(conveyerIn);
 		myStates.add(calShooter);
 		myStates.add(shootBallAndReset);
@@ -387,9 +393,10 @@ public class AutoStateMachine {
 		myEvents.add(timer4);
 		myEvents.add(gyro1);
 		myEvents.add(timer5);
+		myEvents.add(timer6);
 		myEvents.add(calEvent1);
 		//myEvents.add(calTimer);
-		myEvents.add(timer6);
+		myEvents.add(timer7);
 		
 		// insert into the network arrays
 		autoStates.add(index, myStates);
@@ -404,19 +411,21 @@ public class AutoStateMachine {
 	// 3) drive forward for a number of sec
 	// 4) lower arm FURTHER for a number of sec
 	// 5) turn right to a number of deg
-	// 6) run conveyer
-	// 7) calibrate shooter
-	// 8) shoot and reset catapult
-	// 9) go back to idle and stay there 
+	// 6) drive forward again for a number of sec
+	// 7) run conveyer
+	// 8) calibrate shooter
+	// 9) shoot and reset catapult
+	// 10) go back to idle and stay there 
 	private void create_ArmMove_Drive_TurnLeft_Shoot_SM(int index) {
 
 		// create states
 		boolean isPwm = false;
 		IdleState startIdle = new IdleState("<Start Idle State>");
 		ArmMoveState moveArmDown = new ArmMoveState("<Arm Move Down State>", 0.35);
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Fast>", isPwm, 0.85);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State>", isPwm, 0.85);
 		ArmMoveState moveArmDownAgain = new ArmMoveState("<Arm Move Down FURTHER State>", 0.35);
 		TurnState turnLeft = new TurnState("<Turn Left State>",-45.0, 0.3, isPwm);
+		DriveForwardState driveForwardAgain = new DriveForwardState("<Drive Forward AGAIN State>", isPwm, 0.85);
 		ConveyerStartState conveyerIn = new ConveyerStartState("<Conveyer In State>",true);
 		CalibrateShooterState calShooter = new CalibrateShooterState("<Cal Shooter State>");
 		ShootAndResetCatapultState shootBallAndReset = new ShootAndResetCatapultState("<Shoot and Reset Catapult State>");
@@ -427,22 +436,24 @@ public class AutoStateMachine {
 		TimeEvent timer2 = new TimeEvent(1.5);  // lower arm timer event
 		TimeEvent timer3 = new TimeEvent(4.0);  // drive forward timer event
 		TimeEvent timer4 = new TimeEvent(0.5);  // lower arm further timer event
-		GyroAngleEvent gyro1 = new GyroAngleEvent(-45.0);  // -45 deg (left turn) event
-		TimeEvent timer5 = new TimeEvent(3.0);  // timer event for conveyer operation	
+		GyroAngleEvent gyro1 = new GyroAngleEvent(-45.0,GyroAngleEvent.AnglePolarity.kLessThan);  // -45 deg (left turn) event
+		TimeEvent timer5 = new TimeEvent(1.5);  // drive forward again timer event	
+		TimeEvent timer6 = new TimeEvent(3.0);  // timer event for conveyer operation	
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event
 		//TimeEvent calTimer = new TimeEvent(3.0);  // time-out event for shooter calibration
-		TimeEvent timer6 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
+		TimeEvent timer7 = new TimeEvent(2.0);  // timer event for catapult shoot/reset operation	
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(moveArmDown);
 		timer2.associateNextState(driveForward);
 		timer3.associateNextState(moveArmDownAgain);
 		timer4.associateNextState(turnLeft);
-		gyro1.associateNextState(conveyerIn);
-		timer5.associateNextState(calShooter);
+		gyro1.associateNextState(driveForwardAgain);
+		timer5.associateNextState(conveyerIn);
+		timer6.associateNextState(calShooter);
 		calEvent1.associateNextState(shootBallAndReset);
 		//calTimer.associateNextState(shootBallAndReset);
-		timer6.associateNextState(deadEnd);
+		timer7.associateNextState(deadEnd);
 		
 		// add events to each state
 		startIdle.addEvent(timer1);
@@ -450,10 +461,11 @@ public class AutoStateMachine {
 		driveForward.addEvent(timer3);
 		moveArmDownAgain.addEvent(timer4);
 		turnLeft.addEvent(gyro1);
-		conveyerIn.addEvent(timer5);
+		driveForward.addEvent(timer5);
+		conveyerIn.addEvent(timer6);
 		calShooter.addEvent(calEvent1);
 		//calShooter.addEvent(calTimer);
-		shootBallAndReset.addEvent(timer6);
+		shootBallAndReset.addEvent(timer7);
 	
 		// store everything
 		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
@@ -464,6 +476,7 @@ public class AutoStateMachine {
 		myStates.add(driveForward);
 		myStates.add(moveArmDownAgain);
 		myStates.add(turnLeft);
+		myStates.add(driveForwardAgain);
 		myStates.add(conveyerIn);
 		myStates.add(calShooter);
 		myStates.add(shootBallAndReset);
@@ -475,9 +488,10 @@ public class AutoStateMachine {
 		myEvents.add(timer4);
 		myEvents.add(gyro1);
 		myEvents.add(timer5);
+		myEvents.add(timer6);
 		myEvents.add(calEvent1);
 		//myEvents.add(calTimer);
-		myEvents.add(timer6);
+		myEvents.add(timer7);
 		
 		// insert into the network arrays
 		autoStates.add(index, myStates);
@@ -901,7 +915,7 @@ public class AutoStateMachine {
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
 		TimeEvent timer2 = new TimeEvent(3.0);  // 0.5s timer event
-		GyroAngleEvent gyro1 = new GyroAngleEvent(-135.0);  // -135 deg (left turn) event
+		GyroAngleEvent gyro1 = new GyroAngleEvent(-135.0,GyroAngleEvent.AnglePolarity.kLessThan);  // -135 deg (left turn) event
 		TimeEvent timer3 = new TimeEvent(3.0);  // timer event for second drive forward	
 		TimeEvent timer4 = new TimeEvent(2.0);  // timer event for conveyer operation	
 		CalibrateEvent calEvent1 = new CalibrateEvent(true);  // shooter calibrated event

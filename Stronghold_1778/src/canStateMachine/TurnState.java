@@ -7,7 +7,7 @@ public class TurnState extends AutoState {
 	private double angleToTurn = 0.0;
 	private double speedToTurn = 0.3;
 	private boolean isPwm = false;
-	
+		
 	public TurnState(double angleToTurn, double speed, boolean isPwm)
 	{
 		this.name = "<Turn State>";
