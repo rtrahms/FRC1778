@@ -273,28 +273,35 @@ public class NetworkCommAssembly {
 			// If none of the arrays have an impossible or zero length
 			if (grip_area.length > 0 && grip_centerx.length > 0 && grip_centery.length > 0 && grip_width.length > 0 && grip_height.length > 0) {
 				// Loop through all the data received from grip
+				/*
 				for (int n = 0; n < grip_area.length; n++) {
+					
 					// If the data matches the targets area criteria
 					if (grip_area[n] >= TARGET_AREA_MIN && grip_area[n] <= TARGET_AREA_MAX) {
 						// If the data matches the targets width critera
 						if (grip_width[n] >= TARGET_WIDTH_MIN && grip_width[n] <= TARGET_WIDTH_MAX) {
 							// If the data matches the targets height criteria
 							if (grip_height[n] >= TARGET_HEIGHT_MIN && grip_height[n] <= TARGET_HEIGHT_MAX) {
+							
 								// Set the target variables to the found targets values
-								target_area = grip_area[n];
-								target_centerx = grip_centerx[n];
-								target_centery = grip_centery[n];
-								target_width = grip_width[n];
-								target_height = grip_height[n];
 								
-								hasTarget = true;
-								
-								return true;
 							}
 						}
 
 					}
+					
 				}
+				*/
+				
+				target_area = grip_area[grip_area.length-1];
+				target_centerx = grip_centerx[grip_centerx.length-1];
+				target_centery = grip_centery[grip_centery.length-1];
+				target_width = grip_width[grip_width.length-1];
+				target_height = grip_height[grip_height.length-1];
+				
+				hasTarget = true;
+				
+				return true;
 			}
 		}
 		

@@ -36,11 +36,11 @@ public class CANDriveAssembly {
 	
 	private static final long AUTO_DRIVE_TIME_SEC = 4;
 	private static final double AUTO_DRIVE_SPEED = -0.5;
-	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.01;
+	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.03;
 	
 	//other constants
 	private static final boolean USE_SQUARED_INPUTS = true;
-	private static final double GYRO_CORRECT_COEFF = 0.125;
+	private static final double GYRO_CORRECT_COEFF = 0.03;
 	
 	// speed controllers and drive class
 	private static CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
@@ -79,18 +79,27 @@ public class CANDriveAssembly {
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
-		//double gyroAngle = 0.0;
-		double gyroAngle = GyroSensor.getAngle();
+		double gyroAngle = 0.0;
+		//double gyroAngle = GyroSensor.getAngle();
 		
-		System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
+		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 		
 		// calculate speed adjustment for left and right sides
 		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
+		
+		/*
 		if (driveAngle > 0.5) driveAngle = 0.5;
 		if (driveAngle < -0.5) driveAngle = -0.5;
 		
+		double leftSpeed = speed+driveAngle;		
+		double rightSpeed = speed-driveAngle;
+		*/
+		
 		// adjust speed of left and right sides
 		drive.tankDrive(driveAngle+speed, -driveAngle+speed);
+		//drive.tankDrive(leftSpeed, rightSpeed);
+		 
+		//drive.drive(-speed, driveAngle);
 	}
 
 	public static void autoStop() {

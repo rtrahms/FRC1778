@@ -10,6 +10,7 @@ import Systems.RioDuinoAssembly;
 import Systems.UltrasonicSensor;
 import canStateMachine.AutoStateMachine;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 
 /**
@@ -36,7 +37,7 @@ public class Robot extends IterativeRobot {
 	public void robotInit() {
 
 		autoSM = new AutoStateMachine();
-
+		
 		pdp = new PowerDistributionPanel();
 		pdp.clearStickyFaults();
 
@@ -97,6 +98,7 @@ public class Robot extends IterativeRobot {
 		CANDriveAssembly.teleopInit();
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
+		
 	}
 
 	/**
@@ -109,7 +111,7 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
-    	CatapultAssembly.teleopPeriodic(); 	
+    	CatapultAssembly.teleopPeriodic(); 		
  	}
 	
 	public void disabledInit() {

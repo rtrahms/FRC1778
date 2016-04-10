@@ -41,10 +41,8 @@ public class AutoStateMachine {
 		createDoNothingSM(0);
 		
 		//*** STATE MACHINE 1: add a lower arm and shoot state machine (mainly for testing)
-		//create_TargetFollower_SM(1);		
-		//create_ArmMove_Shoot_SM(1);
-		//createDriveForwardSM_Slow(1);
-		createDoNothingSM(1);
+		createDriveForwardSM_Slow(1);
+		//createDoNothingSM(1);
 				
 		//--- STATE MACHINE 2:  mover only == add a drive straight (fast & short) state machine
 		createHalfArmMoveAndDriveForwardSM_Fast(2); 
@@ -55,7 +53,9 @@ public class AutoStateMachine {
 		//createDoNothingSM(3);
 		
 		//--- STATE MACHINE 4: add a drive straight, state machine
-		createDoNothingSM(4);
+		//create_TargetFollower_SM(4);		
+		create_ArmMove_Shoot_SM(4);
+		//createDoNothingSM(4);
 		
 		//--- STATE MACHINE 5: add a do nothing state machine
 		createDoNothingSM(5);
