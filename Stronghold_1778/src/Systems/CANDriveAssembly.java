@@ -1,5 +1,6 @@
 package Systems;
 
+import NetworkComm.InputOutputComm;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;
@@ -36,7 +37,7 @@ public class CANDriveAssembly {
 	
 	private static final long AUTO_DRIVE_TIME_SEC = 4;
 	private static final double AUTO_DRIVE_SPEED = -0.5;
-	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.03;
+	private static final double AUTO_DRIVE_CORRECT_COEFF = 0.02;
 	
 	//other constants
 	private static final boolean USE_SQUARED_INPUTS = true;
@@ -79,25 +80,38 @@ public class CANDriveAssembly {
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
-		double gyroAngle = 0.0;
-		//double gyroAngle = GyroSensor.getAngle();
+		//double gyroAngle = 0.0;
+		double gyroAngle = GyroSensor.getAngle();
 		
 		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 		
 		// calculate speed adjustment for left and right sides
 		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
 		
+		// send output data for test & debug
+		String gyroAngleStr = String.format("%.2f", gyroAngle);
+		String driveAngleStr = String.format("%.2f", driveAngle);
+		String myString = new String("gyroAngle = " + gyroAngleStr + " driveAngle = " + driveAngleStr + " speed = " + speed);
+		System.out.println(myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_gyro", myString);
+
 		/*
 		if (driveAngle > 0.5) driveAngle = 0.5;
 		if (driveAngle < -0.5) driveAngle = -0.5;
+		*/
 		
 		double leftSpeed = speed+driveAngle;		
 		double rightSpeed = speed-driveAngle;
-		*/
+		
+		String leftSpeedStr = String.format("%.2f", leftSpeed);
+		String rightSpeedStr = String.format("%.2f", rightSpeed);
+		String myString2 = new String("leftSpeed = " + leftSpeedStr + " rightSpeed = " + rightSpeedStr);
+		System.out.println(myString2);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_tankDrive", myString2);
 		
 		// adjust speed of left and right sides
-		drive.tankDrive(driveAngle+speed, -driveAngle+speed);
-		//drive.tankDrive(leftSpeed, rightSpeed);
+		//drive.tankDrive(driveAngle+speed, -driveAngle+speed);
+		drive.tankDrive(leftSpeed, rightSpeed);
 		 
 		//drive.drive(-speed, driveAngle);
 	}

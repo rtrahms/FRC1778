@@ -1,10 +1,9 @@
-package Systems;
+package NetworkComm;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.networktables.NetworkTable;
 
-public class NetworkCommAssembly {
+public class GRIPDataComm {
     
     private static NetworkTable table;
 	
@@ -56,7 +55,7 @@ public class NetworkCommAssembly {
 	private static int readyTimer = 0;
 
 	// Robot targeting speed (% how fast it moves and turns)
-	private static final double DRIVE_SPEED = 0.35;
+	private static final double DRIVE_SPEED = 0.5;
 	
 	// Number of loops to perform to guarantee the robot is lined up with the target
 	private static final int IS_CENTERED_DELAY = 15;
@@ -68,9 +67,8 @@ public class NetworkCommAssembly {
 	
 	public static boolean running = false;
 	
-	private static Joystick gamepad;   // gamepad used for testing ONLY
-	private static final double TARGETX_INIT = 320.0;   // testing only
-	private static final double TARGETY_INIT = 240.0;   // testing only
+	private static final double TARGETX_INIT = 320.0;  
+	private static final double TARGETY_INIT = 240.0;  
 	
     public static void initialize() {
     	if (!initialized) {
@@ -81,10 +79,7 @@ public class NetworkCommAssembly {
 	        
 	        //poller = new PollingThread();
 	        //poller.start();
-	        
-			// testing input only
-	        //gamepad = new Joystick(2);
-	        
+	        	        
        		initialized = true;
     	}
 	}
@@ -250,23 +245,6 @@ public class NetworkCommAssembly {
 	// Filters data from grip and determines if the target is visible
 	// Writes target data to target variables if the target is found.
 	private static boolean findTarget() {
-		
-		// TESTING INPUT ONLY - simulates actual target data normally provided by GRIP & camera //
-		/*
-		double incrX = gamepad.getRawAxis(4);
-		//if (Math.abs(incrX) < 0.1)
-		//	incrX = 0.0;
-		target_centerx = gamepad.getRawAxis(4)*IMAGE_WIDTH/2+IMAGE_WIDTH;
-		
-		double incrY = gamepad.getRawAxis(5);
-		if (Math.abs(incrY) < 0.1)
-			incrY = 0.0;
-		target_centery = gamepad.getRawAxis(5)*IMAGE_HEIGHT/2+IMAGE_HEIGHT;
-		
-		return true;
-		*/
-		// TESTING INPUT ONLY //
-
 		
 		// If none of the data received from grip is null
 		if (grip_area != null && grip_centerx != null && grip_centery != null && grip_width != null && grip_height != null) {

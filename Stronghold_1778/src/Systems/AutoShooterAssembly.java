@@ -1,5 +1,7 @@
 package Systems;
 
+import NetworkComm.GRIPDataComm;
+
 public class AutoShooterAssembly {
 
 	private static boolean initialized = false;
@@ -31,13 +33,13 @@ public class AutoShooterAssembly {
 	public static void calibrateShooter()
 	{
 		// if no target data, return false
-		if (!NetworkCommAssembly.hasTarget()) {
+		if (!GRIPDataComm.hasTarget()) {
 			System.out.println("AutoShooterAssembly: no targets, resetting calibration");
 			reset();
 		}
 		else {
 			// target data exists, and is centered
-			if (NetworkCommAssembly.targetCentered()) {
+			if (GRIPDataComm.targetCentered()) {
 				isCalibrated = true;
 				driveLeft = 0;
 				driveRight = 0;
@@ -45,8 +47,8 @@ public class AutoShooterAssembly {
 			else {
 			// target data exists, but is not centered
 				isCalibrated = false;
-				driveLeft = NetworkCommAssembly.getLeftDriveValue();
-				driveRight = NetworkCommAssembly.getRightDriveValue();
+				driveLeft = GRIPDataComm.getLeftDriveValue();
+				driveRight = GRIPDataComm.getRightDriveValue();
 			}
 			
 			//System.out.println("AutoShooterAssembly: calibrating... driveLeft: " + driveLeft + " driveRight: " + driveRight);

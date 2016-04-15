@@ -2,6 +2,7 @@ package canStateMachine;
 
 import java.util.ArrayList;
 
+import NetworkComm.InputOutputComm;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class AutoStateMachine {
@@ -53,7 +54,7 @@ public class AutoStateMachine {
 		//createDoNothingSM(3);
 		
 		//--- STATE MACHINE 4: add a drive straight, state machine
-		//create_TargetFollower_SM(4);		
+		//screate_TargetFollower_SM(4);		
 		create_ArmMove_Shoot_SM(4);
 		//createDoNothingSM(4);
 		
@@ -68,7 +69,9 @@ public class AutoStateMachine {
 		create_ArmMove_DriveStraight_Shoot_SM(7);
 		//createDoNothingSM(7);
 
-		System.out.println("autoStates list size = " + autoStates.size() + ", autoEvents list size = " + autoEvents.size());
+		String myString = new String("autoStates list size = " + autoStates.size() + ", autoEvents list size = " + autoEvents.size());
+		System.out.println(myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_setup", myString);
 	}
 	
 	public AutoState getState() {
@@ -80,7 +83,10 @@ public class AutoStateMachine {
 		
 		// determine if we are running auto or not
 		int networkIndex = getNetworkIndex();
-		System.out.println("autoNetworkEnable = " + autoNetworkEnable + ", networkIndex = " + networkIndex);
+		
+		String myString = new String("autoNetworkEnable = " + autoNetworkEnable + ", networkIndex = " + networkIndex);
+		System.out.println(myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_network", myString);
 		
 		if (autoNetworkEnable)
 		{
@@ -108,7 +114,10 @@ public class AutoStateMachine {
 			// process the current state
 			if (currentState != null)
 			{
-				//System.out.println("State = " + currentState.name);
+				String myString = new String("State = " + currentState.name);
+				System.out.println(myString);
+				InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_currentState", myString);
+
 				nextState = currentState.process();
 			}
 			
@@ -144,6 +153,8 @@ public class AutoStateMachine {
 		// third switch is binary 4
 		if (autoNetworkSwitch3.get())
 			value += 4;
+		
+		//value = 1;  // testing only
 
 		if (value == 0)
 		{
@@ -662,12 +673,12 @@ public class AutoStateMachine {
 		// create states
 		boolean isPwm = false;
 		IdleState startIdle = new IdleState("<Start Idle State>");
-		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Slow>", isPwm, 0.65);
+		DriveForwardState driveForward = new DriveForwardState("<Drive Forward State - Slow>", isPwm, 0.40);
 		IdleState deadEnd = new IdleState("<Dead End State>");
 		
 		// create events (between the states)
 		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-		TimeEvent timer2 = new TimeEvent(100.0);  // drive forward timer event
+		TimeEvent timer2 = new TimeEvent(25.0);  // drive forward timer event
 		
 		// connect each event with a state to move to
 		timer1.associateNextState(driveForward);

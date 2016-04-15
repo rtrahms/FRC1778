@@ -1,11 +1,12 @@
 package org.usfirst.frc.team1778.robot;
 
+import NetworkComm.GRIPDataComm;
+import NetworkComm.InputOutputComm;
 import Systems.AutoShooterAssembly;
 import Systems.CANDriveAssembly;
 import Systems.CatapultAssembly;
 import Systems.FrontArmAssembly;
 import Systems.GyroSensor;
-import Systems.NetworkCommAssembly;
 import Systems.RioDuinoAssembly;
 import Systems.UltrasonicSensor;
 import canStateMachine.AutoStateMachine;
@@ -44,15 +45,18 @@ public class Robot extends IterativeRobot {
 		GyroSensor.initialize();
 		UltrasonicSensor.initialize();
 		
-		NetworkCommAssembly.initialize();
-		AutoShooterAssembly.initialize();
-				
+		GRIPDataComm.initialize();
+		InputOutputComm.initialize();
+		
+		AutoShooterAssembly.initialize();	
 		CANDriveAssembly.initialize();
 		FrontArmAssembly.initialize();
 		CatapultAssembly.initialize();
 
 		RioDuinoAssembly.initialize();
 		RioDuinoAssembly.SendString("robotInit");
+		
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainStatus", "Robot initialization complete!");
 	}
 
 	// called one time on entry into autonomous
@@ -62,7 +66,7 @@ public class Robot extends IterativeRobot {
 		GyroSensor.reset();
 		UltrasonicSensor.reset();
 		
-		NetworkCommAssembly.autoInit();
+		GRIPDataComm.autoInit();
 		AutoShooterAssembly.autoInit();
 		
 		RioDuinoAssembly.autonomousInit();
@@ -71,6 +75,8 @@ public class Robot extends IterativeRobot {
 		
 		// start the autonomous state machine
 		autoSM.start();
+		
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainStatus", "Autonomous initialization complete!");
 	}
 
 	/**
@@ -79,7 +85,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 				
 		// update targeting data from network tables
-		NetworkCommAssembly.updateValues();
+		GRIPDataComm.updateValues();
 		
 		// state machine runs things in autonomous
 		autoSM.process();
@@ -99,6 +105,7 @@ public class Robot extends IterativeRobot {
 		FrontArmAssembly.teleopInit();
 		CatapultAssembly.teleopInit();
 		
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainStatus", "Teleop initialization complete!");
 	}
 
 	/**
@@ -111,12 +118,28 @@ public class Robot extends IterativeRobot {
     	
     	CANDriveAssembly.teleopPeriodic();
     	FrontArmAssembly.teleopPeriodic();
-    	CatapultAssembly.teleopPeriodic(); 		
+    	CatapultAssembly.teleopPeriodic(); 	
+    	
+		
+		// send output data for test & debug
+    	/*
+    	double gyroAngle = GyroSensor.getAngle();
+		String gyroAngleStr = String.format("%.2f", gyroAngle);
+		String myString = new String("gyroAngle = " + gyroAngleStr);
+		System.out.println(myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Teleop/gyro_test", myString);
+		*/
+
  	}
 	
 	public void disabledInit() {
 		
+		
 		RioDuinoAssembly.disabledInit();
+		
+		InputOutputComm.initialize();
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainStatus", "Robot disabled!");
+		
 	}
 	
 	public void testInit() {
