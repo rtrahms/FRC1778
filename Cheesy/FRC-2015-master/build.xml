@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="FRC Deployment" default="deploy">
+
+  <!--
+  The following properties can be defined to override system level
+  settings. These should not be touched unless you know what you're
+  doing. The primary use is to override the wpilib version when
+  working with older robots that can't compile with the latest
+  libraries.
+  -->
+
+  <!-- By default the system version of WPI is used -->
+  <!-- <property name="version" value=""/> -->
+
+  <!-- By default the system team number is used -->
+  <!-- <property name="team-number" value=""/> -->
+
+  <!-- By default the target is set to 10.TE.AM.2 -->
+  <!-- <property name="target" value=""/> -->
+
+  <!-- Any other property in build.properties can also be overridden. -->
+  
+  <property file="${user.home}/wpilib/wpilib.properties"/>
+  <property file="build.properties"/>
+  <property file="${user.home}/wpilib/java/${version}/ant/build.properties"/>
+
+  <import file="${wpilib.ant.dir}/build.xml"/>
+
+  <target name="jar" depends="compile">
+    <echo>[athena-jar] Making jar ${dist.jar}.</echo>
+    <mkdir dir="${dist.dir}" />
+    <mkdir dir="${build.jars}" />
+
+    <echo>[athena-jar] Copying jars from ${classpath} to ${build.jars}.</echo>
+    <copy todir="${build.jars}" flatten="true">
+      <path>
+      <pathelement path="${classpath}"/>
+      </path>
+    </copy>
+
+    <jar destfile="${dist.jar}" update="false">
+      <manifest>
+      <attribute name="Main-Class" value="edu.wpi.first.wpilibj.RobotBase"/>
+      <attribute name="Robot-Class" value="${robot.class}"/>
+      <attribute name="Class-Path" value="."/>
+      </manifest>
+
+      <fileset dir="${build.dir}" includes="**/*.class"/>
+      <fileset dir="${resources.dir}"/>
+    <zipgroupfileset dir="${build.jars}">
+      <include name="**/*.jar" />
+    </zipgroupfileset>
+    </jar>
+  </target>
+
+</project> 
