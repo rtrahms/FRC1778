@@ -6,28 +6,21 @@ package org.usfirst.frc.team1778.robot;
 */
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.Button;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;import standard.LogitechF310;
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
+import Utility.LogitechF310;
+
 
 public class Controller {
 
-    public static final int PORT_DRIVER_CONTROLLER = 0;
-    public static final int PORT_COPILOT_CONTROLLER = 1;
-
-	public Joystick controller;
-	public Button QUICKTURN_Button;
-
-	// Ports
-	ControllerDriver = new Joystick(ControlMap.PORT_STICK_RIGHT);
-	ControllerCoPilot = new Joystick(ControlMap.PORT_CONTROLLER);
-
-
-	public class ControllerDriver {
-	public static final int QUICKTURN_Button = LogitechF310.RB;
-	public static final int THROTTLE = LogitechF310.Axis.LEFT_Y;
-	public static final int STEERING = LogitechF310.Axis.RIGHT_X;
+    public int PORT_DRIVER_CONTROLLER=0;
+    public int PORT_COPILOT_CONTROLLER=1;
+	public Joystick Driver;
+	public Joystick CoPilot;
+	public Button quickTurn;
+	
+    public Controller (){
+    	Driver = new Joystick(PORT_DRIVER_CONTROLLER);
+    	CoPilot = new Joystick(PORT_COPILOT_CONTROLLER);
+    	quickTurn = new JoystickButton(Driver, LogitechF310.RB);
     }
-
-	public class ControllerCopilot{
-
-	}
 }

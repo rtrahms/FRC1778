@@ -1,10 +1,10 @@
 package Utility;
 
 public class LogitechF310 {
-	public static final int A = 1;
-	public static final int B = 2;
-	public static final int X = 3;
-	public static final int Y = 4;
+	public static final int A = 1;//Bottom Button
+	public static final int B = 2;//Right Button
+	public static final int X = 3;//Left button
+	public static final int Y = 4;//Top Button
 	public static final int LB = 5;
 	public static final int RB = 6;
 	public static final int MODE = 7;
@@ -12,7 +12,7 @@ public class LogitechF310 {
 	public static final int LEFT_PRESS = 9;
 	public static final int RIGHT_PRESS = 10;
 
-	public class Axes {
+	public class Axis {
 		public static final int LEFT_X = 0;
 		public static final int LEFT_Y = 1;
 		public static final int LT = 2;
