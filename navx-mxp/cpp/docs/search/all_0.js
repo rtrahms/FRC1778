@@ -1,0 +1,4 @@
+var searchData=
+[
+  ['ahrs',['AHRS',['../class_a_h_r_s.html',1,'AHRS'],['../class_a_h_r_s.html#a6f9d7fa297c0e3dce0bad3272d9054ed',1,'AHRS::AHRS(SPI::Port spi_port_id)'],['../class_a_h_r_s.html#a45e3ae030f3a2fddf4972972c97f8af2',1,'AHRS::AHRS(I2C::Port i2c_port_id)'],['../class_a_h_r_s.html#ae76d59aa62536c99473f80c051b2cd44',1,'AHRS::AHRS(SerialPort::Port serial_port_id)'],['../class_a_h_r_s.html#adcb06a062468cb4b0b2a884b69aec178',1,'AHRS::AHRS(SPI::Port spi_port_id, uint8_t update_rate_hz)'],['../class_a_h_r_s.html#a4cbb115f3db9bb365d5a9a600ea5b148',1,'AHRS::AHRS(SPI::Port spi_port_id, uint32_t spi_bitrate, uint8_t update_rate_hz)'],['../class_a_h_r_s.html#a7025b7ac3a4e0cc72542bdae1dd365ce',1,'AHRS::AHRS(I2C::Port i2c_port_id, uint8_t update_rate_hz)'],['../class_a_h_r_s.html#ace80b71e05debd4d22b81add11560471',1,'AHRS::AHRS(SerialPort::Port serial_port_id, AHRS::SerialDataType data_type, uint8_t update_rate_hz)']]]
+];
