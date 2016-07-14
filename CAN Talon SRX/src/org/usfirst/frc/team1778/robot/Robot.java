@@ -12,9 +12,10 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public class Robot extends SampleRobot {
 
-	Driver driver;
+  CANTalon motor;
+
   public Robot() {
-	  driver = new Driver();
+      motor = new CANTalon(1); // Initialize the CanTalonSRX on device 1.
   }
 
   /**
@@ -22,7 +23,15 @@ public class Robot extends SampleRobot {
     */
   public void operatorControl() {
     while (isOperatorControl() && isEnabled()) {
-    	driver.driveNow();
+      // Set the motor's output to half power.
+      // This takes a number from -1 (100% speed in reverse) to +1 (100% speed
+      // going forward)
+      motor.set(0.5);
+
+      Timer.delay(0.01);  // Note that the CANTalon only receives updates every
+                          // 10ms, so updating more quickly would not gain you
+                          // anything.
     }
+    motor.disable();
   }
 }
