@@ -1,4 +1,5 @@
-package canStateMachine;
+/*
+ package canStateMachine;
 
 import java.util.ArrayList;
 
@@ -610,9 +611,9 @@ public class AutoStateMachine {
 		autoEvents.add(index, myEvents);
 
 	}
-
+*/
 //******************************* UNUSED (OLD BUT USEFUL) STATE MACHINES **********************//
-
+/*
 	// **** ARM MOVE DOWN THEN UP STATE MACHINE ***** 
 	// ** Test front arm movement in auto - no driving
 	// 1) be idle for a number of sec
@@ -1055,3 +1056,4 @@ public class AutoStateMachine {
 
 
 }
+*/

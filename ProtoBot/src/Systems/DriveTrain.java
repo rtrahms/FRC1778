@@ -3,14 +3,16 @@ package Systems;
 import edu.wpi.first.wpilibj.CANTalon;
 
 public class DriveTrain {
-	CANTalon motorL,motorR;
+	static CANTalon motorL,motorR;
 	
+	// takes motor IDs and sets them to the correct motor variable
 	public DriveTrain(int leftMotorID,int rightMotorID){
 		motorL = new CANTalon(leftMotorID);
 		motorR = new CANTalon(rightMotorID);
 	}
 	
-	public void ChangeSpeed(float powerL,float powerR){
+	// call to change the power given to the motor
+	public static void ChangeSpeed(double powerL,double powerR){
 		motorL.set(powerL);
 		motorR.set(powerR);
 	}

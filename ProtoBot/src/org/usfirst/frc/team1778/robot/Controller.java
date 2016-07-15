@@ -18,6 +18,7 @@ public class Controller {
 	public Joystick CoPilot;
 	public Button quickTurn;
 	
+	
     public Controller (){
     	Driver = new Joystick(PORT_DRIVER_CONTROLLER);
     	CoPilot = new Joystick(PORT_COPILOT_CONTROLLER);

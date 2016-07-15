@@ -5,6 +5,7 @@ import Systems.DriveTrain;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import Utility.LogitechF310;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -13,12 +14,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * creating this project, you must also update the manifest file in the resource
  * directory.
  */
+
 public class Robot extends IterativeRobot {
     final String defaultAuto = "Default";
     final String customAuto = "My Auto";
     String autoSelected;
     SendableChooser chooser;
-    UserInput UserInput;
+    Controller controller = new Controller();
+    UserInput userInput = new UserInput();
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -29,7 +32,7 @@ public class Robot extends IterativeRobot {
         chooser.addDefault("Default Auto", defaultAuto);
         chooser.addObject("My Auto", customAuto);
         SmartDashboard.putData("Auto choices", chooser);
-        DriveTrain DriveTrain = new DriveTrain(0,1);
+        DriveTrain DriveTrain = new DriveTrain(8,3);
     }
     
 	/**
@@ -65,7 +68,8 @@ public class Robot extends IterativeRobot {
     }
     
     public void teleopPeriodic() {
-        
+    	DriveControl drive = new DriveControl();
+    	drive.calculateDrive(userInput.getLeftStickVert(),userInput.getRightStickHoriz(),userInput.getLeftButton(),false);
     }
     
     public void testPeriodic() {
