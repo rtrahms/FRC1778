@@ -21,7 +21,7 @@ public class Controller {
     public Controller (){
     	Driver = new Joystick(PORT_DRIVER_CONTROLLER);
     	CoPilot = new Joystick(PORT_COPILOT_CONTROLLER);
-    	quickTurn = new JoystickButton(Driver, LogitechF310.RB);
+    	quickTurn = new JoystickButton(Driver, LogitechF310.LB);
     }
     
     public double Driver_Throttle (){
