@@ -12,16 +12,27 @@ import Utility.LogitechF310;
 
 public class Controller {
 
-    public int PORT_DRIVER_CONTROLLER=0;
-    public int PORT_COPILOT_CONTROLLER=1;
-	public Joystick Driver;
-	public Joystick CoPilot;
-	public Button quickTurn;
-	
+    public static final int PORT_DRIVER_CONTROLLER=0;
+    public static final int PORT_COPILOT_CONTROLLER=1;
+	public static Joystick Driver;
+	public static Joystick CoPilot;
+	public static Button quickTurn;
 	
     public Controller (){
     	Driver = new Joystick(PORT_DRIVER_CONTROLLER);
     	CoPilot = new Joystick(PORT_COPILOT_CONTROLLER);
     	quickTurn = new JoystickButton(Driver, LogitechF310.RB);
+    }
+    
+    public double Driver_Throttle (){
+    	return Driver.getRawAxis(LogitechF310.Axis.RIGHT_X);
+    }
+
+    public double Driver_Steering (){
+    	return Driver.getRawAxis(LogitechF310.Axis.LEFT_X);
+    }
+    
+    public boolean Driver_isQuickTurn(){
+    	return Driver.getRawButton(LogitechF310.RB);
     }
 }

@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import Utility.LogitechF310;
+import org.usfirst.frc.team1778.robot.Controller;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -16,6 +17,7 @@ import Utility.LogitechF310;
  */
 
 public class Robot extends IterativeRobot {
+	protected Controller Controller;
     final String defaultAuto = "Default";
     final String customAuto = "My Auto";
     String autoSelected;
@@ -28,6 +30,11 @@ public class Robot extends IterativeRobot {
      * used for any initialization code.
      */
     public void robotInit() {
+    	
+    	//This is the driver control class.  All buttons an joysticks are here.
+    	Controller = new Controller();
+    	
+    	//The Autonomous mode chooser in smart dashboard
         chooser = new SendableChooser();
         chooser.addDefault("Default Auto", defaultAuto);
         chooser.addObject("My Auto", customAuto);
