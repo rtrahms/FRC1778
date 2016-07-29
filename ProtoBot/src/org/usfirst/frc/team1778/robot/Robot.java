@@ -5,7 +5,6 @@ import Systems.DriveTrain;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import Utility.LogitechF310;
 import org.usfirst.frc.team1778.robot.Controller;
 
 /**
@@ -23,7 +22,6 @@ public class Robot extends IterativeRobot {
     String autoSelected;
     SendableChooser chooser;
     Controller controller = new Controller();
-    UserInput userInput = new UserInput();
 	
     /**
      * This function is run when the robot is first started up and should be
@@ -76,11 +74,14 @@ public class Robot extends IterativeRobot {
     
     public void teleopPeriodic() {
     	DriveControl drive = new DriveControl();
-    	drive.calculateDrive(userInput.getLeftStickVert(),userInput.getRightStickHoriz(),userInput.getLeftButton(),false);
+       	
+    	// drive command for all controllers
+    	 drive.calculateDrive(org.usfirst.frc.team1778.robot.Controller.Driver_Throttle(), org.usfirst.frc.team1778.robot.Controller.Driver_Steering(),
+    	 		org.usfirst.frc.team1778.robot.Controller.Driver_isQuickTurn(), false);
     }
     
     public void testPeriodic() {
-    
+    	
     }
     
 }

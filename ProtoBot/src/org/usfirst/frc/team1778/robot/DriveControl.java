@@ -1,4 +1,5 @@
 package org.usfirst.frc.team1778.robot;
+import Utility.SimpleUtil;
 
 public class DriveControl {
 	
@@ -7,7 +8,7 @@ public class DriveControl {
     private double wheelDeadband = 0.02;
 	
 	public DriveControl(){
-	
+		
 	}
 	
 	public void calculateDrive(double throttle, double wheel, boolean isQuickTurn,boolean isHighGear){
@@ -46,6 +47,8 @@ public class DriveControl {
         
         double negInertiaAccumulator = 0.0;
         double negInertiaScalar;
+        
+        
         if (isHighGear) {
             negInertiaScalar = 4.0;
             sensitivity =  .5; // what is the sensitivity
@@ -61,7 +64,7 @@ public class DriveControl {
             }
             sensitivity = .85; // Constants.sensitivityLow.getDouble();
         }
-
+	
         double negInertiaPower = negInertia * negInertiaScalar;
         negInertiaAccumulator += negInertiaPower;
 
@@ -82,7 +85,7 @@ public class DriveControl {
             if (Math.abs(linearPower) < 0.2) {
                 double alpha = 0.1;
                 quickStopAccumulator = (1 - alpha) * quickStopAccumulator
-                        + alpha * 5 * -1 * wheel; //Util.limit(wheel, 1.0)
+                        + alpha * 5 * -1 * SimpleUtil.limit(true, wheel, 1);
             }
             overPower = 1.0;
             if (isHighGear) {
