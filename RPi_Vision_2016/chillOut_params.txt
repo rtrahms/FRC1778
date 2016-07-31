@@ -1,15 +1,17 @@
+roborio_ipaddr = 10.17.78.23
 frameWidth = 320
 frameHeight = 240
-minArea = 50
+minArea = 300
 maxArea = 1000000
 minCircularity = 0.1
 minConvexity = 0.87
 minInertiaRatio = 0.01
+minRadius = 50
 minColor_h = 30
-minColor_s = 50
-minColor_v = 50
-maxColor_h = 90
-maxColor_s = 255
+minColor_s = 0
+minColor_v = 0
+maxColor_h = 100
+maxColor_s = 20
 maxColor_v = 255
 
 # reference - red
@@ -26,6 +28,14 @@ minColor_s = 50
 minColor_v = 50
 maxColor_h = 90
 maxColor_s = 255
+maxColor_v = 255
+
+# reference - retroreflective green tape
+minColor_h = 30
+minColor_s = 0
+minColor_v = 0
+maxColor_h = 90
+maxColor_s = 20
 maxColor_v = 255
 
 # reference - blue
