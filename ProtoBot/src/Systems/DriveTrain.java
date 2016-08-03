@@ -2,7 +2,7 @@ package Systems;
 
 import edu.wpi.first.wpilibj.CANTalon;
 
-public class DriveTrain {
+public class DriveTrain implements Systems  {
 	static CANTalon motorL,motorR;
 	
 	// takes motor IDs and sets them to the correct motor variable

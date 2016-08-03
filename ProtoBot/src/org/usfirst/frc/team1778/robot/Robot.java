@@ -18,6 +18,9 @@ import org.usfirst.frc.team1778.robot.Controller;
 
 public class Robot extends IterativeRobot {
 	protected Controller Controller;
+
+	//Autonoumous Mode Choices
+	final String doNothing = "Do Nothing";
     final String defaultAuto = "Default";
     final String customAuto = "My Auto";
     String autoSelected;
@@ -32,34 +35,41 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
     	
     	//This is the driver control class.  All buttons an joysticks are here.
-    	Controller = new Controller();
+    	Controller Controller = new Controller();
     	
-    	//The Autonomous mode chooser in smart dashboard
+        DriveTrain DriveTrain = new DriveTrain(8,3);
+
+    	
+    	//The Autonomous mode chooser in smart dashboard. It will return a 
         chooser = new SendableChooser();
-        chooser.addDefault("Default Auto", defaultAuto);
+        chooser.addDefault("Do Nothing", doNothing);
         chooser.addObject("My Auto", customAuto);
         SmartDashboard.putData("Auto choices", chooser);
-        DriveTrain DriveTrain = new DriveTrain(8,3);
+        
+        
     }
     
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select between different autonomous modes
-	 * using the dashboard. The sendable chooser code works with the Java SmartDashboard. If you prefer the LabVIEW
-	 * Dashboard, remove all of the chooser code and uncomment the getString line to get the auto name from the text box
-	 * below the Gyro
+	 * using the dashboard. The sendable chooser code works with the Java SmartDashboard. 
 	 *
 	 * You can add additional auto modes by adding additional comparisons to the switch structure below with additional strings.
 	 * If using the SendableChooser make sure to add them to the chooser code above as well.
 	 */
     public void autonomousInit() {
-    	autoSelected = (String) chooser.getSelected();
-//		autoSelected = SmartDashboard.getString("Auto Selector", defaultAuto);
+		//TODO: The Encoder need to be zeroed her.
+    	//drive.zeroEncoders();
+
+    	autoSelected = ((Command) chooser.getSelected());
+		if (autoSelected != null) {
+			autoSelected.start();
+		}
 		System.out.println("Auto selected: " + autoSelected);
     }
 
     public void autonomousPeriodic() {
     	switch(autoSelected) {
-    	case customAuto:
+    	case "doNothing":
         //Put custom auto code here   
             break;
     	case defaultAuto:

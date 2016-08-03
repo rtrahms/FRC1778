@@ -1,6 +1,7 @@
 package Systems;
 
 import NetworkComm.InputOutputComm;
+import Sensors.GyroSensor;
 import edu.wpi.first.wpilibj.CANTalon;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.RobotDrive;

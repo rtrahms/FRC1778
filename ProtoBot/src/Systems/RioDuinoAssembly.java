@@ -3,7 +3,7 @@ package Systems;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
 
-public class RioDuinoAssembly {
+public class RioDuinoAssembly implements System {
 	
 	public static enum Color { Black, Red, Blue, Yellow, Orange, Green, Purple, Grey};
 	
@@ -16,7 +16,8 @@ public class RioDuinoAssembly {
 
 	private static I2C i2cBus;
 	
-	public static void initialize() {
+	@Override
+	public void initialize() {
 		if (!initialized)
 		{
 			i2cBus = new I2C(I2C.Port.kMXP, 4);	
@@ -24,6 +25,11 @@ public class RioDuinoAssembly {
 			
 			setTeamColor();
 		}
+	}
+	
+	@Override
+	public boolean isInitialized(){
+		return initialized;
 	}
 	
 	public static void setTeamColor(Color col) {
@@ -43,28 +49,32 @@ public class RioDuinoAssembly {
 		 sendTeamColor(teamColor);
 	}
 		
-	public static void autonomousInit() {
+	@Override
+	public void autonomousInit() {
 	
 		setTeamColor();
 		SendString("colorGreen");
 		SendString("autoInit");
 	}
 	
-	public static void teleopInit() {
+	@Override
+	public void teleopInit() {
 		
 		setTeamColor();
 		SendString("colorGreen");
 		SendString("teleopInit");
 	}
 	
-	public static void testInit() {
+	@Override
+	public void testInit() {
 
 		setTeamColor();		
 		SendString("colorOrange");		
 		SendString("testInit");
 	}
 	
-	public static void disabledInit() {
+	@Override
+	public void disabledInit() {
 		if (!initialized)
 			initialize();
 		
@@ -133,5 +143,17 @@ public class RioDuinoAssembly {
 		}
 		i2cBus.transaction(WriteData, WriteData.length, null, 0);
 
+	}
+
+	@Override
+	public void teleopPeriodic() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void testPeriodic() {
+		// TODO Auto-generated method stub
+		
 	}
 }

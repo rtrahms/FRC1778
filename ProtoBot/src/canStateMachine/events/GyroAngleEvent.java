@@ -1,8 +1,14 @@
-package canStateMachine;
+package canStateMachine.events;
 
 import Systems.GyroSensor;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.Utility;
+
+/**
+ * GyroAngleEvents (degrees, polarity)
+ * @author ScottD
+ *
+ */
 
 // event triggered when gyro gets to a certain predetermined angle
 public class GyroAngleEvent extends Event {
@@ -23,8 +29,9 @@ public class GyroAngleEvent extends Event {
 	}
 	
 	// overloaded initialize method
-	public void initialize()
+	public void initialize (String args)
 	{
+		ParseMyArguments(args);
 		//System.out.println("GyroAngleEvent initialized!");
 		GyroSensor.reset();
 		super.initialize();
@@ -59,6 +66,21 @@ public class GyroAngleEvent extends Event {
 		}
 		
 		return false;
+	}
+	
+	public void ParseMyArguments(String argSection)
+	{
+		String arg;
+		int argEndPos, argStartPos;
+		
+		argEndPos = argSection.indexOf(",")+1;		
+		arg  = argSection.substring(0, argEndPos).trim();			
+		angleToTurn = Double.parseDouble(arg);
+		
+		argStartPos = argEndPos + 1 ;
+		arg  = argSection.substring(argStartPos).trim();	
+		accuracyDeg = Double.parseDouble(arg);
+	
 	}
 
 }

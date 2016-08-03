@@ -1,17 +1,20 @@
-/*
- package canStateMachine;
+package canStateMachine;
 
 import java.util.ArrayList;
 
 import NetworkComm.InputOutputComm;
+import canStateMachine.autoStates.AutoState;
+import canStateMachine.events.*;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class AutoStateMachine {
 		
+/*
+ * TODO: Need to use Smart Dashboard to select automode
 	private DigitalInput autoNetworkSwitch1;
 	private DigitalInput autoNetworkSwitch2;
 	private DigitalInput autoNetworkSwitch3;
-
+*/
 	private boolean autoNetworkEnable = false;
 	
 	private ArrayList<ArrayList<AutoState>> autoStates;
@@ -21,19 +24,24 @@ public class AutoStateMachine {
 	
 	public AutoStateMachine()
 	{
+/*
+* TODO: Need to use Smart Dashboard to select automode
 		//  Switch arrangement: <0> <1> <2> - from the rear of the robot
 		// ON = toward bumper  --  OFF = toward robot center 
 		autoNetworkSwitch1 = new DigitalInput(0);
 		autoNetworkSwitch2 = new DigitalInput(1);
 		autoNetworkSwitch3 = new DigitalInput(2);
+*/
 
 		// create list of lists for states and events
 		autoStates = new ArrayList<ArrayList<AutoState>>();
 		autoEvents = new ArrayList<ArrayList<Event>>();
 			
-		createStateNetworks();
+		//createStateNetworks();
 	}
 	
+	/*
+	* TODO: Need to use Smart Dashboard to select automode
 	private void createStateNetworks()
 	{	
 		// Eight possible state machine slots (three select switches)
@@ -74,7 +82,8 @@ public class AutoStateMachine {
 		System.out.println(myString);
 		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_setup", myString);
 	}
-	
+*/	
+
 	public AutoState getState() {
 		return currentState;
 	}
@@ -83,7 +92,7 @@ public class AutoStateMachine {
 	{
 		
 		// determine if we are running auto or not
-		int networkIndex = getNetworkIndex();
+		//int networkIndex = getNetworkIndex();
 		
 		String myString = new String("autoNetworkEnable = " + autoNetworkEnable + ", networkIndex = " + networkIndex);
 		System.out.println(myString);
@@ -137,60 +146,6 @@ public class AutoStateMachine {
 		}
 	}
 	
-	// computes binary value from digital inputs.  
-	// If all switches are false (zero), auto is disabled
-	private int getNetworkIndex()
-	{
-		int value = 0;
-		
-		// first switch is binary 1
-		if (autoNetworkSwitch1.get())
-			value += 1;
-		
-		// second switch is binary 2
-		if (autoNetworkSwitch2.get())
-			value += 2;
-		
-		// third switch is binary 4
-		if (autoNetworkSwitch3.get())
-			value += 4;
-		
-		//value = 1;  // testing only
-
-		if (value == 0)
-		{
-			// all switches off means no auto modes selected - auto state machine operation disabled
-			autoNetworkEnable = false;
-		}
-		else
-		{
-			// Non-zero network - auto mode selected!
-			autoNetworkEnable = true;
-		}
-		
-		// return index value for network selected
-		return value;
-		
-	}
-	
-	// **** DO NOTHING STATE MACHINE ***** 
-	// First (zero index) state machine - does nothing
-	private void createDoNothingSM(int index) {
-		
-		IdleState deadEnd = new IdleState("<Dead End State>");
-		TimeEvent timer1 = new TimeEvent(0.5);  // 0.5s timer event
-
-		ArrayList<AutoState> myStates = new ArrayList<AutoState>();
-		ArrayList<Event> myEvents = new ArrayList<Event>();
-
-		myStates.add(deadEnd);
-		myEvents.add(timer1);
-		
-		// insert into the network arrays
-		autoStates.add(index, myStates);
-		autoEvents.add(index, myEvents);
-	}
-
 	// **** [ARM MOVE - DRIVE]  STATE MACHINE ***** 
 	// ** Good for ramparts, rough terrain, rock wall, portcullis
 	// 1) be idle for a number of sec

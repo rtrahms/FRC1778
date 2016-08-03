@@ -1,4 +1,4 @@
-package canStateMachine;
+package canStateMachine.states;
 
 import Systems.CANDriveAssembly;
 
@@ -67,5 +67,11 @@ public class DriveForwardState extends AutoState {
 		
 		// cleanup base class
 		super.exit();
+	}
+
+	@Override
+	public void initialize(String args) {
+		// TODO Auto-generated method stub
+		
 	}
 }

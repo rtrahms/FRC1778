@@ -1,0 +1,17 @@
+/ Drive Straight for 4 seconds
+/ This is an autonomous script for team 1778
+/ Prototype Bot - July 2016
+/ by: Scott Davidson
+/
+/ The title of the file is the name of the script
+/ Each line is an Action.  An action is made up of a State and Event.
+/ A State puts the robot in motion.
+/ An Event monitors and terminates that state. 
+/ Each Action can have a State and Event separated by a "|"
+/ Multiple Actions can be placed on the same line seperated by a ";"
+/ Each line makes up a Phase that is be executed in order.  
+/ The next line only exectuted after the previous line is finished.
+
+IdleState()|TimedEvent(0.5);
+DriveForward(50)|TimedEvent(4.0);
+IdleState();
