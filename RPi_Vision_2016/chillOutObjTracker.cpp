@@ -14,9 +14,6 @@ using namespace nt;
 
 int main()
 {
-	// OpenCV blob detector param obj
-    	SimpleBlobDetector::Params params;
-
 	FILE *parameter_file = NULL;
 
 	char roborio_ipaddr[32];
@@ -24,26 +21,6 @@ int main()
 	/********* OpenCV parameter section *******/
 	int frameWidth =  640;
 	int frameHeight = 480;
-
-	params.filterByColor = true;
-	params.blobColor = 255;
-
-	// Filter by Area.
-	params.filterByArea = true;
-	params.minArea = 1000;
-	params.maxArea = 1000000;
-	
-	// Filter by Circularity
-	params.filterByCircularity = false;
-	params.minCircularity = 0.1;
-	
-	// Filter by Convexity
-	params.filterByConvexity = false;
-	params.minConvexity = 0.87;
-	
-	// Filter by Inertia
-	params.filterByInertia = false;
-	params.minInertiaRatio = 0.01;
 
 	// minimum target radius
 	int minRadius = 10;
@@ -69,11 +46,6 @@ int main()
 		fscanf(parameter_file,"roborio_ipaddr = %s\n",roborio_ipaddr);
 		fscanf(parameter_file,"frameWidth = %d\n",&frameWidth);
 		fscanf(parameter_file,"frameHeight = %d\n",&frameHeight);
-		fscanf(parameter_file,"minArea = %f\n",&(params.minArea));
-		fscanf(parameter_file,"maxArea = %f\n",&(params.maxArea));
-		fscanf(parameter_file,"minCircularity = %f\n",&(params.minCircularity));
-		fscanf(parameter_file,"minConvexity = %f\n",&(params.minConvexity));
-		fscanf(parameter_file,"minInertiaRatio = %f\n",&(params.minInertiaRatio));
 		fscanf(parameter_file,"minRadius = %d\n",&minRadius);
 		fscanf(parameter_file,"minColor_h = %d\n",&minColor_h);
 		fscanf(parameter_file,"minColor_s = %d\n",&minColor_s);
@@ -87,11 +59,7 @@ int main()
 	printf("roborio_ipaddr = %s\n",roborio_ipaddr);
 	printf("frameWidth = %d\n",frameWidth);
 	printf("frameHeight = %d\n",frameHeight);
-	printf("minArea = %f\n",params.minArea);
-	printf("maxArea = %f\n",params.maxArea);
-	printf("minCircularity = %f\n",params.minCircularity);
-	printf("minConvexity = %f\n",params.minConvexity);
-	printf("minInertiaRatio = %f\n",params.minInertiaRatio);
+	printf("minRadius = %d\n",minRadius);
 	printf("minColor_h = %d\n",minColor_h);
 	printf("minColor_s = %d\n",minColor_s);
 	printf("minColor_v = %d\n",minColor_v);
@@ -110,7 +78,7 @@ int main()
 	
 
     VideoCapture cap(0);     // get 'any' cam
-    //VideoCapture cap(1);       // get second camera
+    //VideoCapture cap("/dev/video1");       // get second camera
 
     // initialize frame size
     if (cap.isOpened()) {
@@ -207,10 +175,15 @@ int main()
 		table->PutNumber("targets",(float)1.0f);
 		table->PutNumber("targetX",center[targetIndex].x);
 		table->PutNumber("targetY",center[targetIndex].y);
+		table->PutNumber("targetRadius",radius[targetIndex]);
+		table->PutNumber("frameWidth",(float)frameWidth);
+		table->PutNumber("frameHeight",(float)frameHeight);
 
 		// draw the target on contour image
 		Scalar colorWhite = Scalar(255, 255, 255);  // white
-		circle(contourImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		circle(inputImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		//circle(binaryImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		//circle(contourImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
 
 		printf("Target radius %3.0f detected at (%3.0f,%3.0f)\n",
 			radius[targetIndex], center[targetIndex].x,center[targetIndex].y);
@@ -224,11 +197,11 @@ int main()
 	
 
 	/*** Image output code - debug only ****/
-	//imshow("original",inputImg);
+	imshow("original",inputImg);
 	//imshow("threshold binary",binaryImg);
 	//imshow("erosionImg",erosionImg);
 	//imshow("dilationImg",dilationImg);
-	imshow("contours",contourImg);
+	//imshow("contours",contourImg);
 	//imshow("keys",frame_with_keys);
 
         int k = waitKey(1);
