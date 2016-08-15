@@ -158,6 +158,7 @@ int main()
 	createTrackbar("Radius Min", "Thresholds", &radius_min_slider, 255, on_min_radius);
 	createTrackbar("Radius Max", "Thresholds", &radius_max_slider, 255, on_max_radius);
 	createTrackbar("Dilation", "Thresholds", &dilation_slider, 50, on_dilation);
+<<<<<<< HEAD
 
 	// calculate image center
 	imageCenterX = frameWidth/2;
@@ -170,6 +171,8 @@ int main()
 		overlayImg = imread("/home/pi/chillout/Vision2017_Target_Overlay1_160x120.png",CV_LOAD_IMAGE_COLOR);
 	else
 		overlayImg = Mat::zeros(Size(frameWidth, frameHeight),CV_8UC3);
+=======
+>>>>>>> origin/master
 
 	// initialize network table for comm with the robot
 	static std::shared_ptr<NetworkTable> table;
@@ -286,8 +289,8 @@ int main()
 
 		// draw the target on one of the images
 		Scalar colorWhite = Scalar(255, 255, 255);  // white
-		circle(inputImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
-		//circle(binaryImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		//circle(inputImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		circle(binaryImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
 		//circle(contourImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
 
 		printf("Target radius %3.0f detected at (%3.0f,%3.0f)\n",
@@ -308,6 +311,7 @@ int main()
 	
 	/*** Image output code - debug only ****/
 	//imshow("original",inputImg);
+<<<<<<< HEAD
 	//imshow("overlay",overlayImg);
 	imshow("threshold binary",binaryImg);
 	imshow("contours",contourImg);
@@ -318,6 +322,12 @@ int main()
 	if (outStream.isOpened())
 		outStream.write(outputImg);
 	
+=======
+	imshow("threshold binary",binaryImg);
+	//imshow("erosionImg",erosionImg);
+	//imshow("dilationImg",dilationImg);
+	imshow("contours",contourImg);
+>>>>>>> origin/master
 
         int k = waitKey(1);
         if ( k==27 )
