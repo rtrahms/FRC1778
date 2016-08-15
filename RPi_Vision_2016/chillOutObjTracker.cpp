@@ -158,7 +158,6 @@ int main()
 	createTrackbar("Radius Min", "Thresholds", &radius_min_slider, 255, on_min_radius);
 	createTrackbar("Radius Max", "Thresholds", &radius_max_slider, 255, on_max_radius);
 	createTrackbar("Dilation", "Thresholds", &dilation_slider, 50, on_dilation);
-<<<<<<< HEAD
 
 	// calculate image center
 	imageCenterX = frameWidth/2;
@@ -171,8 +170,6 @@ int main()
 		overlayImg = imread("/home/pi/chillout/Vision2017_Target_Overlay1_160x120.png",CV_LOAD_IMAGE_COLOR);
 	else
 		overlayImg = Mat::zeros(Size(frameWidth, frameHeight),CV_8UC3);
-=======
->>>>>>> origin/master
 
 	// initialize network table for comm with the robot
 	static std::shared_ptr<NetworkTable> table;
@@ -205,7 +202,7 @@ int main()
             break;
 
 	// color threshold input image into binary image
-        cvtColor( inputImg, hsvImg, CV_BGR2HSV );
+    cvtColor( inputImg, hsvImg, CV_BGR2HSV );
 	inRange(hsvImg, Scalar(minColor_h, minColor_s, minColor_v), Scalar(maxColor_h, maxColor_s, maxColor_v), binaryImg);		/*green*/
 
 	Mat binary2 = binaryImg.clone();
@@ -311,7 +308,6 @@ int main()
 	
 	/*** Image output code - debug only ****/
 	//imshow("original",inputImg);
-<<<<<<< HEAD
 	//imshow("overlay",overlayImg);
 	imshow("threshold binary",binaryImg);
 	imshow("contours",contourImg);
@@ -320,14 +316,7 @@ int main()
 	// write out to file (for webserver)
 	VideoWriter outStream(outFile,CV_FOURCC('M','J','P','G'), 2, Size(frameWidth,frameHeight), true);
 	if (outStream.isOpened())
-		outStream.write(outputImg);
-	
-=======
-	imshow("threshold binary",binaryImg);
-	//imshow("erosionImg",erosionImg);
-	//imshow("dilationImg",dilationImg);
-	imshow("contours",contourImg);
->>>>>>> origin/master
+		outStream.write(outputImg);	
 
         int k = waitKey(1);
         if ( k==27 )
