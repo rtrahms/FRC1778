@@ -1,58 +1,13 @@
 roborio_ipaddr = 10.17.78.23
-frameWidth = 320
-frameHeight = 240
+frameWidth = 160
+frameHeight = 120
 minRadius = 50
-minColor_h = 30
+maxRadius = 150
+minColor_h = 26
+maxColor_h = 73
 minColor_s = 0
-minColor_v = 0
-maxColor_h = 100
-maxColor_s = 20
+maxColor_s = 16
+minColor_v = 221
 maxColor_v = 255
+dilationFactor = 11
 
-# reference - red
-minColor_h = 160
-minColor_s = 50
-minColor_v = 50
-maxColor_h = 180
-maxColor_s = 255
-maxColor_v = 255
-
-# reference - green
-minColor_h = 30
-minColor_s = 50
-minColor_v = 50
-maxColor_h = 90
-maxColor_s = 255
-maxColor_v = 255
-
-# reference - retroreflective green tape
-minColor_h = 30
-minColor_s = 0
-minColor_v = 0
-maxColor_h = 90
-maxColor_s = 20
-maxColor_v = 255
-
-# reference - blue
-minColor_h = 100
-minColor_s = 50
-minColor_v = 50
-maxColor_h = 120
-maxColor_s = 255
-maxColor_v = 255
-
-# reference - yellow
-minColor_h = 10
-minColor_s = 50
-minColor_v = 50
-maxColor_h = 30
-maxColor_s = 255
-maxColor_v = 255
-
-# reference - orange
-minColor_h = 5
-minColor_s = 50
-minColor_v = 50
-maxColor_h = 12
-maxColor_s = 255
-maxColor_v = 255
