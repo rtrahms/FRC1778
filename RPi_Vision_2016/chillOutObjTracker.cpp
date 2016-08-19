@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctime>
 
 using namespace cv;
 using namespace std;
@@ -90,6 +91,13 @@ int main()
 
 	/********* MJPG streaming section *******/
 	String outFile = "./out.mjpg";
+	
+	/******* timer section *****/
+	clock_t startTime = clock();
+	clock_t duration;
+	double timeInSeconds;
+	double resetVideoTimeSec = 60.0;  // Release/reset VideoWriter every so many questions
+	int resetCtr = 0;
 	
 	/********* OpenCV parameter section *******/
 	int frameWidth =  640;
@@ -202,7 +210,7 @@ int main()
             break;
 
 	// color threshold input image into binary image
-    cvtColor( inputImg, hsvImg, CV_BGR2HSV );
+        cvtColor( inputImg, hsvImg, CV_BGR2HSV );
 	inRange(hsvImg, Scalar(minColor_h, minColor_s, minColor_v), Scalar(maxColor_h, maxColor_s, maxColor_v), binaryImg);		/*green*/
 
 	Mat binary2 = binaryImg.clone();
@@ -286,19 +294,19 @@ int main()
 
 		// draw the target on one of the images
 		Scalar colorWhite = Scalar(255, 255, 255);  // white
-		//circle(inputImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
-		circle(binaryImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		circle(inputImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		//circle(binaryImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
 		//circle(contourImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
 
-		printf("Target radius %3.0f detected at (%3.0f,%3.0f)\n",
-			radius[targetIndex], center[targetIndex].x - imageCenterX,
-					     center[targetIndex].y - imageCenterY);
+		//printf("Target radius %3.0f detected at (%3.0f,%3.0f)\n",
+		//	radius[targetIndex], center[targetIndex].x - imageCenterX,
+		//			     center[targetIndex].y - imageCenterY);
 	}
 	else
 	{
 		// let roborio know that no target is detected
 		table->PutNumber("targets",(float)0.0f);
-		printf("No target\n");
+		//printf("No target\n");
 	}
 	
 	// create output image with overlay
@@ -316,7 +324,21 @@ int main()
 	// write out to file (for webserver)
 	VideoWriter outStream(outFile,CV_FOURCC('M','J','P','G'), 2, Size(frameWidth,frameHeight), true);
 	if (outStream.isOpened())
-		outStream.write(outputImg);	
+		outStream.write(outputImg);
+	else
+		printf("Error! Could not open stream!\n");
+	
+
+	// check time duration - if long enough, reset VideoWriter object
+	duration = clock();
+	timeInSeconds = (duration - startTime) / (double) CLOCKS_PER_SEC;
+	//printf("timeInSeconds = %f\n",timeInSeconds);
+	if (timeInSeconds > resetVideoTimeSec)
+	{
+		printf("Releasing VideoWriter: %d\n",++resetCtr);
+		outStream.release();
+		startTime = clock();
+	}
 
         int k = waitKey(1);
         if ( k==27 )
