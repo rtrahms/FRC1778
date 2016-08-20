@@ -22,15 +22,15 @@ int maxColor_h = 255;
 int maxColor_s = 255;
 int maxColor_v = 255;
 
-int minRadius = 50;
-int maxRadius = 100;
+double minArea = 1000.0;
+double maxArea = 30000.0;
 
 int dilationFactor = 5;
 
 int hue_min_slider, hue_max_slider;
 int sat_min_slider, sat_max_slider;
 int val_min_slider, val_max_slider;
-int radius_min_slider, radius_max_slider;
+int area_min_slider, area_max_slider;
 int dilation_slider;
 
 void on_min_hue(int, void *) 
@@ -63,14 +63,14 @@ void on_max_val(int, void *)
 	maxColor_v = val_max_slider;
 }
 
-void on_min_radius(int, void *) 
+void on_min_area(int, void *) 
 {
-	minRadius = radius_min_slider;
+	minArea = area_min_slider;
 }
 
-void on_max_radius(int, void *) 
+void on_max_area(int, void *) 
 {
-	maxRadius = radius_max_slider;
+	maxArea = area_max_slider;
 }
 
 void on_dilation(int, void *) 
@@ -104,7 +104,7 @@ int main()
 	int frameHeight = 480;
 	int imageCenterX, imageCenterY;
 
-	// target radius
+	// target area
 	int targetIndex = -1;
 	bool targetDetected = false;
 
@@ -119,8 +119,8 @@ int main()
 		fscanf(parameter_file,"roborio_ipaddr = %s\n",roborio_ipaddr);
 		fscanf(parameter_file,"frameWidth = %d\n",&frameWidth);
 		fscanf(parameter_file,"frameHeight = %d\n",&frameHeight);
-		fscanf(parameter_file,"minRadius = %d\n",&minRadius);
-		fscanf(parameter_file,"maxRadius = %d\n",&maxRadius);
+		fscanf(parameter_file,"minArea = %f\n",&minArea);
+		fscanf(parameter_file,"maxArea = %f\n",&maxArea);
 		fscanf(parameter_file,"minColor_h = %d\n",&minColor_h);
 		fscanf(parameter_file,"maxColor_h = %d\n",&maxColor_h);
 		fscanf(parameter_file,"minColor_s = %d\n",&minColor_s);
@@ -134,8 +134,8 @@ int main()
 	printf("roborio_ipaddr = %s\n",roborio_ipaddr);
 	printf("frameWidth = %d\n",frameWidth);
 	printf("frameHeight = %d\n",frameHeight);
-	printf("minRadius = %d\n",minRadius);
-	printf("maxRadius = %d\n",maxRadius);
+	printf("minArea = %f\n",minArea);
+	printf("maxArea = %f\n",maxArea);
 	printf("minColor_h = %d\n",minColor_h);
 	printf("maxColor_h = %d\n",maxColor_h);
 	printf("minColor_s = %d\n",minColor_s);
@@ -151,8 +151,8 @@ int main()
 	sat_max_slider = maxColor_s;
 	val_min_slider = minColor_v;
 	val_max_slider = maxColor_v;
-	radius_min_slider = minRadius;
-	radius_max_slider = maxRadius;
+	area_min_slider = minArea;
+	area_max_slider = maxArea;
 	dilation_slider = dilationFactor;
 
 	// slider control window - named "Thresholds"
@@ -163,8 +163,8 @@ int main()
 	createTrackbar("Sat Max", "Thresholds", &sat_max_slider, 255, on_max_sat);
 	createTrackbar("Val Min", "Thresholds", &val_min_slider, 255, on_min_val);
 	createTrackbar("Val Max", "Thresholds", &val_max_slider, 255, on_max_val);
-	createTrackbar("Radius Min", "Thresholds", &radius_min_slider, 255, on_min_radius);
-	createTrackbar("Radius Max", "Thresholds", &radius_max_slider, 255, on_max_radius);
+	createTrackbar("Area Min", "Thresholds", &area_min_slider, maxArea, on_min_area);
+	createTrackbar("Area Max", "Thresholds", &area_max_slider, maxArea, on_max_area);
 	createTrackbar("Dilation", "Thresholds", &dilation_slider, 50, on_dilation);
 
 	// calculate image center
@@ -238,34 +238,33 @@ int main()
 		convexHull(Mat(contours[i]), hulls[i], false);
 	}
 
-	// create a bounding rect for each convex hull
-	vector<vector<Point>> contours_poly(contours.size());
-	vector<Rect> boundRect(contours.size());
-	vector<Point2f>center(contours.size());
-	vector<float>radius(contours.size());
+	// create stats for each convex hull	
+	vector<Moments>mu(hulls.size());	  // hull moments
+	vector<Point2f>mc(hulls.size());       // hull mass centers
+	vector<double>targetArea(hulls.size());   // hull areas
 
-	for (int i=0; i<contours.size(); i++)
+	for (int i=0; i<hulls.size(); i++)
 	{
-		approxPolyDP(Mat(hulls[i]),contours_poly[i], 3, true);
-		//boundRect[i] = boundingRect(Mat(contours_poly[i]));
-		minEnclosingCircle((Mat)contours_poly[i], center[i], radius[i]);
+		mu[i] = moments(hulls[i], false);   // find moments
+		mc[i] = Point2f(mu[i].m10/mu[i].m00, mu[i].m01/mu[i].m00);
+		targetArea[i] = contourArea(hulls[i]);
 	}
 
-	int maxTargetRadius = -1;
+	int maxTargetArea = -1;
 	int targetIndex = -1;
 	targetDetected = false;
-	for (int i=0; i<contours.size(); i++)
+	for (int i=0; i<hulls.size(); i++)
 	{
-		// see if this target meets the minimum radius requirement
-		if (radius[i] > minRadius)
+		// see if this target meets the minimum area requirement
+		if (targetArea[i] > minArea)
 		{
 			targetDetected = true;
 
 			// see if this target is the biggest so far
-			if (radius[i] > maxTargetRadius)
+			if (targetArea[i] > maxTargetArea)
 			{
 				targetIndex = i;
-				maxTargetRadius = radius[i];
+				maxTargetArea = targetArea[i];
 			}
 		}
 	}
@@ -276,9 +275,7 @@ int main()
 	{
 		Scalar colorGreen = Scalar(0, 0, 255);  // green
 		Scalar colorWhite = Scalar(255, 255, 255);  // white
-		//drawContours(contourImg, contours, i, colorGreen, 1, 8, hierarchy, 0, Point());
-		drawContours(contourImg, hulls, i, colorWhite, 1, 8, hierarchy, 0, Point());
-		circle(contourImg, center[i], (int)radius[i],colorGreen,1,8,0);
+		drawContours(contourImg, hulls, i, colorWhite, 2, 8, hierarchy, 0, Point());
 	}
 
 	// if target meets criteria, do stuff
@@ -286,21 +283,22 @@ int main()
 	{
 		// write target info out to roborio
 		table->PutNumber("targets",(float)1.0f);
-		table->PutNumber("targetX",center[targetIndex].x - imageCenterX);
-		table->PutNumber("targetY",center[targetIndex].y - imageCenterY);
-		table->PutNumber("targetRadius",radius[targetIndex]);
+		table->PutNumber("targetX",mc[targetIndex].x - imageCenterX);
+		table->PutNumber("targetY",mc[targetIndex].y - imageCenterY);
+		table->PutNumber("targetArea",targetArea[targetIndex]);
 		table->PutNumber("frameWidth",(float)frameWidth);
 		table->PutNumber("frameHeight",(float)frameHeight);
 
 		// draw the target on one of the images
 		Scalar colorWhite = Scalar(255, 255, 255);  // white
-		circle(inputImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
-		//circle(binaryImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
-		//circle(contourImg, center[targetIndex], (int)radius[targetIndex],colorWhite,1,8,0);
+		Scalar colorGreen = Scalar(0, 255, 0);  // green
+		Scalar colorBlue = Scalar(255, 0, 0);  // blue
+		drawContours(inputImg, hulls, targetIndex, colorGreen, 2, 8, hierarchy, 0, Point());
+		circle(inputImg, mc[targetIndex], 3 ,colorBlue,2,6,0);
 
-		//printf("Target radius %3.0f detected at (%3.0f,%3.0f)\n",
-		//	radius[targetIndex], center[targetIndex].x - imageCenterX,
-		//			     center[targetIndex].y - imageCenterY);
+		//printf("Target area %3.0f detected at (%3.0f,%3.0f)\n",
+		//	targetArea[targetIndex], mc[targetIndex].x - imageCenterX,
+		//			     mc[targetIndex].y - imageCenterY);
 	}
 	else
 	{
