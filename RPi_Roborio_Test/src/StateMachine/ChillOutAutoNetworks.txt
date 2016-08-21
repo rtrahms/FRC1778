@@ -1,0 +1,16 @@
+Network:DoNothing {
+	Actions:1; Events:1; Action:Idle; Event:TimeSec(5.0);
+	Actions:1; Events:0; Action:Deadend;
+}
+
+Network:DriveForward1 {
+	Actions:1 Events:1; Action:Idle; Event:TimeSec(0.5);
+	Actions:1 Events:1; Action:DriveForward; Event:TimeSec(5.0);
+	Actions:1 Events:0; Action:Deadend;
+}
+
+Network:FollowForever {
+	Actions:1 Events:1; Action:Idle; Event:TimeSec(0.5);
+	Actions:1 Events:0; Action:Follow;
+}
+

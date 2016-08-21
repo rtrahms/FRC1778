@@ -1,6 +1,10 @@
 
 package org.usfirst.frc.team1778.robot;
 
+import NetworkComm.InputOutputComm;
+import NetworkComm.RPIComm;
+import StateMachine.AutoStateMachine;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -15,11 +19,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
+	AutoStateMachine autoSM;
+	
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
      */
     public void robotInit() {
+		RPIComm.initialize();
+		InputOutputComm.initialize();
+		
+		autoSM = new AutoStateMachine();
+		
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");
     }
     
 	/**
@@ -33,7 +45,10 @@ public class Robot extends IterativeRobot {
 	 */
     public void autonomousInit() {
 		
-		RPIComm.initialize();
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
+    	
+    	autoSM.start();
+    	
     }
 
     /**
@@ -41,10 +56,12 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	RPIComm.updateValues();
+    	
+    	autoSM.process();
     }
 
     public void teleopInit() {
-		RPIComm.initialize();    	
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
     }
     
     /**
@@ -53,7 +70,13 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
     	RPIComm.updateValues();        
     }
-    
+
+    public void disabledInit() {
+    	autoSM.stop();
+    	
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot disabled...");
+    }
+
     /**
      * This function is called periodically during test mode
      */
