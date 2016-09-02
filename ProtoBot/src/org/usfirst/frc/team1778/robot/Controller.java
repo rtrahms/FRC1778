@@ -10,15 +10,14 @@ import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import Utility.LogitechF310;
 import Utility.LogitechDualAction;
 import Utility.InterLink;
-import org.usfirst.frc.team1778.robot.Robot;
 
 
 public class Controller {
 
 	
 	// Types: 0 = Logitech F310, 1 = InterLink Flight Controller, 2 = Logitech Dual Action
-	public static final int DRIVER_CONTROLLER_TYPE = 2;
-    public static final int COPILOT_CONTROLLER_TYPE = 2;
+	public static final int DRIVER_CONTROLLER_TYPE = 1;
+    public static final int COPILOT_CONTROLLER_TYPE = 1;
     public static final int PORT_DRIVER_CONTROLLER = 0;
     public static final int PORT_COPILOT_CONTROLLER = 1;
 	public static Joystick Driver;
