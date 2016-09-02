@@ -3,6 +3,8 @@ package StateMachine;
 import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -12,11 +14,14 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.prefs.Preferences;
 
 public class AutonomousNetworkParser {
 		
-	final static String FILE_NAME = "ChillOutAutoNetworks.txt";
-	final static Charset ENCODING = StandardCharsets.UTF_8;	
+	//final static String FILE_NAME = "/home/lvuser/chillOutAutoNetworks.txt";
+	//final static Charset ENCODING = StandardCharsets.UTF_8;	
+	private final static String ROOT_DIR= "chillOutAutoPrefs";
+	private static Preferences prefs;
 	
 	private static ArrayList<AutoNetwork> autoNets;
 	private static List<String> lines;
@@ -26,10 +31,23 @@ public class AutonomousNetworkParser {
 		autoNets = null;
 		lines = null;
 		ctr = 0;
+		
+		prefs = Preferences.userRoot().node(ROOT_DIR);
 	}
 	
 	public static ArrayList<AutoNetwork> readInNetworks() {
 		autoNets = new ArrayList<AutoNetwork>();
+		
+		/*
+		FileReader fr = new FileReader(FILE_NAME);
+		BufferedReader br = new BufferedReader(fr);
+
+		String s; 
+		while((s = br.readLine()) != null) { 
+			System.out.println(s); 
+		} 
+		fr.close(); 
+		*/
 		
 		/*
 		try {
@@ -39,13 +57,24 @@ public class AutonomousNetworkParser {
 			System.out.println("IOException: "  + e.toString());
 		}
 		*/
-		// TODO: parse file
 	
+		/***** use only when storing the preferences first time *****/
 		// create networks
-		autoNets.add(createDoNothingNetwork());
-		autoNets.add(createTargetFollowerNetwork());
-		autoNets.add(createDriveForwardNetwork_Slow());
-		autoNets.add(createTestNetwork());
+		autoNets.add(0, createDoNothingNetwork());
+		//autoNets.get(0).persist(prefs,"DoNothingNetwork");
+		
+		autoNets.add(1, createTargetFollowerNetwork());
+		//autoNets.get(1).persist(prefs,"TargetFollowerNetwork");
+		
+		autoNets.add(2, createDriveForwardNetwork_Slow());
+		//autoNets.get(2).persist(prefs,"DriveForwardSlowNetwork");
+		
+		autoNets.add(3, createTestNetwork());
+		//autoNets.get(3).persist(prefs,"TestNetwork");
+		
+		// store number of networks in preferences
+		
+		/**** TODO: normal operation - read in preferences file ***/
 		
 		return autoNets;
 	}
@@ -53,12 +82,7 @@ public class AutonomousNetworkParser {
 	private void parseSingleNetwork() {
 		
 	}
-	
-	private static List<String> readSmallTextFile(String aFileName) throws IOException {
-			Path path = Paths.get(aFileName);
-			return Files.readAllLines(path, ENCODING);
-	}
-	
+		
 	// **** DO NOTHING Network ***** 
 	private static AutoNetwork createDoNothingNetwork() {
 		

@@ -1,0 +1,27 @@
+<ChillOutAutoNetworks>
+	<Network Name="DriveForwardSlowNetwork" Index="1">
+		<State Name="IdleState" NextState="DriveForwardState">
+			<Action Name="IdleAction"></Action>
+			<Action Name="IdleAction"></Action>
+			<Event Name="TimerEvent" ValueSec="0.5"></Event>
+		</State>
+		<State Name="DriveForwardState" NextState="DeadEndState">
+			<Action></Action>
+			<Action></Action>
+			<Action></Action>
+			<Event Name="TimerEvent" ValueSec="15.0"></Event>
+		</State>
+		<State Name="DeadEndState" NextState="null"></State></Network>
+	<Network Name="FollowTargetForeverNetwork" Index="2">
+		<State Name="IdleState" NextState="CalTargetState">
+			<Action Name="IdleAction"></Action>
+			<Action Name="IdleAction"></Action>
+			<Event Name="TimerEvent" ValueSec=""></Event>
+		</State>
+		<State Name="CalTargetState" NextState="null">
+			<Action Name="CalibrateTargetAction"></Action>
+			<Action Name="IdleAction"></Action>
+		</State>
+	</Network>
+	<Network Name="DoNothingNetwork" Index="3"></Network>
+	<Network Name="TestNetwork" Index="4"></Network></ChillOutAutoNetworks>

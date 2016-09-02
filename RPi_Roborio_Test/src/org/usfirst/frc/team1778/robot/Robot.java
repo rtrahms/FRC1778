@@ -4,7 +4,7 @@ package org.usfirst.frc.team1778.robot;
 import NetworkComm.InputOutputComm;
 import NetworkComm.RPIComm;
 import StateMachine.AutoStateMachine;
-
+import Systems.CANDriveAssembly;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -28,6 +28,7 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
 		RPIComm.initialize();
 		InputOutputComm.initialize();
+		CANDriveAssembly.initialize();
 		
 		autoSM = new AutoStateMachine();
 		
@@ -62,6 +63,7 @@ public class Robot extends IterativeRobot {
 
     public void teleopInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
+		CANDriveAssembly.teleopInit();
     }
     
     /**
@@ -69,7 +71,8 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
     	RPIComm.updateValues();        
-    }
+		CANDriveAssembly.teleopPeriodic();
+   }
 
     public void disabledInit() {
     	autoSM.stop();

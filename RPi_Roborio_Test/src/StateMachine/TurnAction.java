@@ -9,7 +9,7 @@ public class TurnAction extends Action {
 		
 	public TurnAction(double angleToTurn, double speed)
 	{
-		this.name = "<Turn State>";
+		this.name = "TurnAction";
 		this.angleToTurn = angleToTurn;
 		this.speedToTurn = speed;
 				

@@ -1,6 +1,7 @@
 package StateMachine;
 
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
 
@@ -20,6 +21,24 @@ public class AutoNetwork {
 		this.name = name;
 		states = new ArrayList<AutoState>();
 		currentState = null;
+	}
+
+	// serialize read in Auto network from preferences
+	public AutoNetwork(Preferences networkPrefs) throws Exception {
+		
+		// retrieve name of network, put generic in if it doesn't exist
+		this.name = networkPrefs.get("name", "<Generic Auto Network>");
+		states = new ArrayList<AutoState>();
+		currentState = null;
+		
+		// retrieve info for all states in this network
+		String[] stateNames = networkPrefs.childrenNames();
+		
+		// create states objects for every child in the network prefs
+		for (String stateStr: stateNames){
+			Preferences statePrefs = networkPrefs.node(stateStr);
+			states.add(new AutoState(statePrefs));
+		}
 	}
 
 	public void addState(AutoState state) {
@@ -80,4 +99,21 @@ public class AutoNetwork {
 			currentState.exit();
 		}
 	}
+	
+	// used for persisting the network in a Java Preferences class object
+	public void persistWrite(Preferences prefs, String networkKeyStr) {
+
+		// create node for autoNetwork
+		Preferences networkPrefs = prefs.node(networkKeyStr);
+		
+		// store network name
+		networkPrefs.put("name",networkKeyStr);
+		
+		// store all the states in the autoNetwork prefs
+		for (AutoState a: states)
+		{
+			a.persistWrite(networkPrefs,a.name);
+		}
+	}	
+	
 }

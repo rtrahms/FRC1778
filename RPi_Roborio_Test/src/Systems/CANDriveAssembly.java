@@ -15,10 +15,10 @@ public class CANDriveAssembly {
 	private static boolean initialized = false;
 	
 	// Speed controller IDs
-	private static final int LEFT_FRONT_TALON_ID = 3;
-	private static final int LEFT_REAR_TALON_ID = 4;
-	private static final int RIGHT_FRONT_TALON_ID = 8;
-	private static final int RIGHT_REAR_TALON_ID = 7;
+	private static final int LEFT_FRONT_TALON_ID = 8;
+	//private static final int LEFT_REAR_TALON_ID = 4;
+	private static final int RIGHT_FRONT_TALON_ID = 3;
+	//private static final int RIGHT_REAR_TALON_ID = 7;
 		
 	// joystick axis ids
 	private static final int JOY_X_AXIS = 0;
@@ -55,16 +55,17 @@ public class CANDriveAssembly {
 	{
 		if (!initialized) {
 	        mFrontLeft = new CANTalon(LEFT_FRONT_TALON_ID);
-	        mBackLeft = new CANTalon(LEFT_REAR_TALON_ID);
+	        //mBackLeft = new CANTalon(LEFT_REAR_TALON_ID);
 	        mFrontRight = new CANTalon(RIGHT_FRONT_TALON_ID);
-	        mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
+	        //mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
 	        	        
-	        drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
+	        //drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
+	        drive = new RobotDrive(mFrontLeft, mFrontRight);
 	        	        
-	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, false);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, false);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, false);
-	        drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, false);   
+	        //drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, false);
+	        //drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, false);
+	        //drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, false);
+	        //drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, false);   
 	        
 	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
 	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);

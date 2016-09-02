@@ -1,5 +1,7 @@
 package StateMachine;
 
+import java.util.prefs.Preferences;
+
 public class Action {
 
 	public String name;
@@ -20,4 +22,12 @@ public class Action {
 		
 	}
 	
+	public void persistWrite(Preferences prefs, String actionKeyStr) {
+
+		// create node for action
+		Preferences actionPrefs = prefs.node(actionKeyStr);
+	
+		// store action name
+		actionPrefs.put("name",actionKeyStr);
+	}
 }

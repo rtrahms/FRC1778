@@ -4,7 +4,7 @@ package StateMachine;
 public class IdleAction extends Action {
 	
 	public IdleAction() {
-		this.name = "<Idle Action>";		
+		this.name = "IdleAction";		
 	}
 	
 	public IdleAction(String name)

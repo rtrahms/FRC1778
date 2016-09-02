@@ -11,11 +11,14 @@ public class AutoStateMachine {
 	private ArrayList<AutoNetwork> autoNetworks;
 
 	private AutoNetwork currentNetwork;
+	private AutoChooser autoChooser;
 	
 	public AutoStateMachine()
 	{
 		// create list of autonomous networks
 		autoNetworks = AutonomousNetworkParser.readInNetworks();
+		
+		autoChooser = new AutoChooser();
 		
 	}
 				
@@ -67,9 +70,28 @@ public class AutoStateMachine {
 	// If all switches are false (zero), auto is disabled
 	private int getNetworkIndex()
 	{
-		int value = 0;
+		int value = 1;
 		
-		value = 1;  // testing only
+		// grab the selected auto mode from the driver station
+		/*
+		AutoChooser.AutoMode mode = autoChooser.getAutoChoice();
+		
+		switch (mode) {
+			case TARGET_FOLLOW:
+				value = 1;
+				break;
+			case DRIVE_FORWARD_SLOW:
+				value = 2;
+				break;
+			case TEST_NETWORK:
+				value = 3;
+				break;
+			case DO_NOTHING:
+			default:
+				value = 0;
+				break;
+		}
+		*/
 
 		if (value == 0)
 		{
