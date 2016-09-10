@@ -1,15 +1,19 @@
 package StateMachine;
 
+import java.util.prefs.Preferences;
+
 import Systems.CANDriveAssembly;
 
 public class DriveForwardAction extends Action {
 	
+	private String name;
 	private double speed = 0.0;
 	
 	public DriveForwardAction(double speed)
 	{
+		this.name = "<Drive Forward Action>";		
 		this.speed = speed;
-		this.name = "< Drive Forward Action>";
+
 		CANDriveAssembly.initialize();
 	}
 	
@@ -49,4 +53,15 @@ public class DriveForwardAction extends Action {
 		// cleanup base class
 		super.cleanup();
 	}
+	
+	public void persistWrite(int counter, Preferences prefs) {
+
+		// create node for action
+		Preferences actionPrefs = prefs.node(counter + "_" + this.name);
+	
+		// store action details
+		actionPrefs.put("class",this.getClass().toString());
+		actionPrefs.putDouble("speed",this.speed);
+	}
+
 }

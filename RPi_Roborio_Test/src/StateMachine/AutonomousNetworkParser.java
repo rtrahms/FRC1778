@@ -1,78 +1,76 @@
 package StateMachine;
 
 import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 public class AutonomousNetworkParser {
 		
-	//final static String FILE_NAME = "/home/lvuser/chillOutAutoNetworks.txt";
-	//final static Charset ENCODING = StandardCharsets.UTF_8;	
-	private final static String ROOT_DIR= "chillOutAutoPrefs";
-	private static Preferences prefs;
+	private final static String PREF_ROOT = "ChillOutAutonomousNetworks";
+	private static Preferences prefRoot, prefs;
 	
 	private static ArrayList<AutoNetwork> autoNets;
-	private static List<String> lines;
-	private static int ctr;
 	
-	public AutonomousNetworkParser() {
-		autoNets = null;
-		lines = null;
-		ctr = 0;
+	private static boolean initialized = false;
 		
-		prefs = Preferences.userRoot().node(ROOT_DIR);
+	public static void initialize() throws Exception {
+		
+		if (!initialized) {
+			autoNets = null;
+			prefRoot = Preferences.userRoot();
+			prefs = prefRoot.node(PREF_ROOT);
+			
+			initialized = true;
+		}
 	}
 	
 	public static ArrayList<AutoNetwork> readInNetworks() {
-		autoNets = new ArrayList<AutoNetwork>();
 		
-		/*
-		FileReader fr = new FileReader(FILE_NAME);
-		BufferedReader br = new BufferedReader(fr);
-
-		String s; 
-		while((s = br.readLine()) != null) { 
-			System.out.println(s); 
-		} 
-		fr.close(); 
-		*/
-		
-		/*
 		try {
-			lines = readSmallTextFile(FILE_NAME);
-		} 
-		catch (IOException e) {
-			System.out.println("IOException: "  + e.toString());
+			if (!initialized)
+				initialize();
+			}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
-		*/
-	
+		
+		autoNets = new ArrayList<AutoNetwork>();
+			
 		/***** use only when storing the preferences first time *****/
+		
+		// clear current preferences keys from previous runs
+		try {
+			prefs.clear();
+			Preferences node = prefs.node("<Do Nothing Network>");
+			node.removeNode();
+		}
+		catch (BackingStoreException e) {
+			e.printStackTrace();
+		}
+		
 		// create networks
-		autoNets.add(0, createDoNothingNetwork());
-		//autoNets.get(0).persist(prefs,"DoNothingNetwork");
-		
-		autoNets.add(1, createTargetFollowerNetwork());
-		//autoNets.get(1).persist(prefs,"TargetFollowerNetwork");
-		
-		autoNets.add(2, createDriveForwardNetwork_Slow());
-		//autoNets.get(2).persist(prefs,"DriveForwardSlowNetwork");
-		
+		autoNets.add(0, createDoNothingNetwork());	
+		autoNets.add(1, createTargetFollowerNetwork());	
+		autoNets.add(2, createDriveForwardNetwork_Slow());	
 		autoNets.add(3, createTestNetwork());
-		//autoNets.get(3).persist(prefs,"TestNetwork");
 		
-		// store number of networks in preferences
+		// add the networks to the prefs object
+		int counter = 0;
+		for (AutoNetwork a: autoNets)
+			a.persistWrite(counter++,prefs);		
+				
+		// store networks to file
+	    try {
+	        FileOutputStream fos = new FileOutputStream("/home/lvuser/chillOutAutoNets.xml");
+	        prefs.exportSubtree(fos);
+	        fos.close();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }	   
 		
 		/**** TODO: normal operation - read in preferences file ***/
 		
@@ -106,8 +104,8 @@ public class AutonomousNetworkParser {
 		AutoNetwork autoNet = new AutoNetwork("<Target Follower Network>");
 
 		// create states
-		AutoState idleState = new AutoState("<Idle State>");
-		IdleAction idleStart = new IdleAction("<Idle Action>");
+		AutoState idleState = new AutoState("<Idle State 1>");
+		IdleAction idleStart = new IdleAction("<Idle Action 1>");
 		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
 		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
 		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
@@ -116,8 +114,8 @@ public class AutonomousNetworkParser {
 		idleState.addAction(doSomething3);
 		idleState.addEvent(timer1);
 		
-		AutoState targetCalState = new AutoState("<Cal Target FOREVER State>");
-		CalibrateTargetAction calTarget = new CalibrateTargetAction("<Cal Target Action>");
+		AutoState targetCalState = new AutoState("<Cal Target FOREVER State 1>");
+		CalibrateTargetAction calTarget = new CalibrateTargetAction("<Cal Target Action 1>");
 		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
 		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
 		targetCalState.addAction(calTarget);
@@ -141,8 +139,8 @@ public class AutonomousNetworkParser {
 		
 		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network - Slow>");
 		
-		AutoState idleState = new AutoState("<Idle State>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action>");
+		AutoState idleState = new AutoState("<Idle State 1>");
+		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
 		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
 		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
 		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
@@ -151,7 +149,7 @@ public class AutonomousNetworkParser {
 		idleState.addAction(doSomething3);
 		idleState.addEvent(timer1);
 
-		AutoState driveState = new AutoState("<Drive State>");
+		AutoState driveState = new AutoState("<Drive State 1>");
 		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.40);
 		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
 		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
@@ -161,7 +159,7 @@ public class AutonomousNetworkParser {
 		idleState.addAction(doSomething5);
 		driveState.addEvent(timer2);
 		
-		AutoState idleState2 = new AutoState("<Idle State2>");
+		AutoState idleState2 = new AutoState("<Idle State 2>");
 		IdleAction deadEnd = new IdleAction("<Dead End Action>");
 		idleState2.addAction(deadEnd);
 				
@@ -182,7 +180,7 @@ public class AutonomousNetworkParser {
 		AutoNetwork autoNet = new AutoNetwork("<Test Network>");
 		
 		AutoState idleState = new AutoState("<Idle State 1>");
-		IdleAction startIdle = new IdleAction("<Start Idle Action>");
+		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
 		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
 		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
 		TimeEvent timer1 = new TimeEvent(10.0);  // timer event

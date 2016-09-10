@@ -19,6 +19,18 @@ public class InputOutputComm {
     	}
     }
     
+    public static void putBoolean(LogTable log, String key, boolean value) {
+    	
+    	double numVal = 0;
+    	
+    	if (value == true) numVal = 1.0;
+    	
+    	if (table != null)
+    		table.putNumber(key,numVal);
+    	else
+    		System.out.println("No network table to write to!!");
+    }
+    
     public static void putDouble(LogTable log, String key, double value) {
     	if (table != null)
     		table.putNumber(key,value);

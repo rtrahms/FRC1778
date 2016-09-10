@@ -23,24 +23,7 @@ public class AutoNetwork {
 		currentState = null;
 	}
 
-	// serialize read in Auto network from preferences
-	public AutoNetwork(Preferences networkPrefs) throws Exception {
-		
-		// retrieve name of network, put generic in if it doesn't exist
-		this.name = networkPrefs.get("name", "<Generic Auto Network>");
-		states = new ArrayList<AutoState>();
-		currentState = null;
-		
-		// retrieve info for all states in this network
-		String[] stateNames = networkPrefs.childrenNames();
-		
-		// create states objects for every child in the network prefs
-		for (String stateStr: stateNames){
-			Preferences statePrefs = networkPrefs.node(stateStr);
-			states.add(new AutoState(statePrefs));
-		}
-	}
-
+	
 	public void addState(AutoState state) {
 		states.add(state);
 	}
@@ -101,18 +84,19 @@ public class AutoNetwork {
 	}
 	
 	// used for persisting the network in a Java Preferences class object
-	public void persistWrite(Preferences prefs, String networkKeyStr) {
+	public void persistWrite(int counter, Preferences prefs) {
 
 		// create node for autoNetwork
-		Preferences networkPrefs = prefs.node(networkKeyStr);
+		Preferences networkPrefs = prefs.node(counter + "_" + this.name);
 		
 		// store network name
-		networkPrefs.put("name",networkKeyStr);
+		networkPrefs.put("class",this.getClass().toString());
 		
 		// store all the states in the autoNetwork prefs
+		int ctr = 0;
 		for (AutoState a: states)
 		{
-			a.persistWrite(networkPrefs,a.name);
+			a.persistWrite(ctr++,networkPrefs);
 		}
 	}	
 	

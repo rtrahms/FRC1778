@@ -1,5 +1,7 @@
 package StateMachine;
 
+import java.util.prefs.Preferences;
+
 import Systems.CANDriveAssembly;
 
 public class TurnAction extends Action {
@@ -9,7 +11,7 @@ public class TurnAction extends Action {
 		
 	public TurnAction(double angleToTurn, double speed)
 	{
-		this.name = "TurnAction";
+		this.name = "<Turn Action>";
 		this.angleToTurn = angleToTurn;
 		this.speedToTurn = speed;
 				
@@ -57,6 +59,17 @@ public class TurnAction extends Action {
 		
 		// cleanup base class
 		super.cleanup();
+	}
+	
+	public void persistWrite(int counter, Preferences prefs) {
+
+		// create node for action
+		Preferences actionPrefs = prefs.node(counter + "_" + this.name);
+	
+		// store action details
+		actionPrefs.put("class",this.getClass().toString());
+		actionPrefs.putDouble("angleToTurn",this.angleToTurn);
+		actionPrefs.putDouble("speedToTurn",this.speedToTurn);
 	}
 
 }

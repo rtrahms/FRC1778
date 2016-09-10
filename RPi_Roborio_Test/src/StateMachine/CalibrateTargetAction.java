@@ -1,5 +1,7 @@
 package StateMachine;
 
+import java.util.prefs.Preferences;
+
 import Systems.CANDriveAssembly;
 import NetworkComm.RPIComm;
 
@@ -52,6 +54,15 @@ public class CalibrateTargetAction extends Action {
 					
 		// cleanup base class
 		super.cleanup();
+	}
+	
+	public void persistWrite(int counter, Preferences prefs) {
+
+		// create node for action
+		Preferences actionPrefs = prefs.node(counter + "_" + this.name);
+	
+		// store action name
+		actionPrefs.put("class",this.getClass().toString());
 	}
 
 }

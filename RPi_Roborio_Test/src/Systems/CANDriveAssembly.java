@@ -70,19 +70,23 @@ public class CANDriveAssembly {
 	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
 	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	        
+	        // initialize the NavXSensor
+	        NavXSensor.initialize();
+	        
 	        initialized = true;
 		}
 	}
 
 
 	public static void autoInit() {
+		NavXSensor.reset();
    	}
 	
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
 		//double gyroAngle = 0.0;
-		double gyroAngle = GyroSensor.getAngle();
+		double gyroAngle = NavXSensor.getAngle();
 		
 		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 		
@@ -94,7 +98,9 @@ public class CANDriveAssembly {
 		String driveAngleStr = String.format("%.2f", driveAngle);
 		String myString = new String("gyroAngle = " + gyroAngleStr + " driveAngle = " + driveAngleStr + " speed = " + speed);
 		System.out.println(myString);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_gyro", myString);
+	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
+	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_gyro", myString);
 
 		/*
 		if (driveAngle > 0.5) driveAngle = 0.5;
@@ -122,7 +128,7 @@ public class CANDriveAssembly {
 	}
 		
 	public static void teleopInit() {
-		GyroSensor.reset();
+		NavXSensor.reset();
 	}
 	
 	public static void teleopPeriodic() {
@@ -190,7 +196,7 @@ public class CANDriveAssembly {
 	}
 	
 	private static double getAngle() {
-		double angle = GyroSensor.getAngle();
+		double angle = NavXSensor.getAngle();
 		return angle;
 	}
 	

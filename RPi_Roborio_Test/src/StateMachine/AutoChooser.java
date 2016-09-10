@@ -9,7 +9,7 @@ public class AutoChooser {
 	}
 	
 	AutoMode mode;
-	private final SendableChooser chooser;
+	private SendableChooser chooser;
 	
 	public AutoChooser() {
 		chooser = new SendableChooser();
@@ -18,12 +18,9 @@ public class AutoChooser {
 		chooser.addObject("TARGET_FOLLOW", AutoMode.TARGET_FOLLOW);
 		chooser.addObject("DRIVE_FORWARD_SLOW", AutoMode.DRIVE_FORWARD_SLOW);
 		chooser.addObject("TEST_NETWORK", AutoMode.TEST_NETWORK);
+		SmartDashboard.putData("Auto_Mode_Chooser", chooser);
 	}
 	
-	public void putChoosersOnDash(){
-		SmartDashboard.putData("Auto_Mode_Chooser ", chooser);
-	}
-
 	public AutoMode getAutoChoice() {
 		return (AutoMode) chooser.getSelected();
 	}

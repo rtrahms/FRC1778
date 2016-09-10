@@ -10,6 +10,7 @@ public class Event {
 	
 	public Event()
 	{
+		name = "<Generic Event>";
 	}
 
 	public void initialize()
@@ -22,13 +23,13 @@ public class Event {
 		return triggered;
 	}
 	
-	public void persistWrite(Preferences prefs, String eventKeyStr) {
+	public void persistWrite(int counter, Preferences prefs) {
 
 		// create node for event
-		Preferences eventPrefs = prefs.node(eventKeyStr);
+		Preferences eventPrefs = prefs.node(counter + "_" + this.name);
 	
-		// store event name
-		eventPrefs.put("name",eventKeyStr);
+		// store event class
+		eventPrefs.put("class",this.getClass().toString());
 	}
 	
 }

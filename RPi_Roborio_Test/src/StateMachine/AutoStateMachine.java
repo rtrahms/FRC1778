@@ -1,6 +1,7 @@
 package StateMachine;
 
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
 
@@ -12,12 +13,21 @@ public class AutoStateMachine {
 
 	private AutoNetwork currentNetwork;
 	private AutoChooser autoChooser;
-	
+		
 	public AutoStateMachine()
 	{
+		try {
+			// initialize the parser utility
+			AutonomousNetworkParser.initialize();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		// create list of autonomous networks
 		autoNetworks = AutonomousNetworkParser.readInNetworks();
 		
+		// create the smart dashboard chooser
 		autoChooser = new AutoChooser();
 		
 	}
@@ -73,7 +83,6 @@ public class AutoStateMachine {
 		int value = 1;
 		
 		// grab the selected auto mode from the driver station
-		/*
 		AutoChooser.AutoMode mode = autoChooser.getAutoChoice();
 		
 		switch (mode) {
@@ -91,7 +100,6 @@ public class AutoStateMachine {
 				value = 0;
 				break;
 		}
-		*/
 
 		if (value == 0)
 		{
