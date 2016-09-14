@@ -1,4 +1,4 @@
-roborio_ipaddr = 10.17.78.23
+roborio_ipaddr = 10.17.78.30
 frameWidth = 160
 frameHeight = 120
 minArea = 1000
@@ -10,4 +10,5 @@ maxColor_s = 16
 minColor_v = 221
 maxColor_v = 255
 dilationFactor = 11
+exposure = 1000
 

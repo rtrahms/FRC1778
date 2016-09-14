@@ -47,6 +47,7 @@ public class Robot extends IterativeRobot {
     public void autonomousInit() {
 		
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
+    	RPIComm.autoInit();
     	
     	autoSM.start();
     	
@@ -63,6 +64,8 @@ public class Robot extends IterativeRobot {
 
     public void teleopInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
+
+    	RPIComm.teleopInit();
 		CANDriveAssembly.teleopInit();
     }
     
