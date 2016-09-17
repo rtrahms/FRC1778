@@ -3,6 +3,7 @@ package StateMachine;
 import java.util.prefs.Preferences;
 
 import Systems.CANDriveAssembly;
+import Systems.NavXSensor;
 
 public class DriveForwardAction extends Action {
 	

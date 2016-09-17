@@ -12,6 +12,12 @@ public class NavXSensor {
 	private static boolean initialized = false;
 	
 	private static AHRS ahrs;
+	
+	public static class Angles {
+		float roll = 0f;
+		float pitch = 0f;
+		float yaw = 0f;
+	}
 		
 	//private static final double GYRO_SENSITIVITY = 0.007;
 	
@@ -37,8 +43,14 @@ public class NavXSensor {
 	{
 		System.out.println("NavXSensor::reset called!");
 		
-		if (ahrs != null)
-			ahrs.reset();
+		if (ahrs != null) 
+		{
+			//ahrs.reset();
+			ahrs.zeroYaw();
+			
+			// allow zeroing to take effect
+			Timer.delay(0.1);
+		}
 	}
 
 	public static boolean isConnected() {
@@ -57,23 +69,29 @@ public class NavXSensor {
 		return false;
 	}
 	
-	public static double getAngle()
+	public static Angles getAngles()
 	{
-		double angle = 0;
+		Angles angles = new Angles();
 		
 		if (ahrs != null) {
-			angle = ahrs.getAngle();
+			angles.roll = ahrs.getRoll();	
+			angles.pitch = ahrs.getPitch();	
+			angles.yaw = ahrs.getYaw();	
+		}			
 		
-			//System.out.println("NavXSensor::getAngle(): angle = " + angle);
-			
-			// slow down reading of sensor
-			Timer.delay(0.02);
-		}
-		//else
-		//	System.out.println("NavXSensor::getAngle(): ahrs object is null! ");
-			
-		
-		return angle;
+		return angles;
 	}
-
+	
+	public static float getYaw() 
+	{
+		float yaw = 0f;
+		
+		if (ahrs != null) {
+			yaw = ahrs.getYaw();	
+		}			
+		
+		return yaw;
+		
+	}
+	
 }

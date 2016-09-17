@@ -18,14 +18,14 @@ public class AutoStateMachine {
 	{
 		try {
 			// initialize the parser utility
-			AutonomousNetworkParser.initialize();
+			AutoNetworkBuilder.initialize();
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		// create list of autonomous networks
-		autoNetworks = AutonomousNetworkParser.readInNetworks();
+		autoNetworks = AutoNetworkBuilder.readInNetworks();
 		
 		// create the smart dashboard chooser
 		autoChooser = new AutoChooser();
@@ -80,27 +80,9 @@ public class AutoStateMachine {
 	// If all switches are false (zero), auto is disabled
 	private int getNetworkIndex()
 	{
-		int value = 1;
-		
 		// grab the selected auto mode from the driver station
-		AutoChooser.AutoMode mode = autoChooser.getAutoChoice();
+		int value = autoChooser.getAutoChoice();
 		
-		switch (mode) {
-			case TARGET_FOLLOW:
-				value = 1;
-				break;
-			case DRIVE_FORWARD_SLOW:
-				value = 2;
-				break;
-			case TEST_NETWORK:
-				value = 3;
-				break;
-			case DO_NOTHING:
-			default:
-				value = 0;
-				break;
-		}
-
 		if (value == 0)
 		{
 			// all switches off means no auto modes selected - auto state machine operation disabled

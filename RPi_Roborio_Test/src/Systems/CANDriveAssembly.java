@@ -86,7 +86,7 @@ public class CANDriveAssembly {
 		// autonomous operation of drive straight
 		
 		//double gyroAngle = 0.0;
-		double gyroAngle = NavXSensor.getAngle();
+		double gyroAngle = NavXSensor.getYaw();
 		
 		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
 		
@@ -100,7 +100,7 @@ public class CANDriveAssembly {
 		System.out.println(myString);
 	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
 	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
-    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_gyro", myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_gyro", myString);
 
 		/*
 		if (driveAngle > 0.5) driveAngle = 0.5;
@@ -172,13 +172,13 @@ public class CANDriveAssembly {
 	}
 	
 	public static void driveDirection(double angle, double speed) {
-		double gyroAngle = getAngle();
+		double gyroAngle = NavXSensor.getYaw();
 		double driveAngle = (angle-gyroAngle)*GYRO_CORRECT_COEFF;
 		drive(driveAngle+speed, -driveAngle+speed, 0);
 	}
 	
 	public static void turnToDirection(double angle, double power) {
-		double gyroAngle = getAngle();
+		double gyroAngle = NavXSensor.getYaw();
 		double driveAngle = (angle-gyroAngle)*(1/360)*power;
 		drive(driveAngle, -driveAngle, 0);
 	}
@@ -194,12 +194,7 @@ public class CANDriveAssembly {
 	public static void driveVelocity(double forwardVel, double angularVel) {
 		drive((forwardVel+angularVel)/2.0,(forwardVel-angularVel)/2.0,0);
 	}
-	
-	private static double getAngle() {
-		double angle = NavXSensor.getAngle();
-		return angle;
-	}
-	
+		
 	//Redundant Methods
 	//===================================================
 	public static void rotateLeft(double speed) {

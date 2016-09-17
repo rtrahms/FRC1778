@@ -42,6 +42,7 @@ public class RPIComm {
     		
 	        table = NetworkTable.getTable("RPIComm/Data_Table");	        	        	        	        
        		initialized = true;
+    		table.putBoolean("autoExposure", true);
     	}
 	}
     

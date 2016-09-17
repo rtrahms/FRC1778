@@ -39,26 +39,17 @@ public class GyroAngleEvent extends Event {
 	// overloaded trigger method
 	public boolean isTriggered()
 	{
-		//System.out.println("angle = " + myGyro.getAngle() + " angleToTurn = " + angleToTurn);
-		/*
-		 * old code - possible to move past angle and NOT trigger!
-		if (Math.abs(GyroSensor.getAngle() - angleToTurn) < accuracyDeg)
-		{
-			System.out.println("GyroAngleEvent triggered!");
-			return true;
-		}
-		*/
 		
 		if (polarity == AnglePolarity.kGreaterThan) {
 			// trigger only if angle is greater than target
-			if ((NavXSensor.getAngle() - angleToTurn) > 0) {
+			if ((NavXSensor.getYaw() - angleToTurn) > 0) {
 				System.out.println("GyroAngleEvent triggered!");
 				return true;
 			}
 		}
 		else {
 			// trigger only if angle is less than target
-			if ((NavXSensor.getAngle() - angleToTurn) < 0) {
+			if ((NavXSensor.getYaw() - angleToTurn) < 0) {
 				System.out.println("GyroAngleEvent triggered!");
 				return true;
 			}			

@@ -8,7 +8,7 @@ import java.io.InputStream;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public class AutonomousNetworkParser {
+public class AutoNetworkBuilder {
 		
 	private final static String PREF_ROOT = "ChillOutAutonomousNetworks";
 	private static Preferences prefRoot, prefs;
@@ -56,7 +56,8 @@ public class AutonomousNetworkParser {
 		autoNets.add(0, createDoNothingNetwork());	
 		autoNets.add(1, createTargetFollowerNetwork());	
 		autoNets.add(2, createDriveForwardNetwork_Slow());	
-		autoNets.add(3, createTestNetwork());
+		autoNets.add(3, createDriveForwardForeverNetwork());	
+		autoNets.add(4, createTestNetwork());
 		
 		// add the networks to the prefs object
 		int counter = 0;
@@ -150,10 +151,10 @@ public class AutonomousNetworkParser {
 		idleState.addEvent(timer1);
 
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.40);
+		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.25);
 		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
 		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
-		TimeEvent timer2 = new TimeEvent(15.0);  // drive forward timer event
+		TimeEvent timer2 = new TimeEvent(3.0);  // drive forward timer event
 		driveState.addAction(driveForward);
 		idleState.addAction(doSomething4);
 		idleState.addAction(doSomething5);
@@ -170,6 +171,40 @@ public class AutonomousNetworkParser {
 		autoNet.addState(idleState);
 		autoNet.addState(driveState);
 		autoNet.addState(idleState2);
+				
+		return autoNet;
+	}
+	
+	// **** MOVE FORWARD FOREVER Network - slow and steady ***** 
+	// 1) be idle for a number of sec
+	// 2) drive forward forever (never stop)
+	private static AutoNetwork createDriveForwardForeverNetwork() {
+		
+		AutoNetwork autoNet = new AutoNetwork("<Drive Forward Network - Slow>");
+		
+		AutoState idleState = new AutoState("<Idle State 1>");
+		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
+		IdleAction doSomething2 = new IdleAction("<Placeholder Action 2>");
+		IdleAction doSomething3 = new IdleAction("<Placeholder Action 3>");
+		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
+		idleState.addAction(startIdle);
+		idleState.addAction(doSomething2);
+		idleState.addAction(doSomething3);
+		idleState.addEvent(timer1);
+
+		AutoState driveState = new AutoState("<Drive State 1>");
+		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.25);
+		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
+		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
+		driveState.addAction(driveForward);
+		idleState.addAction(doSomething4);
+		idleState.addAction(doSomething5);
+						
+		// connect each event with a state to move to
+		idleState.associateNextState(driveState);
+						
+		autoNet.addState(idleState);
+		autoNet.addState(driveState);
 				
 		return autoNet;
 	}

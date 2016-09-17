@@ -5,6 +5,7 @@ import NetworkComm.InputOutputComm;
 import NetworkComm.RPIComm;
 import StateMachine.AutoStateMachine;
 import Systems.CANDriveAssembly;
+import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -58,6 +59,15 @@ public class Robot extends IterativeRobot {
      */
     public void autonomousPeriodic() {
     	RPIComm.updateValues();
+
+		double gyroAngle = NavXSensor.getYaw();
+				
+		// send output data for test & debug
+		String gyroAngleStr = String.format("%.2f", gyroAngle);
+		String myString = new String("gyroAngle = " + gyroAngleStr);
+		System.out.println(myString);
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autonomousPeriodic", myString);
+   	
     	
     	autoSM.process();
     }
