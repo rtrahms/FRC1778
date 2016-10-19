@@ -1,6 +1,7 @@
 package StateMachine;
 
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
 
@@ -11,11 +12,23 @@ public class AutoStateMachine {
 	private ArrayList<AutoNetwork> autoNetworks;
 
 	private AutoNetwork currentNetwork;
-	
+	private AutoChooser autoChooser;
+		
 	public AutoStateMachine()
 	{
+		try {
+			// initialize the parser utility
+			AutoNetworkBuilder.initialize();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		// create list of autonomous networks
-		autoNetworks = AutonomousNetworkParser.readInNetworks();
+		autoNetworks = AutoNetworkBuilder.readInNetworks();
+		
+		// create the smart dashboard chooser
+		autoChooser = new AutoChooser();
 		
 	}
 				
@@ -67,10 +80,9 @@ public class AutoStateMachine {
 	// If all switches are false (zero), auto is disabled
 	private int getNetworkIndex()
 	{
-		int value = 0;
+		// grab the selected auto mode from the driver station
+		int value = autoChooser.getAutoChoice();
 		
-		value = 1;  // testing only
-
 		if (value == 0)
 		{
 			// all switches off means no auto modes selected - auto state machine operation disabled

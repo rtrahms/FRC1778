@@ -1,6 +1,7 @@
 package StateMachine;
 
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 public class AutoState {
 	
@@ -8,9 +9,11 @@ public class AutoState {
 	protected ArrayList<Event> eventList;
 	public String name;
 	protected AutoState nextState;
+	protected Preferences statePrefs;
 	
 	public AutoState() {
 		this.name = "AutoState";
+		
 		actionList = new ArrayList<Action>();
 		eventList = new ArrayList<Event>();
 		this.nextState = null;
@@ -20,6 +23,16 @@ public class AutoState {
 		this.name = name;
 		actionList = new ArrayList<Action>();
 		eventList = new ArrayList<Event>();
+		this.nextState = null;
+	}
+	
+	// create auto state from preferences
+	public AutoState(Preferences statePrefs) throws Exception {
+		this.name = statePrefs.get("name","AutoState");
+		
+		actionList = new ArrayList<Action>();
+		eventList = new ArrayList<Event>();
+		
 		this.nextState = null;
 	}
 	
@@ -83,4 +96,30 @@ public class AutoState {
 		}		
 	}
 	
+	public void persistWrite(int counter, Preferences prefs) {
+
+		// create node for autoState - done by the derived class
+		Preferences statePrefs = prefs.node(counter + "_" + this.name);
+
+		statePrefs.put("class",this.getClass().toString());
+			
+		// create nodes for actions and events
+		Preferences actionPrefs = statePrefs.node("actions");
+		Preferences eventPrefs = statePrefs.node("events");
+				
+		// store all the actions in the action prefs
+		int ctr = 0;
+		for (Action a: actionList)
+		{
+			a.persistWrite(ctr++, actionPrefs);
+		}
+		
+		// store all the events in the action prefs
+		ctr = 0;
+		for (Event e: eventList)
+		{
+			e.persistWrite(ctr++, eventPrefs);
+		}
+
+	}
 }

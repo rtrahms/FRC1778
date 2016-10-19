@@ -1,20 +1,25 @@
 package StateMachine;
 
+import java.util.prefs.Preferences;
+
 import edu.wpi.first.wpilibj.Utility;
 
 // event triggered when timer gets to a certain predetermined angle
 public class TimeEvent extends Event {
 	
+	private String name;
 	private double durationSec;
 	private long startTimeUs;
 	
 	public TimeEvent()
 	{	
+		this.name = "<Timer Event>";
 		this.durationSec = 0.0;
 	}
 	
 	public TimeEvent(double durationSec)
 	{
+		this.name = "<Timer Event>";
 		this.durationSec = durationSec;
 	}
 	
@@ -41,5 +46,15 @@ public class TimeEvent extends Event {
 		}
 		
 		return false;
+	}
+	
+	public void persistWrite(int counter, Preferences prefs) {
+
+		// create node for event
+		Preferences eventPrefs = prefs.node(counter + "_" + this.name);
+	
+		// store event details
+		eventPrefs.put("class",this.getClass().toString());
+		eventPrefs.putDouble("durationSec",this.durationSec);		
 	}
 }

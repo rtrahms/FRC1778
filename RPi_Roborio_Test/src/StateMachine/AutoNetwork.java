@@ -1,6 +1,7 @@
 package StateMachine;
 
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import NetworkComm.InputOutputComm;
 
@@ -22,6 +23,7 @@ public class AutoNetwork {
 		currentState = null;
 	}
 
+	
 	public void addState(AutoState state) {
 		states.add(state);
 	}
@@ -80,4 +82,22 @@ public class AutoNetwork {
 			currentState.exit();
 		}
 	}
+	
+	// used for persisting the network in a Java Preferences class object
+	public void persistWrite(int counter, Preferences prefs) {
+
+		// create node for autoNetwork
+		Preferences networkPrefs = prefs.node(counter + "_" + this.name);
+		
+		// store network name
+		networkPrefs.put("class",this.getClass().toString());
+		
+		// store all the states in the autoNetwork prefs
+		int ctr = 0;
+		for (AutoState a: states)
+		{
+			a.persistWrite(ctr++,networkPrefs);
+		}
+	}	
+	
 }

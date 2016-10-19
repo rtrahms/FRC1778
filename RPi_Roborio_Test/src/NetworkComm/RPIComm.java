@@ -42,6 +42,7 @@ public class RPIComm {
     		
 	        table = NetworkTable.getTable("RPIComm/Data_Table");	        	        	        	        
        		initialized = true;
+    		table.putBoolean("autoExposure", true);
     	}
 	}
     
@@ -57,9 +58,23 @@ public class RPIComm {
     	targetArea = 0;
     	targetDistance = 0;
     	
-		reset();		
+		reset();
+		
+		table.putBoolean("autoExposure", false);
     }
     
+    public static void teleopInit() {
+    	numTargets = 0;
+    	deltaX = 0;
+    	deltaY = 0;
+    	targetArea = 0;
+    	targetDistance = 0;
+    	
+		reset();
+		
+		table.putBoolean("autoExposure", true);
+    }
+  
         
     public static void reset() {
 		

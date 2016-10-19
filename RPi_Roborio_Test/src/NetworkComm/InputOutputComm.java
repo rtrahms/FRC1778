@@ -19,6 +19,14 @@ public class InputOutputComm {
     	}
     }
     
+    public static void putBoolean(LogTable log, String key, boolean value) {
+    	    	
+    	if (table != null)
+    		table.putBoolean(key, value);
+    	else
+    		System.out.println("No network table to write to!!");
+    }
+    
     public static void putDouble(LogTable log, String key, double value) {
     	if (table != null)
     		table.putNumber(key,value);
@@ -33,4 +41,12 @@ public class InputOutputComm {
     		System.out.println("No network table to write to!!");
     }
     
+    public static void deleteKey(String key)
+    {
+    	if (table != null)
+    		table.delete(key);
+    	else
+    		System.out.println("No network table to write to!!");
+    	
+    }
 }

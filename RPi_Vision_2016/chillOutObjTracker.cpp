@@ -5,6 +5,11 @@
 
 #include <networktables/NetworkTable.h>
 
+#include <libv4l2.h>
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctime>
@@ -26,12 +31,49 @@ double minArea = 1000.0;
 double maxArea = 30000.0;
 
 int dilationFactor = 5;
+float exposure = 10.0;
+bool auto_exposure = false;
 
 int hue_min_slider, hue_max_slider;
 int sat_min_slider, sat_max_slider;
 int val_min_slider, val_max_slider;
 int area_min_slider, area_max_slider;
 int dilation_slider;
+int exposure_slider;
+
+// video capture objects
+VideoCapture cap(0);     // get 'any' cam
+//VideoCapture cap("/dev/video1");    // get second camera - not used
+int descriptor = v4l2_open("/dev/video0",O_RDWR);   // v4l capture object
+
+void autoExposureOn()
+{
+	v4l2_control c;
+
+	c.id = V4L2_CID_EXPOSURE_AUTO;
+	c.value = 3;
+	v4l2_ioctl(descriptor,VIDIOC_S_CTRL,&c);
+}
+
+void autoExposureOff()
+{
+	v4l2_control c;
+
+	c.id = V4L2_CID_EXPOSURE_AUTO;
+	c.value = 1;
+	v4l2_ioctl(descriptor,VIDIOC_S_CTRL,&c);
+}
+
+
+void set_exposure(float exp_abs) 
+{
+	v4l2_control c;
+
+	// set exposure absolute value
+	c.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	c.value = exp_abs;
+	v4l2_ioctl(descriptor,VIDIOC_S_CTRL,&c);
+}
 
 void on_min_hue(int, void *) 
 {
@@ -78,7 +120,12 @@ void on_dilation(int, void *)
 	dilationFactor = dilation_slider;
 }
 
+void on_exposure(int, void *) 
+{
+	exposure = exposure_slider;
 
+	set_exposure(exposure);
+}
 
 int main()
 {
@@ -108,7 +155,6 @@ int main()
 	int targetIndex = -1;
 	bool targetDetected = false;
 
-
 	/******** OpenCV parameter section *******/
 
 	// read in parameters (if file exists)
@@ -128,6 +174,7 @@ int main()
 		fscanf(parameter_file,"minColor_v = %d\n",&minColor_v);
 		fscanf(parameter_file,"maxColor_v = %d\n",&maxColor_v);
 		fscanf(parameter_file,"dilationFactor = %d\n",&dilationFactor);
+		fscanf(parameter_file,"exposure = %f\n",&exposure);
 	}
 	fclose(parameter_file);
 	printf("File read complete.\n");
@@ -143,7 +190,9 @@ int main()
 	printf("minColor_v = %d\n",minColor_v);
 	printf("maxColor_v = %d\n",maxColor_v);
 	printf("dilationFactor = %d\n",dilationFactor);
+	printf("exposure = %f\n",exposure);
 	
+
 	// initialize slider values
 	hue_min_slider = minColor_h;
 	hue_max_slider = maxColor_h;
@@ -154,9 +203,11 @@ int main()
 	area_min_slider = minArea;
 	area_max_slider = maxArea;
 	dilation_slider = dilationFactor;
+	exposure_slider = (int) exposure;
 
 	// slider control window - named "Thresholds"
 	namedWindow("Thresholds", 1);
+	moveWindow("Thresholds",200,0);
 	createTrackbar("Hue Min", "Thresholds", &hue_min_slider, 255, on_min_hue);
 	createTrackbar("Hue Max", "Thresholds", &hue_max_slider, 255, on_max_hue);
 	createTrackbar("Sat Min", "Thresholds", &sat_min_slider, 255, on_min_sat);
@@ -166,6 +217,7 @@ int main()
 	createTrackbar("Area Min", "Thresholds", &area_min_slider, maxArea, on_min_area);
 	createTrackbar("Area Max", "Thresholds", &area_max_slider, maxArea, on_max_area);
 	createTrackbar("Dilation", "Thresholds", &dilation_slider, 50, on_dilation);
+	createTrackbar("Exposure", "Thresholds", &exposure_slider, 2500, on_exposure);
 
 	// calculate image center
 	imageCenterX = frameWidth/2;
@@ -186,9 +238,14 @@ int main()
 	NetworkTable::Initialize();
 	table = NetworkTable::GetTable("RPIComm/Data_Table");
 	
-
-    VideoCapture cap(0);     // get 'any' cam
-    //VideoCapture cap("/dev/video1");       // get second camera
+	// set exposure level first	
+	if (descriptor != -1) {
+		autoExposureOff();
+		set_exposure(exposure);
+		printf("v4l2 descriptor = %d\n",descriptor);
+	}
+	else
+		printf("ERROR - could not open v4l2 device!\n");
 
     // initialize frame size
     if (cap.isOpened()) {
@@ -306,7 +363,23 @@ int main()
 		table->PutNumber("targets",(float)0.0f);
 		//printf("No target\n");
 	}
-	
+
+	// check to see if we need to change auto exposure
+	bool autoExp = table->GetBoolean("autoExposure");
+	if (auto_exposure && !autoExp)
+	{
+		printf("turning auto_exposure off\n");
+		auto_exposure = false;
+		autoExposureOff();
+		set_exposure(exposure);
+	} 
+	if (!auto_exposure && autoExp)
+	{
+		printf("turning auto_exposure on\n");
+		auto_exposure = true;
+		autoExposureOn();
+	}
+
 	// create output image with overlay
 	float alpha = 0.6;
 	float beta = 1.0 - alpha;
@@ -316,8 +389,13 @@ int main()
 	//imshow("original",inputImg);
 	//imshow("overlay",overlayImg);
 	imshow("threshold binary",binaryImg);
+	moveWindow("threshold binary",0,0);
+	
 	imshow("contours",contourImg);
+	moveWindow("contours",0,200);
+
 	imshow("output",outputImg);
+	moveWindow("output",0, 400);
 
 	// write out to file (for webserver)
 	VideoWriter outStream(outFile,CV_FOURCC('M','J','P','G'), 2, Size(frameWidth,frameHeight), true);
@@ -344,4 +422,3 @@ int main()
     }
     return 0;
 }
-
