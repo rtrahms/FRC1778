@@ -57,7 +57,8 @@ public class AutoNetworkBuilder {
 		autoNets.add(1, createTargetFollowerNetwork());	
 		autoNets.add(2, createDriveForwardNetwork_Slow());	
 		autoNets.add(3, createDriveForwardForeverNetwork());	
-		autoNets.add(4, createTestNetwork());
+		autoNets.add(4, createComplexDrivingNetwork());	
+		autoNets.add(5, createTestNetwork());
 		
 		// add the networks to the prefs object
 		int counter = 0;
@@ -151,10 +152,10 @@ public class AutoNetworkBuilder {
 		idleState.addEvent(timer1);
 
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.25);
+		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.5);
 		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
 		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
-		TimeEvent timer2 = new TimeEvent(3.0);  // drive forward timer event
+		TimeEvent timer2 = new TimeEvent(6.0);  // drive forward timer event
 		driveState.addAction(driveForward);
 		idleState.addAction(doSomething4);
 		idleState.addAction(doSomething5);
@@ -193,7 +194,7 @@ public class AutoNetworkBuilder {
 		idleState.addEvent(timer1);
 
 		AutoState driveState = new AutoState("<Drive State 1>");
-		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.25);
+		DriveForwardAction driveForward = new DriveForwardAction("<Drive Forward Action - Slow>", 0.5);
 		IdleAction doSomething4 = new IdleAction("<Placeholder Action 4>");
 		IdleAction doSomething5 = new IdleAction("<Placeholder Action 5>");
 		driveState.addAction(driveForward);
@@ -205,6 +206,104 @@ public class AutoNetworkBuilder {
 						
 		autoNet.addState(idleState);
 		autoNet.addState(driveState);
+				
+		return autoNet;
+	}
+	
+	// **** COMPLEX DRIVING Network - drive in L pattern and return to original spot ***** 
+	// 1) be idle for a number of sec
+	// 2) drive forward for a number of sec X
+	// 3) Turn 90 deg left
+	// 4) drive forward for a number of sec Y
+	// 5) Turn around (180 deg right)
+	// 6) drive forward for a number of sec Y
+	// 7) Turn 90 deg right
+	// 8) drive forward for a number of sec X
+	// 9) Turn around (180 deg left)
+	// 10) go back to idle and stay there 
+	private static AutoNetwork createComplexDrivingNetwork() {
+		
+		AutoNetwork autoNet = new AutoNetwork("<Complex Driving Network>");
+		
+		AutoState idleState = new AutoState("<Idle State 1>");
+		IdleAction startIdle = new IdleAction("<Start Idle Action 1>");
+		TimeEvent timer1 = new TimeEvent(0.5);  // timer event
+		idleState.addAction(startIdle);
+		idleState.addEvent(timer1);
+
+		AutoState driveState1 = new AutoState("<Drive State 1>");
+		DriveForwardAction driveForward1 = new DriveForwardAction("<Drive Forward Action 1>", 0.5);
+		TimeEvent timer2 = new TimeEvent(6.0);  // drive forward timer event
+		driveState1.addAction(driveForward1);
+		driveState1.addEvent(timer2);
+		
+		AutoState turnLeftState = new AutoState("<Turn Left State -90 deg>");
+		TurnAction turnLeftAction = new TurnAction("<Turn left action>",-90, 0.3);
+		GyroAngleEvent gyroLeft = new GyroAngleEvent(-90, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -90 deg
+		turnLeftState.addAction(turnLeftAction);
+		turnLeftState.addEvent(gyroLeft);
+			
+		AutoState driveState2 = new AutoState("<Drive State 2>");
+		DriveForwardAction driveForward2 = new DriveForwardAction("<Drive Forward Action 2>", 0.5);
+		TimeEvent timer3 = new TimeEvent(6.0);  // drive forward timer event
+		driveState2.addAction(driveForward2);
+		driveState2.addEvent(timer3);
+		
+		AutoState aboutFaceRightState = new AutoState("<About Face Right State +180 deg>");
+		TurnAction aboutFaceRightAction = new TurnAction("<About Face right action>",180, 0.3);
+		GyroAngleEvent gyroAboutFaceRight = new GyroAngleEvent(180, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +180 deg
+		aboutFaceRightState.addAction(aboutFaceRightAction);
+		aboutFaceRightState.addEvent(gyroAboutFaceRight);
+
+		AutoState driveState3 = new AutoState("<Drive State 3>");
+		DriveForwardAction driveForward3 = new DriveForwardAction("<Drive Forward Action 3>", 0.5);
+		TimeEvent timer4 = new TimeEvent(6.0);  // drive forward timer event
+		driveState3.addAction(driveForward3);
+		driveState3.addEvent(timer4);
+
+		AutoState turnRightState = new AutoState("<Turn Right State +90 deg>");
+		TurnAction turnRightAction = new TurnAction("<Turn right action>",90, 0.3);
+		GyroAngleEvent gyroRight = new GyroAngleEvent(90, GyroAngleEvent.AnglePolarity.kGreaterThan);  // gyro angle event for +90 deg
+		turnRightState.addAction(turnRightAction);
+		turnRightState.addEvent(gyroRight);
+
+		AutoState driveState4 = new AutoState("<Drive State 4>");
+		DriveForwardAction driveForward4 = new DriveForwardAction("<Drive Forward Action 4>", 0.5);
+		TimeEvent timer5 = new TimeEvent(6.0);  // drive forward timer event
+		driveState4.addAction(driveForward4);
+		driveState4.addEvent(timer5);
+
+		AutoState aboutFaceLeftState = new AutoState("<About Face Left State -180 deg>");
+		TurnAction aboutFaceLeftAction = new TurnAction("<About Face left action>",-180, 0.3);
+		GyroAngleEvent gyroAboutFaceLeft = new GyroAngleEvent(-180, GyroAngleEvent.AnglePolarity.kLessThan);  // gyro angle event for -180 deg
+		aboutFaceLeftState.addAction(aboutFaceLeftAction);
+		aboutFaceLeftState.addEvent(gyroAboutFaceLeft);
+
+		AutoState idleState2 = new AutoState("<Idle State 2>");
+		IdleAction deadEnd = new IdleAction("<Dead End Action>");
+		idleState2.addAction(deadEnd);
+				
+		// connect each event with a state to move to
+		idleState.associateNextState(driveState1);
+		driveState1.associateNextState(turnLeftState);
+		turnLeftState.associateNextState(driveState2);
+		driveState2.associateNextState(aboutFaceRightState);
+		aboutFaceRightState.associateNextState(driveState3);
+		driveState3.associateNextState(turnRightState);
+		turnRightState.associateNextState(driveState4);
+		driveState4.associateNextState(aboutFaceLeftState);
+		aboutFaceLeftState.associateNextState(idleState2);
+						
+		autoNet.addState(idleState);
+		autoNet.addState(driveState1);
+		autoNet.addState(turnLeftState);
+		autoNet.addState(driveState2);
+		autoNet.addState(aboutFaceRightState);
+		autoNet.addState(driveState3);
+		autoNet.addState(turnRightState);
+		autoNet.addState(driveState4);
+		autoNet.addState(aboutFaceLeftState);
+		autoNet.addState(idleState2);
 				
 		return autoNet;
 	}

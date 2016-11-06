@@ -60,7 +60,7 @@ public class RPIComm {
     	
 		reset();
 		
-		table.putBoolean("autoExposure", false);
+		table.putBoolean("autoExposure", true);
     }
     
     public static void teleopInit() {
@@ -72,6 +72,11 @@ public class RPIComm {
     	
 		reset();
 		
+		table.putBoolean("autoExposure", true);
+    }
+    
+    public static void disabledInit() {
+    	
 		table.putBoolean("autoExposure", true);
     }
   

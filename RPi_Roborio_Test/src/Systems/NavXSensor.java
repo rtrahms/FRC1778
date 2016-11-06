@@ -2,9 +2,7 @@
 package Systems;
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
@@ -18,9 +16,7 @@ public class NavXSensor {
 		float pitch = 0f;
 		float yaw = 0f;
 	}
-		
-	//private static final double GYRO_SENSITIVITY = 0.007;
-	
+			
 	public static void initialize()
 	{
 		if (!initialized) {
@@ -45,7 +41,8 @@ public class NavXSensor {
 		
 		if (ahrs != null) 
 		{
-			//ahrs.reset();
+			ahrs.reset();
+			ahrs.resetDisplacement();
 			ahrs.zeroYaw();
 			
 			// allow zeroing to take effect

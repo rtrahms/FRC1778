@@ -18,7 +18,7 @@ public class TurnAction extends Action {
 		CANDriveAssembly.initialize();
 	}
 	
-	public TurnAction(String name, double angleToTurn, double speed, boolean isPwm)
+	public TurnAction(String name, double angleToTurn, double speed)
 	{
 		this.name =  name;
 		this.angleToTurn = angleToTurn;

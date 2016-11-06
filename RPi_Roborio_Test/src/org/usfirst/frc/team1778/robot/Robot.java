@@ -5,9 +5,12 @@ import NetworkComm.InputOutputComm;
 import NetworkComm.RPIComm;
 import StateMachine.AutoStateMachine;
 import Systems.CANDriveAssembly;
+import Systems.MotionProfilePrototype;
 import Systems.NavXSensor;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Utility;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -20,8 +23,14 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  */
 public class Robot extends IterativeRobot {
 	
-	AutoStateMachine autoSM;
+	private static final int GAMEPAD_ID = 0;
 	
+	AutoStateMachine autoSM;
+	Joystick gamepad;
+	final float DEBOUNCE_LIMIT_SEC	= 0.25f;
+	
+	long startTimeUs = Utility.getFPGATime();
+
     /**
      * This function is run when the robot is first started up and should be
      * used for any initialization code.
@@ -29,10 +38,14 @@ public class Robot extends IterativeRobot {
     public void robotInit() {
 		RPIComm.initialize();
 		InputOutputComm.initialize();
-		CANDriveAssembly.initialize();
+		//CANDriveAssembly.initialize();
 		
-		autoSM = new AutoStateMachine();
+		MotionProfilePrototype.initialize();
 		
+		gamepad = new Joystick(GAMEPAD_ID);
+		
+		//autoSM = new AutoStateMachine();
+				
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");
     }
     
@@ -50,7 +63,9 @@ public class Robot extends IterativeRobot {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
     	RPIComm.autoInit();
     	
-    	autoSM.start();
+    	MotionProfilePrototype.autoInit();
+    	
+    	//autoSM.start();
     	
     }
 
@@ -60,23 +75,25 @@ public class Robot extends IterativeRobot {
     public void autonomousPeriodic() {
     	RPIComm.updateValues();
 
-		double gyroAngle = NavXSensor.getYaw();
+		//double gyroAngle = NavXSensor.getYaw();
 				
 		// send output data for test & debug
-		String gyroAngleStr = String.format("%.2f", gyroAngle);
-		String myString = new String("gyroAngle = " + gyroAngleStr);
-		System.out.println(myString);
-    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autonomousPeriodic", myString);
-   	
+		//String gyroAngleStr = String.format("%.2f", gyroAngle);
+		//String myString = new String("gyroAngle = " + gyroAngleStr);
+		//System.out.println(myString);
+    	//InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autonomousPeriodic", myString);
+   		
+    	//autoSM.process();
     	
-    	autoSM.process();
-    }
+     }
 
     public void teleopInit() {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","teleop mode...");
 
     	RPIComm.teleopInit();
-		CANDriveAssembly.teleopInit();
+		//CANDriveAssembly.teleopInit();
+		
+    	MotionProfilePrototype.teleopInit();
     }
     
     /**
@@ -84,13 +101,38 @@ public class Robot extends IterativeRobot {
      */
     public void teleopPeriodic() {
     	RPIComm.updateValues();        
-		CANDriveAssembly.teleopPeriodic();
+		//CANDriveAssembly.teleopPeriodic();   	
+    	
+		long currentTimeUs = Utility.getFPGATime();
+		double delta = (currentTimeUs - startTimeUs)/1e6;
+		
+		if (delta > DEBOUNCE_LIMIT_SEC) 
+		{
+	    	if (gamepad.getRawButton(1))
+	    		MotionProfilePrototype.moveProfile(0);
+	    	else if (gamepad.getRawButton(2))
+	    		MotionProfilePrototype.moveProfile(1);
+	    	else if (gamepad.getRawButton(3))
+	    		MotionProfilePrototype.moveProfile(2);
+	    	else if (gamepad.getRawButton(4))
+	    		MotionProfilePrototype.moveProfile(4);   // complex movement #1
+	    	
+	    	startTimeUs = Utility.getFPGATime();
+	    	
+		}
+		
+		MotionProfilePrototype.control();
    }
 
     public void disabledInit() {
-    	autoSM.stop();
+    		
+    	//autoSM.stop();
     	
-    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot disabled...");
+    	RPIComm.disabledInit();
+   	
+    	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot disabled...");  
+    	
+    	MotionProfilePrototype.disabledInit();
     }
 
     /**
