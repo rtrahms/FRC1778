@@ -55,7 +55,7 @@ public class AutoNetwork {
 		if (currentState != null)
 		{
 			String myString = new String("State = " + currentState.name);
-			System.out.println(myString);
+			//System.out.println(myString);
 			InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/AutoSM_currentState", myString);
 
 			AutoState nextState = currentState.process();

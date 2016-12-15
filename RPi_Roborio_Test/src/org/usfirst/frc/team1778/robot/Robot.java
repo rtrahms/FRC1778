@@ -7,6 +7,7 @@ import StateMachine.AutoStateMachine;
 import Systems.CANDriveAssembly;
 import Systems.MotionProfilePrototype;
 import Systems.NavXSensor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
@@ -28,6 +29,9 @@ public class Robot extends IterativeRobot {
 	AutoStateMachine autoSM;
 	Joystick gamepad;
 	final float DEBOUNCE_LIMIT_SEC	= 0.25f;
+    final int PCM_NODE_ID = 2;
+	
+	//DoubleSolenoid myDoubleSol;
 	
 	long startTimeUs = Utility.getFPGATime();
 
@@ -40,11 +44,13 @@ public class Robot extends IterativeRobot {
 		InputOutputComm.initialize();
 		//CANDriveAssembly.initialize();
 		
-		MotionProfilePrototype.initialize();
+		//myDoubleSol = new DoubleSolenoid(PCM_NODE_ID, 0, 1);
+
+		//MotionProfilePrototype.initialize();
 		
-		gamepad = new Joystick(GAMEPAD_ID);
+		//gamepad = new Joystick(GAMEPAD_ID);
 		
-		//autoSM = new AutoStateMachine();
+		autoSM = new AutoStateMachine();
 				
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot initialized...");
     }
@@ -63,9 +69,9 @@ public class Robot extends IterativeRobot {
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","autonomous mode...");
     	RPIComm.autoInit();
     	
-    	MotionProfilePrototype.autoInit();
+    	//MotionProfilePrototype.autoInit();
     	
-    	//autoSM.start();
+    	autoSM.start();
     	
     }
 
@@ -83,7 +89,7 @@ public class Robot extends IterativeRobot {
 		//System.out.println(myString);
     	//InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autonomousPeriodic", myString);
    		
-    	//autoSM.process();
+    	autoSM.process();
     	
      }
 
@@ -93,7 +99,7 @@ public class Robot extends IterativeRobot {
     	RPIComm.teleopInit();
 		//CANDriveAssembly.teleopInit();
 		
-    	MotionProfilePrototype.teleopInit();
+    	//MotionProfilePrototype.teleopInit();
     }
     
     /**
@@ -103,6 +109,7 @@ public class Robot extends IterativeRobot {
     	RPIComm.updateValues();        
 		//CANDriveAssembly.teleopPeriodic();   	
     	
+    	/*
 		long currentTimeUs = Utility.getFPGATime();
 		double delta = (currentTimeUs - startTimeUs)/1e6;
 		
@@ -118,21 +125,21 @@ public class Robot extends IterativeRobot {
 	    		MotionProfilePrototype.moveProfile(4);   // complex movement #1
 	    	
 	    	startTimeUs = Utility.getFPGATime();
-	    	
 		}
 		
 		MotionProfilePrototype.control();
+		*/
    }
 
     public void disabledInit() {
     		
-    	//autoSM.stop();
+    	autoSM.stop();
     	
     	RPIComm.disabledInit();
    	
     	InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"MainLog","robot disabled...");  
     	
-    	MotionProfilePrototype.disabledInit();
+    	//MotionProfilePrototype.disabledInit();
     }
 
     /**

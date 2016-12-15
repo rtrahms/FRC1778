@@ -66,7 +66,7 @@ public class AutoState {
 	public AutoState process()
 	{
 		// debug only - say who we are
-		System.out.println("Current state is " + name);
+		//System.out.println("Current state is " + name);
 		
 		// for all the actions this state has, process each
 		for (Action a: actionList) {

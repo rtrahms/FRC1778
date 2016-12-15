@@ -45,7 +45,7 @@ public class CANDriveAssembly {
 	
 	// speed controllers and drive class
 	private static CANTalon mFrontLeft, mBackLeft, mFrontRight, mBackRight;
-    private static RobotDrive drive;
+    //private static RobotDrive drive;  // no longer used
     
     // drive control
     private static Joystick leftStick, rightStick;
@@ -60,15 +60,15 @@ public class CANDriveAssembly {
 	        //mBackRight = new CANTalon(RIGHT_REAR_TALON_ID);
 	        	        
 	        //drive = new RobotDrive(mFrontLeft, mBackLeft, mFrontRight, mBackRight);
-	        drive = new RobotDrive(mFrontLeft, mFrontRight);
+	        //drive = new RobotDrive(mFrontLeft, mFrontRight);
 	        	        
 	        //drive.setInvertedMotor(RobotDrive.MotorType.kFrontLeft, false);
 	        //drive.setInvertedMotor(RobotDrive.MotorType.kFrontRight, false);
 	        //drive.setInvertedMotor(RobotDrive.MotorType.kRearLeft, false);
-	        //drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, false);   
-	        
-	        leftStick = new Joystick(LEFT_JOYSTICK_ID);
-	        rightStick = new Joystick(RIGHT_JOYSTICK_ID);
+	        //drive.setInvertedMotor(RobotDrive.MotorType.kRearRight, false);
+	        	        
+	        //leftStick = new Joystick(LEFT_JOYSTICK_ID);
+	        //rightStick = new Joystick(RIGHT_JOYSTICK_ID);
 	        
 	        // initialize the NavXSensor
 	        NavXSensor.initialize();
@@ -82,49 +82,50 @@ public class CANDriveAssembly {
 		NavXSensor.reset();
    	}
 	
+	private static double getGyroAngle() {
+		
+		//double gyroAngle = 0.0;
+		//double gyroAngle = NavXSensor.getYaw();	  // -180 deg to +180 deg
+		double gyroAngle = NavXSensor.getAngle();     // continuous angle (can be larger than 360 deg)
+		
+		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
+			
+		// send output data for test & debug
+	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
+	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
+
+		String gyroAngleStr = String.format("%.2f", gyroAngle);
+	    String myString = new String("gyroAngle = " + gyroAngleStr);
+		//System.out.println(myString);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/GyroAngle", myString);		
+
+		return gyroAngle;
+	}
+	
+	
 	public static void autoPeriodicStraight(double speed) {
 		// autonomous operation of drive straight
 		
-		//double gyroAngle = 0.0;
-		double gyroAngle = NavXSensor.getYaw();
+		double gyroAngle = getGyroAngle();
 		
-		//System.out.println("autoPeriodicStraight:  Gyro angle = " + gyroAngle);
-		
-		// calculate speed adjustment for left and right sides
+		// calculate speed adjustment for left and right sides (negative sign added as feedback)
 		double driveAngle = -gyroAngle * AUTO_DRIVE_CORRECT_COEFF;
-		
-		// send output data for test & debug
-		String gyroAngleStr = String.format("%.2f", gyroAngle);
-		String driveAngleStr = String.format("%.2f", driveAngle);
-		String myString = new String("gyroAngle = " + gyroAngleStr + " driveAngle = " + driveAngleStr + " speed = " + speed);
-		System.out.println(myString);
-	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Connected",NavXSensor.isConnected());
-	    InputOutputComm.putBoolean(InputOutputComm.LogTable.kMainLog,"Auto/IMU_Calibrating",NavXSensor.isCalibrating());
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_gyro", myString);
-
-		/*
-		if (driveAngle > 0.5) driveAngle = 0.5;
-		if (driveAngle < -0.5) driveAngle = -0.5;
-		*/
-		
+				
 		double leftSpeed = speed+driveAngle;		
 		double rightSpeed = speed-driveAngle;
 		
 		String leftSpeedStr = String.format("%.2f", leftSpeed);
 		String rightSpeedStr = String.format("%.2f", rightSpeed);
 		String myString2 = new String("leftSpeed = " + leftSpeedStr + " rightSpeed = " + rightSpeedStr);
-		System.out.println(myString2);
-		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight_tankDrive", myString2);
+		//System.out.println(myString2);
+		InputOutputComm.putString(InputOutputComm.LogTable.kMainLog,"Auto/autoPeriodicStraight", myString2);
 		
 		// adjust speed of left and right sides
-		//drive.tankDrive(driveAngle+speed, -driveAngle+speed);
-		drive.tankDrive(leftSpeed, rightSpeed);
-		 
-		//drive.drive(-speed, driveAngle);
+		drive(leftSpeed, rightSpeed, 0.0);		 
 	}
 
 	public static void autoStop() {
-		drive.drive(0.0, 0.0);
+		drive(0.0, 0.0, 0.0);
 	}
 		
 	public static void teleopInit() {
@@ -133,6 +134,7 @@ public class CANDriveAssembly {
 	
 	public static void teleopPeriodic() {
 		
+		/********************** No longer used - reference cheesy drive code 
 		// Left Stick Throttle Control
 		double throttleVal = 1.0 - ((leftStick.getRawAxis(JOY_Z_AXIS))+1.0)/2.0;
 		
@@ -164,21 +166,29 @@ public class CANDriveAssembly {
 				
 		//Set the drive train 
 		drive(leftValue, rightValue, 0);
-		
+		*********************/
 	}
 	
-	public static void drive(double left, double right, double strafe) {
-		drive.tankDrive(left, right, USE_SQUARED_INPUTS);
+	// CORE DRIVE METHOD
+	// Assumes parameters are PercentVbus (0.0 to 1.0)
+	public static void drive(double leftValue, double rightValue, double strafe) {
+		
+		double rightMotorPolarity = -1.0;  // right motor is inverted 
+		double leftMotorPolarity = 1.0;    // left motor is not inverted
+				
+		// set motor values directly
+		mFrontLeft.set(leftMotorPolarity*leftValue);
+		mFrontRight.set(rightMotorPolarity*rightValue);
 	}
 	
 	public static void driveDirection(double angle, double speed) {
-		double gyroAngle = NavXSensor.getYaw();
+		double gyroAngle = getGyroAngle();	
 		double driveAngle = (angle-gyroAngle)*GYRO_CORRECT_COEFF;
 		drive(driveAngle+speed, -driveAngle+speed, 0);
 	}
 	
 	public static void turnToDirection(double angle, double power) {
-		double gyroAngle = NavXSensor.getYaw();
+		double gyroAngle = getGyroAngle();
 		double driveAngle = (angle-gyroAngle)*(1/360)*power;
 		drive(driveAngle, -driveAngle, 0);
 	}
@@ -195,9 +205,9 @@ public class CANDriveAssembly {
 		drive((forwardVel+angularVel)/2.0,(forwardVel-angularVel)/2.0,0);
 	}
 		
-	//Redundant Methods
+	//Turn methods
 	//===================================================
-	public static void rotateLeft(double speed) {
+	public static void rotateLeft(double speed) {		
 		drive(-speed, speed, 0);
 	}
 
